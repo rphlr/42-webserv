@@ -6,14 +6,18 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:40:45 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/21 13:20:13 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/21 23:19:20 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.hpp"
 #include "errors.hpp"
 
-Server::Server(void) {}
+Server::Server(void) {} : _server_name(""),
+						_port(0),
+						_host(0),
+						_max_body_size(0),
+						_root("") {}
 
 Server::~Server(void) {}
 
@@ -30,14 +34,14 @@ Server &Server::operator = (const Server &c)
 	return *this;
 }
 
-const char	*Server::ServerAttributionError::what(string s) const throw() { return s; }
+const char	*Server::ServerAttributionError::what(const char *s) const throw() { return s; }
 
 void	Server::setName(string n)
 {
 	if (n.size() < 20 && !n.empty())
 		this->_server_name = n;
 	else
-		throw Server::ServerAttributionError("Invalid server_name (too long or empty)");
+		throw std::runtime_error(INVALID_CONF + "server_name (too long or empty)");
 }
 
 void	Server::setPort(int p)
@@ -45,13 +49,13 @@ void	Server::setPort(int p)
 	if (p > 0 || p < 65535)
 		this->_port = p;
 	else
-		throw std::overflow_error("Invalid port");
+		throw std::overflow_error(INVALID_CONF + "port");
 }
 
 void	Server::setSize(int s)
 {
 	if (s > 1000 || s < 0)					//check for BUFFER_SIZE (maybe throw error?)
-		throw Server::ServerAttributionError("Invalid max_body_size (exceeding buffer)");
+		throw std::runtime_error(INVALID_CONF + "max_body_size");
 	else
 		this->_max_body_size = s;
 }
@@ -66,13 +70,13 @@ void	Server::setErrorPage(int code, string path)
 	if (code >= 100 && code < 600)
 		this->_error_pages[code] = path;
 	else
-		throw Server::ServerAttributionError("Invalid error_page attribution (code does not exist)");
+		throw std::runtime_error(INVALID_CONF + "error_page (code does not exist)");
 }
 
 void	Server::setHost(string h) { this->_host = h; }
 
-string	Server::getName(void) const { return this->_server_name };
-uint16_t	Server::getPort(void) const { return this->_port; }
+string	Server::getName(void) const { return this->_server_name; }
+uint32_t	Server::getPort(void) const { return this->_port; }
 string	Server::getHost(void) const { return this->_host; }
 uint32_t	Server::getSize(void) const { return this->_max_body_size; }
 string	Server::getRoot(void) const { return this->_root; }

@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/21 11:57:45 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/21 22:45:45 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ Parser &Parser::operator = (const Parser &c)
 	return *this;
 }
 
-vector<string>	Parser::ParseFile(string doc)
+vector<string>	Parser::openFile(string doc)
 {
 	//open file
 	std::ifstream	inputFile;

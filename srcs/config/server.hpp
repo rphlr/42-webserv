@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:12:22 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/21 13:25:39 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/21 22:38:17 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ public:
 	class ServerAttributionError : public std::exception
 	{
 	public:
-		virtual const char *what(string s) const throw();
+		virtual const char *what(const char *s) const throw();
 	};
 
 private:
