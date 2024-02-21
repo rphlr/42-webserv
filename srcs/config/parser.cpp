@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/20 22:28:52 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/21 11:57:45 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,16 @@
 #include <sstream>
 #include <fstream>
 
-Parser::Parser(void) : _server_nbr(0)
+Parser::Parser(void)
 {}
 
 Parser::~Parser(void)
 {}
 
-Parser::Parser(const Parser &c) : _server_nbr(c._server_nbr)
-{}
+Parser::Parser(const Parser &c)
+{
+	(void) c;
+}
 
 Parser &Parser::operator = (const Parser &c)
 {
@@ -51,7 +53,6 @@ vector<string>	Parser::ParseFile(string doc)
 	// if (!checkBrackets(wholeFile))
 	// 	throw std::runtime_error(FILE_SYNTAX);
 
-	std::cout << "nb of servers " << this->_server_nbr << std::endl;
 	inputFile.close();
 	return wholeFile;
 }

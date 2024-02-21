@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:03:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/02/20 21:59:22 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/21 12:51:19 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,10 @@ int	main(int ac, char **av)
 	(void) ac;
 	Parser	parsing;
 
+	if (ac != 2) {
+		std::cout << "Specify a config file as your program parameter" << std::endl;
+		return (-1);
+	}
 	try {
 		parsing.ParseFile(av[1]);
 	}
