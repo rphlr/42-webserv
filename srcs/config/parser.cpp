@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/22 19:05:38 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/23 15:25:59 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include <sstream>
 #include <fstream>
 
-Parser::Parser(void) {}
+Parser::Parser(void) : inServ(false), inErr(false), inLoc(false) {}
 
 Parser::~Parser(void) {}
 
@@ -28,6 +28,16 @@ Parser &Parser::operator = (const Parser &c)
 	return *this;
 }
 
+void	Parser::handleLine(string &line)
+{
+	//remove whitespace
+	line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
+	std::cout << line << std::endl;
+	//separate by : into two parts
+	//check key and check if value typecast ok
+	//send to set function and catch error
+}
+
 vector<string>	Parser::parseFile(string doc)
 {
 	//open file
@@ -35,7 +45,6 @@ vector<string>	Parser::parseFile(string doc)
 	vector<string>	wholeFile;
 	Server			ServConf;
 
-	// std::cout << ServConf._all_set["_server_name"] << std::endl;
 	inputFile.open(doc, std::fstream::in);
 	if (inputFile.fail())
 		throw std::runtime_error(FILE_OPENING);
@@ -47,17 +56,33 @@ vector<string>	Parser::parseFile(string doc)
 	{
 		if (line.empty() || line.at(0) == '#')
 			continue;
-		// line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
-		// std::cout << line << std::endl;
-		if (!line.compare(serv)) {
-			std::cout << "server found\n";
+		if (line == serv) {
+			this->inServ = true;
+			std::cout << "server section found\n";
+			continue;
 		}
-		if (!line.compare(err)) {
-			std::cout << "error_page found\n";
+		if (line == err && this->inServ) {
+			if (inErr)
+				throw std::runtime_error(SECTION_ERR + "error_page");
+			std::cout << "error_page section found\n";
+			this->inErr = true;
+			continue;
 		}
-		if (!line.compare(loc)) {
-			std::cout << "location found\n";
+		else
+			throw std::runtime_error(SECTION_ERR + "error_page");
+		if (line == loc) {
+			if (this->inServ) {
+				this->inLoc = true; this->inErr = false;
+			}
+			else
+				throw std::runtime_error(SECTION_ERR + "error_page");
+			std::cout << "error_page section found\n";
+			continue;
 		}
+
+
+		//treat line depending on bool inServ, inErr, inLoc
+
 
 		if (!line.empty())
 			wholeFile.push_back(line);

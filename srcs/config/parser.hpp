@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 17:21:27 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/22 17:02:06 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/23 14:43:47 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,13 @@ public:
 	Parser &operator = (const Parser &c);
 
 	vector<string>	parseFile(string doc);
+	void	handleLine(string &line);
 	// bool	checkBrackets(vector<string> wholeFile);
 
 private:
+	bool	inServ;
+	bool	inLoc;
+	bool	inErr;
 
 };
 

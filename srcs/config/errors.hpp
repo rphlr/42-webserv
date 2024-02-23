@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:03:09 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/22 17:07:33 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/23 15:19:30 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,5 +21,6 @@ const string FILE_EMPTY = "This file is empty";
 const string FILE_SYNTAX = "This file contains a syntax error";
 const string ERROR_CODE = "This error code does not exist";
 const string INVALID_CONF = "The configuration file is invalid due to: ";
+const string SECTION_ERR = "A subsection or setting is outside of the allowed scope: "
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:12:22 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/22 18:51:13 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/23 13:44:39 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,23 +38,26 @@ public:
 	void	setHost(string h);
 	void	setSize(int s);
 	void	setRoot(string r);
+	void	setDefFile(string d);
 	void	setErrorPage(int code, string &path);
 
 	string	getName(void) const;
-	uint32_t	getPort(void) const;
+	int		getPort(void) const;
 	string	getHost(void) const;
-	uint32_t	getSize(void) const;
+	int		getSize(void) const;
 	string	getRoot(void) const;
+	string	getDefFile(void) const;
 	string	getErrorPath(int code) const;
 
-	std::map<string, bool>	_all_set;
 
 private:
+	std::map<string, bool>	_all_set;
 	string		_server_name;
-	uint32_t	_port;
+	int			_port;
 	string		_host;
-	uint32_t	_max_body_size;
+	int			_max_body_size;
 	string		_root;
+	string		_default_file;
 	std::map<int, string>	_error_pages;
 	//something for locations like unordered map int, location class
 
