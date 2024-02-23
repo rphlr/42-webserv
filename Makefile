@@ -6,7 +6,7 @@
 #    By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/26 14:19:55 by rrouille          #+#    #+#              #
-#    Updated: 2024/02/20 21:58:57 by ckarl            ###   ########.fr        #
+#    Updated: 2024/02/22 17:58:55 by ckarl            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,7 @@ SRCS_DIR	= srcs
 
 # Source files
 MAIN_SRC		= main.cpp
-CONFIG_SRC		= parser.cpp
+CONFIG_SRC		= parser.cpp server.cpp
 
 # Object files
 MAIN_OBJ		= $(addprefix $(OBJS_DIR)/, $(MAIN_SRC:.cpp=.o))
