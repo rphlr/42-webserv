@@ -1,36 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   webserv.hpp                                        :+:      :+:    :+:   */
+/*   errors.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/26 14:04:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/02/19 17:22:38 by ckarl            ###   ########.fr       */
+/*   Created: 2024/02/19 18:03:09 by ckarl             #+#    #+#             */
+/*   Updated: 2024/02/21 23:16:12 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef WEBSERV_HPP
-#define WEBSERV_HPP
+#ifndef ERRORS_HPP
+#define ERRORS_HPP
 
-#include <iostream>
 #include <string>
-#include <vector>
-#include <map>
-#include <fstream>
-#include <sstream>
-#include <sys/socket.h>
+using std::string;
 
-#define BUFFER_SIZE 1024
-
-class Webserv
-{
-	public:
-		Webserv(std::string config_file);
-		~Webserv(void);
-		void	run(void);
-	private:
-		std::string	_config_file;
-};
+const string FILE_OPENING = "This file could not be opened";
+const string FILE_EMPTY = "This file is empty";
+const string FILE_SYNTAX = "This file contains a syntax error";
+const string ERROR_CODE = "This error code does not exist";
+const string INVALID_CONF = "The configuration file is invalid due to: "
 
 #endif

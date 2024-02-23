@@ -3,29 +3,45 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:03:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/01/26 14:13:41 by rrouille         ###   ########.fr       */
+/*   Updated: 2024/02/21 12:51:19 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "webserv.hpp"
+#include "../includes/webserv.hpp"
+#include "config/parser.hpp"
 
 int	main(int ac, char **av)
 {
-	std::string	config_file;
+	(void) ac;
+	Parser	parsing;
 
-	if (ac == 1)
-		config_file = "config/default.conf";
-	else if (ac != 2)
-	{
-		std::cout << "Usage: ./webserv <config_file>" << std::endl;
-		return (1);
+	if (ac != 2) {
+		std::cout << "Specify a config file as your program parameter" << std::endl;
+		return (-1);
 	}
-	else
-		config_file = av[1];
-	Webserv webserv(config_file);
-	webserv.run();
+	try {
+		parsing.ParseFile(av[1]);
+	}
+	catch (std::exception &e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+
+	// std::string	config_file;
+
+	// if (ac == 1)
+	// 	config_file = "config/default.conf";
+	// else if (ac != 2)
+	// {
+	// 	std::cout << "Usage: ./webserv <config_file>" << std::endl;
+	// 	return (1);
+	// }
+	// else
+	// 	config_file = av[1];
+	// Webserv webserv(config_file);
+	// webserv.run();
 	return (0);
 }
