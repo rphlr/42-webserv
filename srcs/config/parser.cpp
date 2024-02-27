@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/27 20:50:57 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/27 21:00:53 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ void	Parser::handleLocation(string &key, string &value)
 {
 	(void)key;
 	(void)value;
+	//set up location class with four elements, set and get functions
 	//get the *location pointer from the current server and assign values inside of location to it
 	//check if it's nullptr before using it
 }
@@ -107,6 +108,7 @@ vector<Server>	Parser::parseFile(string doc)
 		if (line == "location:") {
 			if (inServ) {
 				inLoc = true; inErr = false;
+				//point to next location inside of same server
 				currentServer->addLocationChangePointer();
 			}
 			else

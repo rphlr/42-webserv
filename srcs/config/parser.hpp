@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 17:21:27 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/27 20:43:31 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/27 20:56:30 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,13 +39,14 @@ public:
 	void	handleSetting(string &key, string &value);
 	// bool	checkBrackets(vector<string> wholeFile);
 
+	//check all servers in the end -> isComplete, double ports, other errors ?
+
 protected:
 	bool	inServ;
 	bool	inLoc;
 	bool	inErr;
 	vector<Server> servers;
 	Server	*currentServer;
-	// vector<vector<Location>> locations;
 
 
 };
