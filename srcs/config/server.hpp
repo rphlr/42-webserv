@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.hpp                                         :+:      :+:    :+:   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:12:22 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/23 13:44:39 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/27 17:59:05 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,21 +33,21 @@ public:
 
 
 
-	void	setName(string n);
-	void	setPort(int p);
-	void	setHost(string h);
-	void	setSize(int s);
-	void	setRoot(string r);
-	void	setDefFile(string d);
-	void	setErrorPage(int code, string &path);
+	void	setName(string &n);
+	void	setPort(int &p);
+	void	setHost(string &h);
+	void	setSize(int &s);
+	void	setRoot(string &r);
+	void	setDefFile(string &d);
+	void	setErrorPage(int &code, string &path);
 
-	string	getName(void) const;
-	int		getPort(void) const;
-	string	getHost(void) const;
-	int		getSize(void) const;
-	string	getRoot(void) const;
-	string	getDefFile(void) const;
-	string	getErrorPath(int code) const;
+	string	&getName(void);
+	int		&getPort(void);
+	string	&getHost(void);
+	int		&getSize(void);
+	string	&getRoot(void);
+	string	&getDefFile(void);
+	string	&getErrorPath(int code);
 
 
 private:
