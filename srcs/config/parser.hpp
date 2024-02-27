@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 17:21:27 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/22 17:02:06 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/27 18:37:38 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include "Server.hpp"
 
 using std::string;
 using std::unordered_map;
@@ -32,9 +33,18 @@ public:
 	Parser &operator = (const Parser &c);
 
 	vector<string>	parseFile(string doc);
+	void	handleLine(string &line);
+	void	handleErrorPage(string &key, string &value);
+	void	handleLocation(string &key, string &value);
+	void	handleSetting(string &key, string &value);
 	// bool	checkBrackets(vector<string> wholeFile);
 
 private:
+	bool	inServ;
+	bool	inLoc;
+	bool	inErr;
+	vector<Server> servers;
+	Server	*currentServer;
 
 };
 

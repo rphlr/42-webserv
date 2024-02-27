@@ -6,12 +6,12 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:03:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/02/22 18:55:22 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/27 14:02:29 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/webserv.hpp"
-#include "config/parser.hpp"
+#include "config/Parser.hpp"
 
 int	main(int ac, char **av)
 {
