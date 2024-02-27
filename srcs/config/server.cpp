@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:40:45 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/27 20:49:52 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/27 21:05:31 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,10 +66,10 @@ void	Server::setRoot(string &r)
 void	Server::setErrorPage(string &c, string &path)
 {
 	int code = stoi(c);
-	if (code >= 100 && code < 600)
+	if (code >= 100 && code < 600 && _error_pages.find(code) == _error_pages.end())
 		_error_pages[code] = path;
 	else
-		throw std::invalid_argument(INVALID_CONF + "error_page (code invalid)");
+		throw std::invalid_argument(INVALID_CONF + "error_page (invalid or double)");
 }
 
 void	Server::setHost(string &h)
