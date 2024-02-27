@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/27 18:40:23 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/27 20:50:57 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 Parser::Parser(void) : inServ(false), inLoc(false), inErr(false), currentServer(nullptr) {}
 
-Parser::~Parser(void) { this->servers.clear(); }
+Parser::~Parser(void) { servers.clear(); }
 
 Parser::Parser(const Parser &c) { (void) c; }
 
@@ -40,37 +40,40 @@ void	Parser::handleLine(string &line)
 		throw std::runtime_error(INVALID_CONF + "a line is missing the delimitor ':'");
 	key = line.substr(0, pos);
 	value = line.substr(pos + 1, line.npos);
-	//send to set function - set in *currentSection
-	if (this->inErr)
-		handleErrorPage(key, value);
-	else if (this->inLoc)
+	//send to set function - set in *currentServer
+	if (inErr)
+		currentServer->setErrorPage(key, value);
+	else if (inLoc)
 		handleLocation(key, value);
 	else
 		handleSetting(key, value);
-}
-
-void	Parser::handleErrorPage(string &key, string &value)
-{
-	(void)key;
-	(void)value;
 }
 
 void	Parser::handleLocation(string &key, string &value)
 {
 	(void)key;
 	(void)value;
+	//get the *location pointer from the current server and assign values inside of location to it
+	//check if it's nullptr before using it
 }
 
 void	Parser::handleSetting(string &key, string &value)
 {
-	(void)key;
-	(void)value;
+	string	setting[6] = {"server_name", "port", "host", "max_body_size", "root", "default_file"};
+	void (Server::*setValue[6])(string &value) = {&Server::setName, &Server::setPort, \
+			&Server::setHost, &Server::setSize, &Server::setRoot, &Server::setDefFile};
+
+	for (int i = 0; i < 6; i++)
+	{
+		if (key == setting[i])
+			(currentServer->*setValue[i])(value);
+	}
 }
 
-vector<string>	Parser::parseFile(string doc)
+vector<Server>	Parser::parseFile(string doc)
 {
 	std::ifstream	inputFile;
-	vector<string>	wholeFile;
+	// vector<string>	wholeFile;
 	// Server			ServConf;
 
 	//check if file can be opened or is empty
@@ -87,10 +90,10 @@ vector<string>	Parser::parseFile(string doc)
 			continue;
 		//determine section
 		if (line == "server:") {
-			this->inLoc = false; this->inErr = false; this->inServ = true;
+			inLoc = false; inErr = false; inServ = true;
 			//point to next Server
-			this->servers.push_back(Server());
-			this->currentServer = &servers.back();
+			servers.push_back(Server());
+			currentServer = &servers.back();
 			// std::cout << "server section found\n";
 			continue;
 		}
@@ -98,12 +101,13 @@ vector<string>	Parser::parseFile(string doc)
 			if (inErr || inLoc || !inServ)
 				throw std::runtime_error(SECTION_ERR + "error_page in wrong section");
 			// std::cout << "error_page section found\n";
-			this->inErr = true;
+			inErr = true;
 			continue;
 		}
 		if (line == "location:") {
-			if (this->inServ) {
-				this->inLoc = true; this->inErr = false;
+			if (inServ) {
+				inLoc = true; inErr = false;
+				currentServer->addLocationChangePointer();
 			}
 			else
 				throw std::runtime_error(SECTION_ERR + "location outside of server section");
@@ -115,13 +119,13 @@ vector<string>	Parser::parseFile(string doc)
 
 
 		//put into vector (TBD if still necessary) OR return a ServerConfig class?
-		if (!line.empty())
-			wholeFile.push_back(line);
+		// if (!line.empty())
+		// 	wholeFile.push_back(line);
 	}
 
 
 	inputFile.close();
-	return wholeFile;
+	return servers;
 }
 
 
