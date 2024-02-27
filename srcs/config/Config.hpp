@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/27 14:03:12 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/27 14:50:36 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/27 20:12:23 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,13 @@
 #include "Errors.hpp"
 #include "Server.hpp"
 #include "Location.hpp"
+#include "Parser.hpp"
 
 using std::string;
 using std::unordered_map;
 using std::vector;
 
-class Config
+class Config : public Parser
 {
 public:
 	Config(void);
@@ -41,8 +42,8 @@ public:
 
 
 private:
-	vector<Server>	ConfigServers;
-	int				totalServ;
+	// vector<Server>	ConfigServers;
+	// int				totalServ;
 
 };
 

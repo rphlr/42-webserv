@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:12:22 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/27 17:59:05 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/27 20:39:00 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include "Location.hpp"
+#include "Errors.hpp"
 
 using std::string;
 using std::unordered_map;
@@ -31,15 +33,14 @@ public:
 	Server(const Server &c);
 	Server &operator = (const Server &c);
 
-
-
 	void	setName(string &n);
-	void	setPort(int &p);
+	void	setPort(string &po);
 	void	setHost(string &h);
-	void	setSize(int &s);
+	void	setSize(string &si);
 	void	setRoot(string &r);
 	void	setDefFile(string &d);
-	void	setErrorPage(int &code, string &path);
+	void	setErrorPage(string &c, string &path);
+	void	addLocationChangePointer(void);
 
 	string	&getName(void);
 	int		&getPort(void);
@@ -47,11 +48,14 @@ public:
 	int		&getSize(void);
 	string	&getRoot(void);
 	string	&getDefFile(void);
+	Location	*getCurrentLoc(void);
 	string	&getErrorPath(int code);
+	vector<Location>	getLocations(void);
+	std::map<int, string>	getErrorPages(void);
 
+	bool	isComplete(void);
 
 private:
-	std::map<string, bool>	_all_set;
 	string		_server_name;
 	int			_port;
 	string		_host;
@@ -59,11 +63,10 @@ private:
 	string		_root;
 	string		_default_file;
 	std::map<int, string>	_error_pages;
-	//something for locations like unordered map int, location class
-
-
+	vector<Location> _locations;
+	Location	*_currentLoc;
 };
 
-
+//create an output stream overloaded operator <<
 
 #endif
