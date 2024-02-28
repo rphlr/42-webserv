@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/27 21:20:11 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/28 13:55:25 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,8 +64,7 @@ void	Parser::handleSetting(string &key, string &value)
 	void (Server::*setValue[6])(string &value) = {&Server::setName, &Server::setPort, \
 			&Server::setHost, &Server::setSize, &Server::setRoot, &Server::setDefFile};
 
-	for (int i = 0; i < 6; i++)
-	{
+	for (int i = 0; i < 6; i++) {
 		if (key == setting[i])
 			(currentServer->*setValue[i])(value);
 	}
@@ -119,10 +118,10 @@ vector<Server>	Parser::parseFile(string doc)
 		//treat line depending on bool inServ, inErr, inLoc
 		handleLine(line);
 
-
-		//put into vector (TBD if still necessary) OR return a ServerConfig class?
-		// if (!line.empty())
-		// 	wholeFile.push_back(line);
+	}
+	// std::cout << *currentServer << std::endl;
+	for(unsigned int i = 0; i < servers.size(); i++) {
+		std::cout << "server:" << servers[i] << std::endl;
 	}
 
 
