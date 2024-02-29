@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:12:22 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/28 14:11:14 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/29 18:22:03 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,10 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
-#include "Location.hpp"
 #include "Errors.hpp"
+#include "Location.hpp"
+
+// class Location;
 
 using std::string;
 using std::unordered_map;
@@ -42,7 +44,6 @@ public:
 	void	setRoot(string &r);
 	void	setDefFile(string &d);
 	void	setErrorPage(string &c, string &path);
-	void	addLocationChangePointer(void);
 
 	string	&getName(void);
 	int		&getPort(void);
@@ -56,6 +57,8 @@ public:
 	std::map<int, string>	getErrorPages(void);
 
 	bool	isComplete(void);
+	void	addLocationChangePointer(void);
+	void	handleLocation(string &key, string &value);
 
 private:
 	string		_server_name;

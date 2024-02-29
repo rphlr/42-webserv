@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:40:45 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/28 14:21:50 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/29 18:21:33 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,12 +93,6 @@ void	Server::setDefFile(string &d)
 		throw std::runtime_error(INVALID_CONF + "default_file (double)");
 }
 
-void	Server::addLocationChangePointer(void)
-{
-	_locations.push_back(Location());
-	_currentLoc = &_locations.back();
-}
-
 string	&Server::getName(void) { return _server_name; }
 int		&Server::getPort(void) { return _port; }
 string	&Server::getHost(void) { return _host; }
@@ -137,6 +131,27 @@ bool	Server::isComplete(void)
 		return true;
 }
 
+void	Server::addLocationChangePointer(void)
+{
+	_locations.push_back(Location());
+	_currentLoc = &_locations.back();
+}
+
+void	Server::handleLocation(string &key, string &value)
+{
+	string	locSetting[4] = {"path","redirect", "methods", "directory_listing"};
+	void (Location::*setValue[4])(string &value) = {&Location::setPath, &Location::setRedirect, \
+			&Location::setMethods, &Location::setDirList};
+
+	for (int i = 0; i < 4; i++) {
+		if (key == locSetting[i]) {
+			(_currentLoc->*setValue[i])(value);
+			return ;
+		}
+	}
+	throw std::invalid_argument(INVALID_CONF + "unknown element in location section");
+}
+
 //outstream overload operator (non-member function)
 std::ostream& operator << (std::ostream& os, Server &obj)
 {
@@ -157,7 +172,7 @@ std::ostream& operator << (std::ostream& os, Server &obj)
 
 		// vector<Location> locs = obj.getLocations();
 		// for(unsigned int i = 0; i < locs.size(); i++) {
-		// 	std::cout << "location 1:" << locs[i] << std::endl;//Location class also overloaded
+		// 	std::cout << "location 1:" << locs[i] << std::endl;
 		// }
 	}
 	return os;

@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/21 22:33:57 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/28 14:47:47 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/29 18:00:13 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,9 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
-#include "Location.hpp"
 #include "Errors.hpp"
+
+class Server;
 
 using std::string;
 using std::unordered_map;
@@ -50,13 +51,15 @@ public:
 
 	string	&getPath(void);
 	string	&getRedirect(void);
-	std::map<string, bool>	&getMethods(void);
+	std::vector<string>	&getMethods(void);
 	bool	&getDirList(void);
+
+	bool	validMethod(string &m);
 
 private:
 	string					_path;
 	string					_redirect;
-	std::map<string, bool>	_methods;
+	std::vector<string>		_methods;
 	bool					_directory_listing;
 };
 

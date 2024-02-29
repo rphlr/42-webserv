@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   errors.hpp                                         :+:      :+:    :+:   */
+/*   Errors.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:03:09 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/28 14:58:51 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/29 17:36:17 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 using std::string;
 
 const string FILE_OPENING = "This file could not be opened or is empty";
-const string FILE_SYNTAX = "This file contains a syntax error";
 const string ERROR_CODE = "This error code does not exist";
 const string NO_ERR = "This server does not have any error_pages";
 const string INVALID_CONF = "The configuration file is invalid due to: ";
