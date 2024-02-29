@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser.hpp                                         :+:      :+:    :+:   */
+/*   Parser.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 17:21:27 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/27 20:56:30 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/29 18:15:14 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,11 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <sstream>
+#include <fstream>
 #include "Server.hpp"
-#include "Location.hpp"
+
+class Server;
 
 using std::string;
 using std::unordered_map;
@@ -35,11 +38,10 @@ public:
 
 	vector<Server>	parseFile(string doc);
 	void	handleLine(string &line);
-	void	handleLocation(string &key, string &value);
 	void	handleSetting(string &key, string &value);
 	// bool	checkBrackets(vector<string> wholeFile);
 
-	//check all servers in the end -> isComplete, double ports, other errors ?
+	//check all servers in the end -> isComplete, double ports, other errors ? double locations (not sure if this is an error)
 
 protected:
 	bool	inServ;

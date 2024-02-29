@@ -1,20 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser.cpp                                         :+:      :+:    :+:   */
+/*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/28 13:55:25 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/29 17:59:14 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
-#include "Errors.hpp"
-#include "Server.hpp"
-#include <sstream>
-#include <fstream>
 
 Parser::Parser(void) : inServ(false), inLoc(false), inErr(false), currentServer(nullptr) {}
 
@@ -44,18 +40,9 @@ void	Parser::handleLine(string &line)
 	if (inErr)
 		currentServer->setErrorPage(key, value);
 	else if (inLoc)
-		handleLocation(key, value);
+		currentServer->handleLocation(key, value);
 	else
 		handleSetting(key, value);
-}
-
-void	Parser::handleLocation(string &key, string &value)
-{
-	(void)key;
-	(void)value;
-	//set up location class with four elements, set and get functions
-	//get the *location pointer from the current server and assign values inside of location to it
-	//check if it's nullptr before using it
 }
 
 void	Parser::handleSetting(string &key, string &value)
@@ -65,9 +52,13 @@ void	Parser::handleSetting(string &key, string &value)
 			&Server::setHost, &Server::setSize, &Server::setRoot, &Server::setDefFile};
 
 	for (int i = 0; i < 6; i++) {
-		if (key == setting[i])
+		if (key == setting[i]) {
 			(currentServer->*setValue[i])(value);
+			return ;
+		}
 	}
+	throw std::invalid_argument(INVALID_CONF + "unknown element in settings");
+
 }
 
 vector<Server>	Parser::parseFile(string doc)
