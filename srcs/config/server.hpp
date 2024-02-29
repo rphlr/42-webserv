@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:12:22 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/27 20:39:00 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/28 14:11:14 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ public:
 	~Server(void);
 	Server(const Server &c);
 	Server &operator = (const Server &c);
+
+	//create a == overloaded operator
 
 	void	setName(string &n);
 	void	setPort(string &po);
@@ -68,5 +70,6 @@ private:
 };
 
 //create an output stream overloaded operator <<
+std::ostream& operator << (std::ostream& os, Server &obj);
 
 #endif

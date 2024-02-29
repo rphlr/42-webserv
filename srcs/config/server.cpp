@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:40:45 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/27 21:05:31 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/02/28 14:21:50 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,12 @@ Server::Server(const Server &c) : _server_name(c._server_name), _port(c._port),
 
 Server &Server::operator = (const Server &c)
 {
-	(void)c;
-	return *this;							//maybe assign after all
+	if (this != &c) {
+		_server_name = c._server_name; _port = c._port; _host = c._host;
+		_max_body_size = c._max_body_size; _root = c._root; _default_file = c._default_file;
+		_error_pages = c._error_pages; _currentLoc = c._currentLoc;
+	}
+	return *this;
 }
 
 void	Server::setName(string &n)
@@ -131,4 +135,30 @@ bool	Server::isComplete(void)
 		return false;
 	else
 		return true;
+}
+
+//outstream overload operator (non-member function)
+std::ostream& operator << (std::ostream& os, Server &obj)
+{
+	if (!obj.isComplete())
+		std::cout << "Server is incomplete" << std::endl;
+	else {
+		std::cout << "server_name: " << obj.getName() << std::endl;
+		std::cout << "port: " << obj.getPort() << std::endl;
+		std::cout << "host: " << obj.getHost() << std::endl;
+		std::cout << "max_body_size: " << obj.getSize() << std::endl;
+		std::cout << "root: " << obj.getRoot() << std::endl;
+		std::cout << "default_file: " << obj.getDefFile() << std::endl;
+		std::cout << "error_pages: " << std::endl;
+		std::map<int, string> errP = obj.getErrorPages();
+		for (std::map<int, string>::iterator it = errP.begin(); it != errP.end(); it++) {
+			std::cout << "\t" << it->first << ": " << it->second << std::endl;
+		}
+
+		// vector<Location> locs = obj.getLocations();
+		// for(unsigned int i = 0; i < locs.size(); i++) {
+		// 	std::cout << "location 1:" << locs[i] << std::endl;//Location class also overloaded
+		// }
+	}
+	return os;
 }
