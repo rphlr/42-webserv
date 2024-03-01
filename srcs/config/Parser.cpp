@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/01 17:03:05 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/01 17:34:36 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,6 @@ vector<Server>	Parser::parseFile(string doc)
 			inLoc = false; inErr = false; inServ = true;
 			servers.push_back(Server());
 			currentServer = &servers.back();//point to next Server
-			std::cout << "server address: " << currentServer << std::endl;
 			continue;
 		}
 		if (line == "error_page:") {
@@ -98,7 +97,6 @@ vector<Server>	Parser::parseFile(string doc)
 		if (line == "location:") {
 			if (inServ) {
 				inLoc = true; inErr = false;
-				std::cout << "server in location: " << currentServer << std::endl;
 				currentServer->addLocationChangePointer(); //point to next location inside of same server
 			}
 			else
