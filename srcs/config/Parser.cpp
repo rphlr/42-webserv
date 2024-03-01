@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/29 17:59:14 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/01 17:03:05 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,15 @@ void	Parser::handleLine(string &line)
 	int		pos;
 
 	//separate by ':' into two parts
+	// std::cout << "currentServer in handleLine: " << *currentServer << std::endl;
+	// std::cout << "server[0] in handleLine: " << servers[0] << std::endl;
+
+	line = line.substr(0, line.find("#"));
 	pos = line.find(sign::DOUBLE_DOT);
 	if (pos == (int)std::string::npos)
 		throw std::runtime_error(INVALID_CONF + "a line is missing the delimitor ':'");
 	key = line.substr(0, pos);
-	value = line.substr(pos + 1, line.npos);
+	value = line.substr(pos + 1);
 	//send to set function - set in *currentServer
 	if (inErr)
 		currentServer->setErrorPage(key, value);
@@ -75,42 +79,34 @@ vector<Server>	Parser::parseFile(string doc)
 	string line;
 	while (std::getline(inputFile, line))
 	{
-		//remove whitespace
 		line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
 		if (line.empty() || line.at(0) == '#')
 			continue;
-		//determine section
 		if (line == "server:") {
 			inLoc = false; inErr = false; inServ = true;
-			//point to next Server
 			servers.push_back(Server());
-			currentServer = &servers.back();
-			// std::cout << "server section found\n";
+			currentServer = &servers.back();//point to next Server
+			std::cout << "server address: " << currentServer << std::endl;
 			continue;
 		}
 		if (line == "error_page:") {
 			if (inErr || inLoc || !inServ)
 				throw std::runtime_error(SECTION_ERR + "error_page in wrong section");
-			// std::cout << "error_page section found\n";
 			inErr = true;
 			continue;
 		}
 		if (line == "location:") {
 			if (inServ) {
 				inLoc = true; inErr = false;
-				//point to next location inside of same server
-				currentServer->addLocationChangePointer();
+				std::cout << "server in location: " << currentServer << std::endl;
+				currentServer->addLocationChangePointer(); //point to next location inside of same server
 			}
 			else
 				throw std::runtime_error(SECTION_ERR + "location outside of server section");
-			// std::cout << "location section found\n";
 			continue;
 		}
-		//treat line depending on bool inServ, inErr, inLoc
 		handleLine(line);
-
 	}
-	// std::cout << *currentServer << std::endl;
 	for(unsigned int i = 0; i < servers.size(); i++) {
 		std::cout << "server:" << servers[i] << std::endl;
 	}
