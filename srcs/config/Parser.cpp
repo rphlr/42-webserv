@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Parser.cpp                                         :+:      :+:    :+:   */
+/*   parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/01 17:34:36 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/05 16:04:42 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,8 +68,6 @@ void	Parser::handleSetting(string &key, string &value)
 vector<Server>	Parser::parseFile(string doc)
 {
 	std::ifstream	inputFile;
-	// vector<string>	wholeFile;
-	// Server			ServConf;
 
 	//check if file can be opened or is empty
 	inputFile.open(doc, std::fstream::in);
@@ -114,21 +112,3 @@ vector<Server>	Parser::parseFile(string doc)
 	return servers;
 }
 
-
-
-// bool	Parser::checkBrackets(vector<string> wholeFile)
-// {
-// 	int	curlyBracket = 0;
-
-// 	for (vector<std::string>::const_iterator it = wholeFile.begin(); it != wholeFile.end(); ++it) {
-// 			const string& str = *it;
-// 			for (string::const_iterator cit = str.begin(); cit != str.end(); ++cit) {
-// 				char c = *cit;
-// 				if (c == sign::CURLY_OPEN)
-// 					curlyBracket++;
-// 				if (c == sign::CURLY_CLOSE)
-// 					curlyBracket--;
-// 	}
-// 	}
-// 	return curlyBracket == 0;
-// }
