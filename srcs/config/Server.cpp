@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:40:45 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/01 17:12:48 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/05 15:53:58 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,9 +157,6 @@ void	Server::handleLocation(string &key, string &value)
 //outstream overload operator (non-member function)
 std::ostream& operator << (std::ostream& os, Server &obj)
 {
-	// vector<Location> locs = obj.getLocations();
-	// 	std::cout << "location size" << obj.getLocations().size() << std::endl;
-
 	if (!obj.isComplete())
 		std::cout << "Server is incomplete" << std::endl;
 	else {

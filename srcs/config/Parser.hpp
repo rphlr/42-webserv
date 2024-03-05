@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 17:21:27 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/01 16:36:06 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/05 15:52:50 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,6 @@ public:
 	vector<Server>	parseFile(string doc);
 	void	handleLine(string &line);
 	void	handleSetting(string &key, string &value);
-	// bool	checkBrackets(vector<string> wholeFile);
 
 	//check all servers in the end -> isComplete, double ports, other errors ? double locations (not sure if this is an error)
 
