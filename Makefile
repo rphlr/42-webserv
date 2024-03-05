@@ -6,12 +6,12 @@
 #    By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/26 14:19:55 by rrouille          #+#    #+#              #
-#    Updated: 2024/02/29 11:07:40 by ckarl            ###   ########.fr        #
+#    Updated: 2024/03/01 17:07:41 by ckarl            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC			= c++
-CFLAGS		= -Wall -Wextra -Werror -std=c++98
+CFLAGS		= -Wall -Wextra -Werror -std=c++98 -fsanitize=address
 NAME		= webserv
 OBJS_DIR	= objs
 SRCS_DIR	= srcs
