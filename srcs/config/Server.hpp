@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:12:22 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/29 18:22:03 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/06 18:17:27 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ public:
 	Server &operator = (const Server &c);
 
 	//create a == overloaded operator
+	bool	operator == ( const Server &comp );
 
 	void	setName(string &n);
 	void	setPort(string &po);
@@ -53,8 +54,8 @@ public:
 	string	&getDefFile(void);
 	Location	*getCurrentLoc(void);
 	string	&getErrorPath(int code);
-	vector<Location>	getLocations(void);
-	std::map<int, string>	getErrorPages(void);
+	vector<Location>	&getLocations(void);
+	std::map<int, string>	&getErrorPages(void);
 
 	bool	isComplete(void);
 	void	addLocationChangePointer(void);
