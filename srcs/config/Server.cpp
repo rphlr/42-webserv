@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:40:45 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/05 15:53:58 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/06 18:05:29 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@ Server::~Server(void) { _locations.clear(); }
 Server::Server(const Server &c) : _server_name(c._server_name), _port(c._port),
 								_host(c._host), _max_body_size(c._max_body_size),
 								_root(c._root), _default_file(c._default_file),
-								_error_pages(c._error_pages), _locations(c._locations), _currentLoc(c._currentLoc) {}
+								_error_pages(c._error_pages), _locations(c._locations),
+								_currentLoc(c._currentLoc) {}
 
 Server &Server::operator = (const Server &c)
 {
@@ -107,14 +108,14 @@ string	&Server::getErrorPath(int code)
 	throw std::logic_error(ERROR_CODE);
 }
 
-std::map<int, string>	Server::getErrorPages(void)
+std::map<int, string>	&Server::getErrorPages(void)
 {
 	if (!_error_pages.empty())
 		return _error_pages;
 	throw std::runtime_error(NO_ERR);
 }
 
-vector<Location>	Server::getLocations(void)
+vector<Location>	&Server::getLocations(void)
 {
 	if (!_locations.empty())
 		return _locations;
@@ -152,6 +153,16 @@ void	Server::handleLocation(string &key, string &value)
 		}
 	}
 	throw std::invalid_argument(INVALID_CONF + "unknown element in location section");
+}
+
+//== overloaded operator (check if name, port or host are the same)
+bool	Server::operator == ( const Server &comp )
+{
+	bool	nameSame = _server_name == comp._server_name;
+	bool	portSame = _port == comp._port;
+	bool	hostSame = _host == comp._host;
+
+	return nameSame && portSame && hostSame;
 }
 
 //outstream overload operator (non-member function)
