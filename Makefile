@@ -3,60 +3,216 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+         #
+#    By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/01/26 14:19:55 by rrouille          #+#    #+#              #
-#    Updated: 2024/03/01 17:07:41 by ckarl            ###   ########.fr        #
+#    Created: 2024/01/29 12:40:01 by rrouille          #+#    #+#              #
+#    Updated: 2024/03/06 14:39:12 by rrouille         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-CC			= c++
-CFLAGS		= -Wall -Wextra -Werror -std=c++98 -fsanitize=address
-NAME		= webserv
-OBJS_DIR	= objs
-SRCS_DIR	= srcs
+# **************************************************************************** #
+#                                                                              #
+#                             Makefile Configuration                           #
+#                                                                              #
+# **************************************************************************** #
 
-# Source files
-MAIN_SRC		= main.cpp
-CONFIG_SRC		= Parser.cpp Server.cpp Location.cpp
+# Name of the executable
+NAME			= Webserv
 
-# Object files
-MAIN_OBJ		= $(addprefix $(OBJS_DIR)/, $(MAIN_SRC:.cpp=.o))
-CONFIG_OBJ		= $(addprefix $(OBJS_DIR)/config/, $(CONFIG_SRC:.cpp=.o))
+# Arguments passed to the executable
+ARGS			= $(filter-out $@,${MAKECMDGOALS})
 
-# List of all object files
-OBJS			= $(MAIN_OBJ) $(CONFIG_OBJ)
+# Directories for source and object files
+SRCSDIR			= srcs
+OBJSDIR			= objs
+HDRDIR			= includes
 
-### COLORS ###
-RED         = \033[1;31m
-GREEN       = \033[1;32m
-YELLOW      = \033[1;33m
-BLUE        = \033[1;34m
-VIOLET      = \033[1;35m
-CYAN        = \033[1;36m
-WHITE       = \033[1;37m
-RESET       = \033[0m
+# Terminal color settings for output messages
+GRAY			= \033[0;90m
+RED				= \033[0;91m
+GREEN			= \033[0;92m
+YELLOW			= \033[0;93m
+BLUE			= \033[0;94m
+MAGENTA			= \033[0;95m
+CYAN			= \033[0;96m
+WHITE			= \033[0;97m
+ENDCOLOR		= \033[0m
 
-all: $(OBJS_DIR) $(NAME)
+# Background colors for terminal
+BG_G			= \033[42m
+BG_R			= \033[41m
+BG_Y			= \033[43m
+BG_B			= \033[44m
+BG_M			= \033[45m
+BG_C			= \033[46m
+BG_W			= \033[47m
 
-$(OBJS_DIR):
-	mkdir -p $(OBJS_DIR)
+# Text formatting options for output messages
+BOLD			= \033[1m
+UNDERLINE		= \033[4m
+ITALIC			= \033[3m
+INVERTED		= \033[7m
 
-$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
-	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+# Command to clear the screen
+CLEAR			= \033c
 
-$(NAME): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
+# Source and object files
+SRCS			= $(shell find ${SRCSDIR} -type f -name '*.cpp')
+OBJS			= $(SRCS:${SRCSDIR}/%.cpp=${OBJSDIR}/%.o)
+CFLAGS			= -Wall -Wextra -Werror -std=c++98 -fsanitize=address 
+CC				= c++
+RM				= rm -rf
+MAKE			= make
+MKDIR			= mkdir -p
 
+UNAME 	= $(shell uname)
+ARCH 	= $(shell uname -m)
+
+DFLAGS	= DEBUG=1
+COMPILATION_DONE = 0
+
+# **************************************************************************** #
+#                           Compilation Rules                                  #
+# **************************************************************************** #
+
+# Rule to compile the entire program
+all:		${NAME}
+
+# Rule to compile the main executable
+${NAME}:	prog_name .WAIT ${OBJS}
+			${COMPILATION}
+			if [ "$(COMPILATION_DONE)" -eq "1" ]; then \
+				printf "┌──────────\n"; \
+				printf "│\tSources for ${GREEN}${NAME}${ENDCOLOR} done.\n"; \
+				printf "├──────────\n├─>>> ${GREEN}${NAME}${ENDCOLOR} compiled!\n└──────────\n"; \
+			else \
+				printf "┌──────────\n"; \
+				printf "│\tNothing to be done for ${GREEN}${NAME}${ENDCOLOR}.\n└──────────\n"; \
+			fi
+
+# Rule to compile object files
+${OBJSDIR}/%.o:	${SRCSDIR}/%.cpp
+				@${MKDIR} ${@D}
+				@if [[ $(if $(filter dbg,${MAKECMDGOALS}),1,0) == "1" ]]; then \
+					printf "│\t > ${YELLOW}DEBUG${ENDCOLOR} Compiling ${YELLOW}$<${ENDCOLOR} with ${YELLOW}${DFLAGS}${ENDCOLOR} and ${YELLOW}${LDFLAGS}${ENDCOLOR}...\r"; \
+					${CC} -D ${DFLAGS} -c $< -o $@ ${LDFLAGS}; \
+				else \
+					printf "│\t > Compiling ${YELLOW}$<${ENDCOLOR} for ${GREEN}${NAME}${ENDCOLOR}...\r"; \
+					${CC} ${CFLAGS} -c $< -o $@ -I${HDRDIR}; \
+				fi
+				$(eval COMPILATION_DONE = 1)
+				@printf "\33[2K"
+
+CC_PROG			= ${CC} ${CFLAGS} ${OBJS} -o ${NAME}
+COMPILATION		= ${CC_PROG}
+
+run:
+				@printf "┌──────────\n"
+				@printf "│\tRunning ${GREEN}${NAME}${ENDCOLOR}...\n"
+				@printf "└──────────\n"
+				@./${NAME} ${ARGS}
+
+# Rebuild the entire project
+re:
+		@printf "\n┌──────────\n│ Cleaning and ${GREEN}recompiling${ENDCOLOR}...\n"
+		@${MAKE} fclean r
+		@${MAKE} all r
+
+# **************************************************************************** #
+#                                 UTILITIES                                    #
+# **************************************************************************** #
+
+prog_name:
+		@printf "${RED}"
+		@cat makefile_utils/prog_name
+		@printf "${ENDCOLOR}\n"
+
+help:
+			@if [ "${PRINT_SCREEN}" = "YES" ]; then \
+				${ECHO} "${CLEAR}\c"; \
+				${MAKE} draw_help; \
+				for i in 3 2 1 0; do \
+					printf '\r${BLUE}Help will be shown in: %d${ENDCOLOR}' "$$i"; \
+					sleep 1; \
+					printf '${CLEARLN}'; \
+				done; \
+			fi
+			@${ECHO} "${GRAY}🏃 Run ${ITALIC}\`./${NAME}\`${ENDCOLOR}${GRAY} to see the program in action.${ENDCOLOR}${GRAY}"
+			@${ECHO} "${BOLD}${UNDERLINE}💡 TIPS: 💡${ENDCOLOR}${GRAY}"
+			@${ECHO} "\t- You can also use ${ITALIC}\`make run\`${ENDCOLOR}${GRAY} or ${ITALIC}\`make r\`${ENDCOLOR}${GRAY} to try it out."
+			@${ECHO} "\t- Check for memory leaks with ${ITALIC}\`make leaks\`${ENDCOLOR}${GRAY} or ${ITALIC}\`make l\`${ENDCOLOR}${GRAY}."
+			@${ECHO} "\t- Check the 42 norm with ${ITALIC}\`make norm\`${ENDCOLOR}${GRAY} or ${ITALIC}\`make n\`${ENDCOLOR}${GRAY}."
+			@${ECHO} "\t- Check the forbidden functions with ${ITALIC}\`make check_forbidden\`${ENDCOLOR}${GRAY} or ${ITALIC}\`make cf\`${ENDCOLOR}${GRAY}."
+			@${ECHO} "\t- Use ${ITALIC}\`make lldb\`${ENDCOLOR}${GRAY} to run the program with lldb."
+			@${ECHO} "\t- Use ${ITALIC}\`make fast\`${ENDCOLOR}${GRAY} or ${ITALIC}\`make cf\`${ENDCOLOR}${GRAY} to compile the program faster."
+			@${ECHO} "\t- Use ${ITALIC}\`make clear\`${ENDCOLOR}${GRAY} or ${ITALIC}\`make c\`${ENDCOLOR}${GRAY} to clear the screen."
+			@${ECHO} "\t- Use ${ITALIC}\`make clean\`${ENDCOLOR}${GRAY} to clean the object files."
+			@${ECHO} "\t- Use ${ITALIC}\`make fclean\`${ENDCOLOR}${GRAY} to clean the object files and the executable."
+			@${ECHO} ""
+			@${ECHO} "${YELLOW}🌟 Use ${ITALIC}\`make help\`${ENDCOLOR}${YELLOW} or ${ITALIC}\`make h\`${ENDCOLOR}${YELLOW} to display these helpful tips. 🚀${ENDCOLOR}"
+h:		help
+
+################################################################################
+#                       Cleaning and Maintenance                               #
+################################################################################
+
+# Clean object files and executable
 clean:
-	/bin/rm -rf $(OBJS_DIR)
+		@if [[ $(if $(filter r,${MAKECMDGOALS}),1,0) == "1" ]]; then \
+			printf "├──────────\n"; \
+		else \
+			printf "┌──────────\n"; \
+		fi
+		@if [ -d "./${OBJSDIR}" ]; then \
+			printf "│\tRemoving ${RED}${OBJSDIR}${ENDCOLOR} for ${YELLOW}${NAME}${ENDCOLOR}\n"; \
+			rm -rf ${OBJSDIR}; \
+		else \
+			printf "│\t${RED}${OBJSDIR}${ENDCOLOR} already removed for ${YELLOW}${NAME}${ENDCOLOR}!\n"; \
+		fi
+		if [ $(if $(filter r,${MAKECMDGOALS}),1,0) == "1" ]; then \
+			printf "├──────────\n"; \
+		else \
+			printf "└──────────\n"; \
+		fi
 
-fclean: clean
-	/bin/rm -f $(NAME)
-	@echo "$(BLUE)All clean! ✨$(RESET)"
+# Clean everything including the executable
+fclean: 
+		@printf "┌──────────\n"
+		@if [ -d "./${OBJSDIR}" ]; then \
+			printf "│\tRemoving ${RED}${OBJSDIR}${ENDCOLOR} for ${YELLOW}${NAME}${ENDCOLOR}\n"; \
+			rm -rf ${OBJSDIR}; \
+		else \
+			printf "│\t${RED}${OBJSDIR}${ENDCOLOR} already removed for ${YELLOW}${NAME}${ENDCOLOR}!\n"; \
+		fi
+		@printf "\033[A\033[2K"
+		@if [ -e "./${NAME}" ]; then \
+			printf "│\tRemoving ${YELLOW}${NAME}${ENDCOLOR}\n"; \
+			rm -rf ${NAME}; \
+		else \
+			printf "│\t${YELLOW}${NAME}${ENDCOLOR} already removed!\n"; \
+		fi
+		@printf "└──────────\n"
 
-re: fclean all
-	@echo "$(GREEN)Cleaned & rebuilt! 💫$(RESET)"
+################################################################################
+#                                 Github                                       #
+################################################################################
 
-.PHONY: all clean fclean re
+# Rule to push changes to Git
+push:			fclean
+			@git add .
+			@if [ -z "${ARGS}" ]; then \
+				echo "${RED}❌ Please provide a commit message! ✨${ENDCOLOR}"; \
+				exit 1; \
+			fi
+			@git commit -m "${ARGS}"
+			@git push
+
+# Rule to pull changes from Git
+pull:
+			@git pull
+
+export MAKEFLAGS += --silent
+
+.PHONY: all fclean clean re
+$(eval dbg:;@:)
+$(eval r:;@:)
