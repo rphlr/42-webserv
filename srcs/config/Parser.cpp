@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser.cpp                                         :+:      :+:    :+:   */
+/*   Parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/05 16:04:42 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/06 18:17:17 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,10 +103,16 @@ vector<Server>	Parser::parseFile(string doc)
 		}
 		handleLine(line);
 	}
+	//print out all servers in the vector
 	for(unsigned int i = 0; i < servers.size(); i++) {
 		std::cout << "server:" << servers[i] << std::endl;
 	}
 
+	//testing if servers are the same or different by comparing name, port and host
+	if (servers[0] == servers[1])
+		std::cout << "they're the same" << std::endl;
+	else
+		std::cout << "they're different" << std::endl;
 
 	inputFile.close();
 	return servers;
