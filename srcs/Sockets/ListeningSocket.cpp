@@ -5,7 +5,7 @@
 // * *********************************** */
 ListeningSocket::ListeningSocket( int domain, int service, int protocol, int port, u_long interface, int bklg ) :
 	BindingSocket( domain, service, protocol, port, interface ) {
-	std::cout << "ListeningSocket constructor called\n";
+	// std::cout << "ListeningSocket constructor called\n";
 	start_listening();
 }
 

@@ -5,7 +5,7 @@
 * *********************************** */
 BindingSocket::BindingSocket( int domain, int service, int protocol, int port, u_long interface ) :
 	SimpleSocket( domain, service, protocol, port, interface ) {
-	std::cout << "BindingSocket constructor called\n";
+	// std::cout << "BindingSocket constructor called\n";
 	set_connection(connect_to_network(get_sock(), get_address()));
 }
 
