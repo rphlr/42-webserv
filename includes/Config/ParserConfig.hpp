@@ -6,7 +6,7 @@
 /*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 17:21:27 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/20 12:50:33 by nvaubien         ###   ########.fr       */
+/*   Updated: 2024/03/20 14:42:30 by nvaubien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ public:
 	void	handleLine(string &line);
 	void	handleSetting(string &key, string &value);
 
+	Server *getNthServer(int n);
 	//check all servers in the end -> isComplete, double ports, other errors ? double locations (not sure if this is an error)
 
 protected:
@@ -48,8 +49,6 @@ protected:
 	bool	inErr;
 	vector<Server> servers;
 	Server	*currentServer;
-
-
 };
 
 namespace sign {

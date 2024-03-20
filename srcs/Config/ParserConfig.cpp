@@ -6,7 +6,7 @@
 /*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/20 12:52:47 by nvaubien         ###   ########.fr       */
+/*   Updated: 2024/03/20 15:03:02 by nvaubien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,12 +109,19 @@ vector<Server>	Parser::parseFile(string doc)
 	}
 
 	//testing if servers are the same or different by comparing name, port and host
-	if (servers[0] == servers[1])
-		std::cout << "they're the same" << std::endl;
-	else
-		std::cout << "they're different" << std::endl;
+	// if (servers[0] == servers[1])
+	// 	std::cout << "they're the same" << std::endl;
+	// else
+	// 	std::cout << "they're different" << std::endl;
 
 	inputFile.close();
 	return servers;
+}
+
+Server *Parser::getNthServer(int n)
+{
+	if (n < 0 || n >= (int)servers.size())
+		throw std::out_of_range(INVALID_CONF + "server index out of range");
+	return &servers[n];
 }
 
