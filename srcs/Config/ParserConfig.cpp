@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Parser.cpp                                         :+:      :+:    :+:   */
+/*   ParserConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
+/*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/06 18:17:17 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/20 12:52:47 by nvaubien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Parser.hpp"
+#include "../../includes/Config/ParserConfig.hpp"
 
-Parser::Parser(void) : inServ(false), inLoc(false), inErr(false), currentServer(nullptr) {}
+Parser::Parser(void) : inServ(false), inLoc(false), inErr(false), currentServer(NULL) {}
 
 Parser::~Parser(void) { servers.clear(); }
 
