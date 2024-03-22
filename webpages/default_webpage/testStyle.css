@@ -1,0 +1,95 @@
+/* testStyle.css */
+
+body {
+	font-family: Georgia, sans-serif;
+	background-color: hsl(196, 69%, 88%)
+}
+
+header {
+	background-color: lightblue; /* Set background color for header */
+	text-align: center; /* Center-align header content */
+	padding: 20px 0; /* Add padding to header content */
+}
+
+nav {
+	text-align: center; /* Center-align navigation links */
+	margin-top: 20px; /* Add margin space above navigation */
+}
+
+nav a {
+	display: inline-block; /* Display navigation links inline */
+	margin: 0 10px; /* Add margin between navigation links */
+	text-decoration: none; /* Remove default underline */
+	color: #333; /* Set color for navigation links */
+}
+
+main {
+	padding: 20px; /* Add padding to main content */
+}
+
+footer {
+	text-align: center; /* Center-align footer content */
+	position: fixed;
+	bottom: 0;
+	width: 100%; /* Make footer span the entire width */
+	background-color: #f9e6ce; /* Set background color for footer */
+	color: #fff; /* Set text color for footer */
+	padding: 10px 0; /* Add padding to footer content */
+}
+/* testStyle.css */
+
+body {
+	font-family: Georgia, sans-serif;
+	background-color: hsl(148, 52%, 87%);
+	margin: 0; /* Remove default margin */
+}
+
+header {
+	background-color: lightblue; /* Set background color for header */
+	text-align: center; /* Center-align header content */
+	padding: 20px 0; /* Add padding to header content */
+}
+
+nav {
+	text-align: center; /* Center-align navigation links */
+	margin-top: 20px; /* Add margin space above navigation */
+}
+
+nav a {
+	display: inline-block; /* Display navigation links inline */
+	margin: 0 10px; /* Add margin between navigation links */
+	text-decoration: none; /* Remove default underline */
+	color: #333; /* Set color for navigation links */
+}
+
+main {
+	padding: 20px; /* Add padding to main content */
+}
+
+footer {
+	text-align: center; /* Center-align footer content */
+	position: fixed;
+	bottom: 0;
+	width: 100%; /* Make footer span the entire width */
+	background-color: #626262; /* Set background color for footer */
+	color: #fff; /* Set text color for footer */
+	padding: 10px 0; /* Add padding to footer content */
+}
+
+/* Style the main content area as a flex container */
+main {
+	display: flex;
+	justify-content: space-between; /* Distribute space between flex items */
+}
+
+/* Style for upload section */
+.upload {
+	flex: 1; /* Make the section flexible to adjust width */
+	/* margin-right: 10px;  Add margin between sections */
+}
+
+/* Style for download section */
+.download {
+	flex: 1; /* Make the section flexible to adjust width */
+	margin-left: 10px !important; /* Add margin between sections */
+}
