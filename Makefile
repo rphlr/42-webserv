@@ -6,7 +6,7 @@
 #    By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/29 12:40:01 by rrouille          #+#    #+#              #
-#    Updated: 2024/03/22 19:20:30 by rrouille         ###   ########.fr        #
+#    Updated: 2024/03/23 13:58:30 by rrouille         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -71,6 +71,15 @@ ARCH				= $(shell uname -m)
 DFLAGS				= DEBUG=1
 COMPILATION_DONE	= 0
 
+# Create a variable to check if the .WAIT target is supported
+WAIT_SUPPORTED := $(shell echo "all: .WAIT" > Makefile.test && ( make -f Makefile.test all 2>/dev/null && echo YES || echo NO) && rm -f Makefile.test)
+
+ifeq ($(WAIT_SUPPORTED),YES)
+    WAIT_CMD := .WAIT
+else
+    WAIT_CMD :=
+endif
+
 # **************************************************************************** #
 #                           Compilation Rules                                  #
 # **************************************************************************** #
@@ -79,9 +88,8 @@ COMPILATION_DONE	= 0
 all:			${NAME}
 
 # Rule to compile the main executable
-${NAME}:		always_rebuild prog_name ${OBJS}
+${NAME}:		prog_name ${WAIT_CMD} ${OBJS}
 				# @make prog_name
-				# ${NAME}: ${OBJS}
 				${COMPILATION}
 				@if [ -d "${OBJSDIR}" ] && [ "$$(ls ${OBJSDIR}/*.o 2>/dev/null)" ]; then \
 					newest_obj=$$(ls -t ${OBJSDIR}/*.o ${OBJSDIR}/*/*.o ${OBJSDIR}/*/*/*.o | head -1); \
@@ -99,9 +107,6 @@ ${NAME}:		always_rebuild prog_name ${OBJS}
 					echo "No object files to compare with."; \
 				fi
 
-always_rebuild:
-	@true
-
 # Rule to compile object files
 ${OBJSDIR}/%.o:	${SRCSDIR}/%.cpp
 				@${MKDIR} ${@D}
@@ -112,7 +117,6 @@ ${OBJSDIR}/%.o:	${SRCSDIR}/%.cpp
 					printf "│\t > Compiling ${YELLOW}$<${ENDCOLOR} for ${GREEN}${NAME}${ENDCOLOR}...\r"; \
 					${CC} ${CFLAGS} -c $< -o $@ -I${HDRDIR}; \
 				fi
-				# $(eval COMPILATION_DONE = 1)
 				@printf "\33[2K"
 
 CC_PROG			= ${CC} ${CFLAGS} ${OBJS} -o ${NAME}
@@ -236,5 +240,3 @@ pull:
 export MAKEFLAGS += --silent
 
 .PHONY: all fclean clean re
-# $(eval dbg:;@:)
-# $(eval r:;@:)
