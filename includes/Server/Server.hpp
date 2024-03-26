@@ -3,5 +3,7 @@
 
 #include "./SimpleServer.hpp"
 #include "./TestServer.hpp"
+#include "./HandleRequest.hpp"
+#include "./HandleResponse.hpp"
 
 #endif
