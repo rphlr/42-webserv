@@ -18,6 +18,50 @@ void TestServer::launch() {
 	}
 }
 
+// void TestServer::launch() 
+// {
+// 	fd_set current_sockets, ready_sockets;
+// 	FD_ZERO(&current_sockets); // Clears the fd_set
+
+// 	// Add listening socket to the set
+// 	FD_SET(get_socket()->get_sock(), &current_sockets);
+
+// 	int max_fd = get_socket()->get_sock();
+
+// 	while (true) 
+// 	{
+// 		ready_sockets = current_sockets;
+
+// 		if (select(max_fd + 1, &ready_sockets, NULL, NULL, NULL) == -1) 
+// 		{
+// 			std::cerr << "Select error: " << strerror(errno);
+// 			break;
+// 		}
+
+// 		// Check each socket for readiness
+// 		for(int i = 0; i <= max_fd; i++) 
+// 		{
+// 			if (FD_ISSET(i, &ready_sockets)) 
+// 			{
+// 				if (i == max_fd) 
+// 				{
+// 					// Accept new connection
+// 					accepter();
+// 				} 
+// 				else 
+// 				{
+// 					handler();
+
+// 					if(strlen(_buffer) !=  0) // Check if there's data in the buffer
+// 					{
+// 						responder();
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// }
+
 void TestServer::accepter() {
 	std::cout << "Accepting...\n";
 	memset(_buffer, 0, 300 );
