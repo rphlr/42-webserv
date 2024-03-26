@@ -30,6 +30,7 @@ void HandleRequest::handleRequest() {
 
 	// Next lines are the headers
 	
+	
 	// Last line is the body
 	std::cout << "\n\n\n";
 
