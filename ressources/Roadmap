@@ -1,5 +1,3 @@
-Here's an overarching roadmap to tackle the project and meet the outlined requirements:
-
 Understanding HTTP: Take time to read and understand the HTTP protocol, especially HTTP/1.1 on which the project is based. Try to understand the format of HTTP requests and responses thoroughly.
 
 Code Structure: Based on the source code you have shared, you are on the right path with a neatly organized code structure. You have arranged the code in a simple-to-complex hierarchy, which makes it easier to maintain and debug in the long run.

@@ -1,4 +1,6 @@
 #include "../../includes/Server/TestServer.hpp"
+#include "../../includes/Server/HandleRequest.hpp"
+#include "../../includes/Server/HandleResponse.hpp"
 
 // TestServer::TestServer() : SimpleServer( AF_INET, SOCK_STREAM, 0, 6545, INADDR_ANY, 10 ) {
 // 	launch();
@@ -17,6 +19,32 @@ void TestServer::launch() {
 		std::cout << "Done\n";
 	}
 }
+
+void TestServer::accepter() {
+	std::cout << "Accepting...\n";
+	memset(_buffer, 0, 300 );
+	struct sockaddr_in address = get_socket()->get_address();
+	int addrlen = sizeof(address);
+	_new_socket = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t*)&addrlen);
+	read( _new_socket, _buffer, 300 );
+}
+
+void TestServer::handler() {
+	// std::cout << "Handling...\n";
+	// std::cout << _buffer << std::endl;
+	HandleRequest request(_buffer);
+	request.handleRequest();
+}
+
+void TestServer::responder() {
+	// HandleResponse response;
+	std::cout << "Responding...\n";
+	char *hello = "Hello from server";
+	write(_new_socket, hello, strlen(hello));
+	close(_new_socket);
+}
+
+/* TESTING */
 
 // void TestServer::launch() 
 // {
@@ -61,24 +89,3 @@ void TestServer::launch() {
 // 		}
 // 	}
 // }
-
-void TestServer::accepter() {
-	std::cout << "Accepting...\n";
-	memset(_buffer, 0, 300 );
-	struct sockaddr_in address = get_socket()->get_address();
-	int addrlen = sizeof(address);
-	_new_socket = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t*)&addrlen);
-	read( _new_socket, _buffer, 300 );
-}
-
-void TestServer::handler() {
-	std::cout << "Handling...\n";
-	std::cout << _buffer << std::endl;
-}
-
-void TestServer::responder() {
-	std::cout << "Responding...\n";
-	char *hello = "Hello from server";
-	write(_new_socket, hello, strlen(hello));
-	close(_new_socket);
-}
