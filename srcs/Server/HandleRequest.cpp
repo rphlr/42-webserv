@@ -7,7 +7,7 @@ HandleRequest::HandleRequest( char *incoming_request ) : _request(incoming_reque
 	std::cout << _request;
 }
 
-void HandleRequest::handleRequest() {
+void HandleRequest::handleRequest() {	//think of chunked requests
 	std::stringstream iss(_request);
 	std::string line;
 
@@ -52,9 +52,6 @@ void HandleRequest::handleRequest() {
 		std::cout << "Line: " << line << std::endl;
 
 	}
-
-
-
 
 }
 
