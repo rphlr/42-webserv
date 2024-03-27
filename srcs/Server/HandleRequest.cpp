@@ -7,12 +7,21 @@ HandleRequest::HandleRequest( char *incoming_request ) : _request(incoming_reque
 	std::cout << _request;
 }
 
-void HandleRequest::handleRequest() {	//think of chunked requests
+void HandleRequest::handleChunkedRequest(std::stringstream &iss)
+{
+
+}
+
+void HandleRequest::handleRequest() {	//think of chunked requests (consider variable to treat incoming request (if chunked))
 	std::stringstream iss(_request);
 	std::string line;
 
 	// First line is the method, path and protocol
 	std::getline(iss, line);
+	if (line.find(': ') != line.npos) {
+		handleChunkedRequest(iss);
+		return ;
+	}
 	std::stringstream firstLine(line);
 	std::string segment;
 	std::vector<std::string> segments;
@@ -37,7 +46,7 @@ void HandleRequest::handleRequest() {	//think of chunked requests
 	while (std::getline(iss, line) && !line.empty()) {
 		int pos = line.find(':');
 		key = line.substr(0, pos);
-		value = line.substr(pos + 1);
+		value = line.substr(pos + 2);
 		_headers.insert(std::make_pair(key, value));
 		std::cout << "Line: " << line << std::endl;
 	}
