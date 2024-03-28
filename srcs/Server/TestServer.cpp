@@ -39,9 +39,9 @@ void TestServer::handler() {
 void TestServer::responder() {
 	// HandleResponse response;
 	std::cout << "Responding...\n";
-	char *hello = "Hello from server";
-	write(_new_socket, hello, strlen(hello));
-	close(_new_socket);
+	const char* response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Salut a tous</h1></body></html>";
+	send(_new_socket, response, strlen(response), 0);
+	shutdown(_new_socket, SHUT_RDWR);
 }
 
 /* TESTING */

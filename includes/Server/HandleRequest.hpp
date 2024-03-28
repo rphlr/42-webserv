@@ -5,6 +5,8 @@
 #include <map>
 #include <sstream>
 #include <vector>
+#include <map>
+#include <algorithm>
 
 class HandleRequest {
 	public:
