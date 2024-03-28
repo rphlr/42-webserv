@@ -11,7 +11,8 @@ class HandleRequest {
 		HandleRequest( char *incoming_request );
 		~HandleRequest();
 		void handleRequest();
-		void handleChunkedRequest(std::stringstream &iss);
+		void handleChunkedBody();
+		bool	isChunked(std::string &line);
 
 		void	setRequest( std::string request );
 		void	setMethod( std::string method );

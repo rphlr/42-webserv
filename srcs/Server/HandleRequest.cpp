@@ -7,19 +7,46 @@ HandleRequest::HandleRequest( char *incoming_request ) : _request(incoming_reque
 	std::cout << _request;
 }
 
-void HandleRequest::handleChunkedRequest(std::stringstream &iss)
+void HandleRequest::handleChunkedBody()
 {
+	//end of overall request
+	if (_request == "\r\n") {
+		// check for max_body_size at the end, if bigger then error code 404 or throw exception
+		return ;
+	}
+
+	std::stringstream iss(_request);
+	std::string line;
+	//only need second line of the chunk
+	std::getline(iss, line); std::getline(iss, line);
+
+	// treat the body line
+	std::cout << "Line: " << line << std::endl;
 
 }
 
-void HandleRequest::handleRequest() {	//think of chunked requests (consider variable to treat incoming request (if chunked))
+bool	HandleRequest::isChunked(std::string &line)
+{
+	std::stringstream ss(line);
+	char c;
+
+	while (ss >> c)
+	{
+		if (!isdigit(c) && c != '\r' && c!= '\n')
+			return false;
+	}
+	return true;
+}
+
+void HandleRequest::handleRequest() {	//think of chunked requests (only body can be chunked)
 	std::stringstream iss(_request);
 	std::string line;
 
 	// First line is the method, path and protocol
 	std::getline(iss, line);
-	if (line.find(': ') != line.npos) {
-		handleChunkedRequest(iss);
+	//check if chunked request (starts with size of chunk 7\r\n for example)
+	if (isChunked(line)) {
+		handleChunkedBody();
 		return ;
 	}
 	std::stringstream firstLine(line);
