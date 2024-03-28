@@ -6,7 +6,9 @@
 // 	launch();
 // }
 
-TestServer::TestServer(Server &server) : SimpleServer( server ) {
+TestServer::TestServer(Server &server) : SimpleServer( server ), _request("") {
+	_routes["/home"] = &TestServer::handleRoot;
+
 	launch();
 }
 
@@ -32,17 +34,19 @@ void TestServer::accepter() {
 void TestServer::handler() {
 	// std::cout << "Handling...\n";
 	// std::cout << _buffer << std::endl;
-	HandleRequest request(_buffer);
-	request.handleRequest();
+	_request.setRequest( _buffer );
+	_request.handleRequest();
 }
 
 void TestServer::responder() {
 	// HandleResponse response;
 	std::cout << "Responding...\n";
-	const char* response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Salut a tous</h1></body></html>";
-	send(_new_socket, response, strlen(response), 0);
+	handleRoot( _request );
+	// const char* response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Salut a tous</h1></body></html>";
+	// send(_new_socket, response, strlen(response), 0);
 	shutdown(_new_socket, SHUT_RDWR);
 }
+
 
 /* TESTING */
 
