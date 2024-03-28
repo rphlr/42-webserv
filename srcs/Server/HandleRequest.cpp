@@ -19,6 +19,14 @@ HandleRequest::HandleRequest( char *incoming_request ) : _request(incoming_reque
 	std::cout << _request;
 }
 
+std::string HandleRequest::getRequest() const {
+	return _request;
+}
+
+void HandleRequest::setRequest( std::string request ) {
+	_request = request;
+}
+
 void HandleRequest::handleRequest() {
 	// First line is the method path and protocol
 	std::string extracted_request = _request.substr(0, _request.find("\n"));
