@@ -23,9 +23,19 @@ std::string HandleRequest::getRequest() const {
 	return _request;
 }
 
+std::string HandleRequest::getMethod() const {
+	return _method;
+}
+
+std::string HandleRequest::getPath() const {
+	return _path;
+}
+
 void HandleRequest::setRequest( std::string request ) {
 	_request = request;
 }
+
+
 
 void HandleRequest::handleRequest() {
 	// First line is the method path and protocol
@@ -39,11 +49,9 @@ void HandleRequest::handleRequest() {
 		segments.push_back(segment);
 	}
 
-	for (int i = 0; i < segments.size(); i++) {
-		_method = segments[0];
-		_path = segments[1];
-		_protocol = segments[2];
-	}
+	_method = segments[0];
+	_path = segments[1];
+	_protocol = segments[2];
 
 	std::cout << CYAN;
 	std::cout << "/ *** Request Parsing *** /\n";
