@@ -37,7 +37,6 @@ private:
 	void accepter();
 	void handler();
 	void responder();
-	
 
 	HandleRequest _request;
 

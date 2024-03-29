@@ -14,6 +14,8 @@
 #define BRIGHT_BLACK "\033[90m"
 #define BRIGHT_RED "\033[91m"
 
+#include <cstdlib> 
+
 // TestServer::TestServer() : SimpleServer( AF_INET, SOCK_STREAM, 0, 6545, INADDR_ANY, 10 ) {
 // 	launch();
 // }
@@ -116,7 +118,10 @@ void TestServer::handleDelete(HandleRequest &request) {
 
 void TestServer::handleRoot(HandleRequest &request)
 {
-	std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/siteHome.html");
+	std::string filePath = this->_rootPath + "/default_webpages/siteHome.html";
+	std::cout << "Root path: " << filePath << std::endl;
+	std::ifstream file(filePath);
+	// std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/siteHome.html");
 	if (!file.is_open())
 	{
 		// handle the error, e.g. by logging it and returning
@@ -138,7 +143,9 @@ void TestServer::handleRoot(HandleRequest &request)
 
 void TestServer::handleCss(HandleRequest &request)
 {
-	std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/styles.css");
+	std::string filePath = this->_rootPath + "/default_webpages/styles.css";
+	std::ifstream file(filePath);
+	// std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/styles.css");
 
 	if (!file.is_open())
 	{
@@ -161,8 +168,9 @@ void TestServer::handleCss(HandleRequest &request)
 
 void TestServer::handleForm(HandleRequest &request)
 {
-	std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/siteForm.html");
-
+	std::string filePath = this->_rootPath + "/default_webpages/siteForm.html";
+	std::ifstream file(filePath);
+	// std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/siteForm.html");
 	if (!file.is_open())
 	{
 		// handle the error, e.g. by logging it and returning
@@ -183,9 +191,11 @@ void TestServer::handleForm(HandleRequest &request)
 }
 
 void TestServer::handleError(HandleRequest &request)
-
 {
-	std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/error_webpages/custom_404.html");
+	std::string filePath = this->_rootPath + "/error_webpages/custom_404.html";
+	std::ifstream file(filePath);
+
+	// std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/error_webpages/custom_404.html");
 
 	if (!file.is_open())
 	{
