@@ -4,6 +4,9 @@
 #include "../Networking/Networking.hpp"
 #include "../Config/Config.hpp"
 
+#include <unistd.h>
+#include <stdlib.h>
+
 // class SimpleServer {
 // 	public:
 // 		SimpleServer( int domain, int service, int protocol, int port, u_long interface, int bklg );
@@ -39,7 +42,7 @@ class SimpleServer {
 		ListeningSocket * get_socket();
 
 
-	private:
+	protected:
 		ListeningSocket * _socket;
 		/* *********************************** *
 		**  Server config ******************** *
@@ -48,6 +51,7 @@ class SimpleServer {
 		int _port;
 		std::string _host;
 		int _max_body_size;
+		std::string _rootPath;
 		// std::string _root;
 		// std::string _default_file;
 		// std::map<int, std::string> _error_pages;
