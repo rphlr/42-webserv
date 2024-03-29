@@ -1,81 +1,133 @@
 #include "../../includes/Server/TestServer.hpp"
 
-// TestServer::TestServer() : SimpleServer( AF_INET, SOCK_STREAM, 0, 6545, INADDR_ANY, 10 ) {
-// 	launch();
-// }
-
-/* *********************************** *
-**  Core functionnalities ************ *
-* *********************************** */
-ListeningSocket * TestServer::get_socket() {
-	return _socket;
-}
-
-// /* *********************************** *
-// **  Canonical Form ******************* *
-// * *********************************** */
 TestServer::TestServer( Server &server ) : _request("") {
-	int on = 1;
-	_new_socket = -1;
-	_port = server.getPort();
 	u_long interface;
-	if (!server.getHost().compare("127.0.0.1")){
-		interface = INADDR_LOOPBACK;
-	}
-	else {
-		interface = inet_addr(server.getHost().c_str());
-	}
-	int bklg = 10;
-	// _socket = new ListeningSocket( domain, service, protocol, port, interface, bklg );
-		// Create a function to setup routes
-	_listen_socket = socket(AF_INET, SOCK_STREAM, 0);
+	_end_server = false;
+	_close_connection = false;
+	_port = server.getPort();
+	_address.sin_family = AF_INET;
+	_address.sin_port = htons(_port);
+	interface = inet_pton(AF_INET, server.getHost().c_str(), &_address.sin_addr);
+	if (interface <= 0)
+		std::cout << "loopback host or not valid" << std::endl;
+	_addr_len = sizeof(_address);
 
+	// Create a function to setup routes
 	_routes["/home"] = &TestServer::handleRoot;
 	_routes["/styles.css"] = &TestServer::handleCss;
 	// _routes["/form"] = &TestServer::handleForm;
 
-	// memset(&_address, 0, sizeof(_address));
-	_address.sin_family = AF_INET;
-	_address.sin_port = htons(_port);
-	_address.sin_addr.s_addr = htonl(interface);
-
-	_rc = setsockopt(_listen_socket, SOL_SOCKET,  SO_REUSEADDR,
-		(char *)&on, sizeof(on));
-	if (_rc < 0) {
-		close(_listen_socket);
-		exit(-1);
-	}
-	_rc = bind(_listen_socket,
-		(struct sockaddr *)&_address, sizeof(_address));
-	if (_rc < 0) {
-		close(_listen_socket);
-		exit(-1);
-	}
-	memset(_fds, 0 , sizeof(_fds));
-	_fds[0].fd = _listen_socket;
-	_fds[0].events = POLLIN;
-	_timeout = 180000;
-
+	init();
 	launch();
 }
 
+void TestServer::init()
+{
+	int on = 1;
+
+	//initialize server socket
+	_listen_socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (_listen_socket < 0) {
+		std::cerr << "initializing server socket failed" << std::endl;
+		exit(-1);
+	}
+		//allow socket descriptor to be reusable
+	if (setsockopt(_listen_socket, SOL_SOCKET,  SO_REUSEADDR,
+		(char *)&on, sizeof(on)) < 0) {
+		close(_listen_socket);
+		std::cerr << "setsockopt" << std::endl;
+		exit(-1);
+	}
+	//bind the socket
+	if (bind(_listen_socket, (sockaddr *)&_address, _addr_len) < 0) {
+		std::cerr << "binding socket failed" << std::endl;
+		close(_listen_socket);
+		exit(-1);
+	}
+	if (listen(_listen_socket, 32) < 0) {
+		std::cerr << "listen() failed" << std::endl;
+		close(_listen_socket);
+		exit(-1);
+	}
+	//initialize the fd_sets for clients
+	FD_ZERO(&_master_set);
+	FD_ZERO(&_working_set);
+	_max_sockets = _listen_socket;
+	FD_SET(_listen_socket, &_master_set);
+
+	//timeout after 3 minutes of inactivity
+	_timeout.tv_sec = 180;
+	_timeout.tv_usec = 0;
+}
+
 void TestServer::launch() {
-	while (true) {
+	while (_end_server == false) {
 		std::cout << "Waiting for a connection...\n";
-		accepter();
-		handler();
+		//copy masterset to workingset
+		memcpy(&_working_set, &_master_set, sizeof(_master_set));
+
+		if (select(_max_sockets + 1, &_working_set, NULL, NULL, &_timeout) <= 0) {
+			std::cerr << "select() failed or timeout" << std::endl;
+			exit(-1);
+		}
+		for (int i = 0; i < _max_sockets; i++) {
+			//check if descriptor is readable, if yes, look for others
+			if (FD_ISSET(i, &_working_set) && i == _listen_socket) {
+				//accept all incoming new connections and add them to the set
+				while (_new_socket != -1) {
+					_new_socket = accept(_listen_socket, (struct sockaddr *)&_address, (socklen_t*)&_addr_len);
+					FD_SET(_new_socket, &_master_set);
+					if (_max_sockets < _new_socket)
+						_max_sockets = _new_socket;
+				}
+				//if not EWOULDBLOCK it means that accept() returned < 0 because of an errror
+				if (errno != EWOULDBLOCK) {
+					std::cerr << "accept() failed" << std::endl;
+					_end_server = true;
+				}
+				break ;
+			}
+			//i != listen_socket, which means and existing socket requests something
+			if (FD_ISSET(i, &_working_set) && i != _listen_socket) {
+				_close_connection = false;
+				//receive all incoming data on this socket
+				// while(true) {
+					memset(_buffer, 0, sizeof(_buffer));
+					//check if client closed connection or if no more data on the socket
+					if (recv(i, _buffer, sizeof(_buffer), 0) <= 0) {
+						if (errno != EWOULDBLOCK) {
+							std::cerr << "recv() failed" << std::endl;
+						}
+						FD_CLR(i, &_master_set);
+						close(i);
+						if (i == _max_sockets) {
+						while (FD_ISSET(_max_sockets, &_master_set) == false)
+							_max_sockets--;
+						}
+						// break ;
+					}
+					else
+						handler();
+				break;
+			}
+		}
+
 		responder();
+		for (int i = 0; i < _max_sockets; i++) {
+			if (FD_ISSET(i, &_master_set))
+				close(i);
+		}
 		std::cout << "Done\n";
 	}
 }
 
 void TestServer::accepter() {
-	std::cout << "Accepting...\n";
-	memset(_buffer, 0, 300 );
-	struct sockaddr_in address = get_socket()->get_address();
-	int addrlen = sizeof(address);
-	_new_socket = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t*)&addrlen);
-	read( _new_socket, _buffer, 300 );
+	// std::cout << "Accepting...\n";
+	// memset(_buffer, 0, 300 );
+	// struct sockaddr_in address = get_socket()->get_address();
+	// int addrlen = sizeof(address);
+	// _new_socket = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t*)&addrlen);
+	// read( _new_socket, _buffer, 300 );
 }
 
 void TestServer::handler() {

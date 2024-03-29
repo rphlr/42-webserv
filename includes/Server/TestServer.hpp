@@ -13,39 +13,26 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 
-// class TestServer : public SimpleServer {
-// 	public:
-// 		TestServer();
-// 		void launch();
-
-// 	private:
-// 		char _buffer[3000];
-// 		int _new_socket;
-
-// 		void accepter();
-// 		void handler();
-// 		void responder();
-
-// };
-
 class TestServer
 {
 public:
 	TestServer(Server &server);
 	void launch();
-	ListeningSocket * get_socket();
+	void init();
+	//need to implement canonical form
 
 private:
 	char _buffer[3000];
 	int _new_socket;
 	int _listen_socket;
-	ListeningSocket * _socket;
+	int _max_sockets;
 	struct sockaddr_in _address;
-	struct pollfd _fds[200];
-	int _nfds;
-	int _timeout;
-	int _close_conn;
-	int _rc;
+	int	_addr_len;
+	struct timeval _timeout;
+	bool _end_server;
+	bool _close_connection;
+	fd_set _master_set;
+	fd_set _working_set;
 
 
 
