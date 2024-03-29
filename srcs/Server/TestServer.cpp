@@ -22,7 +22,7 @@
 
 TestServer::TestServer(Server &server) : SimpleServer( server ), _request("") {
 	// Create a function to setup routes
-	_routes["/home"] = &TestServer::handleRoot;
+	_routes["/home"] = &TestServer::handleHome;
 	_routes["/form"] = &TestServer::handleForm;
 	_routes["/styles.css"] = &TestServer::handleCss;
 	// _routes["/form"] = &TestServer::handleForm;
@@ -93,7 +93,7 @@ void TestServer::handleGet(HandleRequest &request) {
 	std::string path = request.getPath();
 	std::cout << "Path: " << path << std::endl;
 	if (path == "/home" || path == "/testHome.html") {
-		handleRoot(request);
+		handleHome(request);
 	} else if (path == "/styles.css") {
 		handleCss(request);
 	} else if (path == "/form" || path == "/testForm.html") {
@@ -116,7 +116,7 @@ void TestServer::handleDelete(HandleRequest &request) {
 	return;
 }
 
-void TestServer::handleRoot(HandleRequest &request)
+void TestServer::handleHome(HandleRequest &request)
 {
 	std::string filePath = this->_rootPath + "/default_webpages/siteHome.html";
 	std::cout << "Root path: " << filePath << std::endl;
@@ -192,14 +192,21 @@ void TestServer::handleForm(HandleRequest &request)
 
 void TestServer::handleError(HandleRequest &request)
 {
-	std::string filePath = this->_rootPath + "/error_webpages/custom_404.html";
+    // std::string responseBody = "404 Not Found\nThe requested URL " + request.getPath() + " was not found on this server.";
+
+    // std::string responseHeaders = "HTTP/1.1 404 Not Found\r\n";
+    // responseHeaders += "Content-Type: text/plain\r\n";
+    // responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
+
+    // std::string response = responseHeaders + "\r\n" + responseBody;
+
+    // send(_new_socket, response.c_str(), response.size(), 0);
+
+	std::string filePath = this->_rootPath + "/error_webpages/custom404.html";\
 	std::ifstream file(filePath);
-
-	// std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/error_webpages/custom_404.html");
-
 	if (!file.is_open())
 	{
-		std::cerr << "Failed to open delete\n";
+		std::cerr << "Failed to open handleError\n";
 		return;
 	}
 	std::stringstream buffer;

@@ -47,7 +47,7 @@ private:
 	void handlePost(HandleRequest &request);
 	void handleDelete(HandleRequest &request);
 
-	void handleRoot(HandleRequest &request);
+	void handleHome(HandleRequest &request);
 	void handleCss(HandleRequest &request);
 	void handleForm(HandleRequest &request);
 	void handleError(HandleRequest &request);
