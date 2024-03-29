@@ -1,9 +1,9 @@
 #ifndef TEST_SERVER_HPP
 #define TEST_SERVER_HPP
 
-#include "./SimpleServer.hpp"
 #include "../Config/Config.hpp"
 #include "./HandleRequest.hpp"
+#include "../Networking/Networking.hpp"
 
 #include <map>
 #include <functional>
@@ -24,20 +24,33 @@
 
 // };
 
-class TestServer : public SimpleServer
+class TestServer
 {
 public:
 	TestServer(Server &server);
 	void launch();
+	ListeningSocket * get_socket();
 
 private:
 	char _buffer[3000];
 	int _new_socket;
+	ListeningSocket * _socket;
+		/* *********************************** *
+	**  Server config ******************** *
+	* *********************************** */
+	std::string _server_name;
+	int _port;
+	std::string _host;
+	int _max_body_size;
+	// std::string _root;
+	// std::string _default_file;
+	// std::map<int, std::string> _error_pages;
+	// std::vector<Location> _locations;
 
 	void accepter();
 	void handler();
 	void responder();
-	
+
 
 	HandleRequest _request;
 
