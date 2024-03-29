@@ -50,6 +50,7 @@ private:
 
 	void handleRoot(HandleRequest &request);
 	void handleCss(HandleRequest &request);
+	void handleForm(HandleRequest &request);
 	void handleError(HandleRequest &request);
 
 };
