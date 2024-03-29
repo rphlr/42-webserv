@@ -15,8 +15,6 @@
 #define BRIGHT_RED "\033[91m"
 
 HandleRequest::HandleRequest( char *incoming_request ) : _request(incoming_request) {
-	std::cout << "!!! Incoming request !!!\n";
-	std::cout << _request;
 }
 
 std::string HandleRequest::getRequest() const {

@@ -72,19 +72,6 @@ void TestServer::responder() {
 	shutdown(_new_socket, SHUT_RDWR);
 }
 
-
-
-// void TestServer::handleGet(HandleRequest &request) {
-// 	std::string path = _request.getPath();
-// 	if (path == "/home") {
-// 		handleRoot(request);
-// 	} else if (path == "/styles.css") {
-// 		handleCss(request);
-// 	} else {
-// 		handleError(request);
-// 	}
-// }
-
 void TestServer::handleGet(HandleRequest &request) {
 	std::cout << "Handling GET request\n";
 	std::string path = request.getPath();
@@ -112,9 +99,7 @@ void TestServer::handleDelete(HandleRequest &request) {
 
 void TestServer::handleRoot(HandleRequest &request)
 {
-	// 
 	std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/siteHome.html");
-
 	if (!file.is_open())
 	{
 		// handle the error, e.g. by logging it and returning
