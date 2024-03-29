@@ -2,6 +2,18 @@
 #include "../../includes/Server/HandleRequest.hpp"
 #include "../../includes/Server/HandleResponse.hpp"
 
+#define RESET "\033[0m"
+#define BLACK "\033[30m"
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define YELLOW "\033[33m"
+#define BLUE "\033[34m"
+#define MAGENTA "\033[35m"
+#define CYAN "\033[36m"
+#define WHITE "\033[37m"
+#define BRIGHT_BLACK "\033[90m"
+#define BRIGHT_RED "\033[91m"
+
 // TestServer::TestServer() : SimpleServer( AF_INET, SOCK_STREAM, 0, 6545, INADDR_ANY, 10 ) {
 // 	launch();
 // }
@@ -9,6 +21,7 @@
 TestServer::TestServer(Server &server) : SimpleServer( server ), _request("") {
 	// Create a function to setup routes
 	_routes["/home"] = &TestServer::handleRoot;
+	_routes["/form"] = &TestServer::handleForm;
 	_routes["/styles.css"] = &TestServer::handleCss;
 	// _routes["/form"] = &TestServer::handleForm;
 
@@ -17,16 +30,14 @@ TestServer::TestServer(Server &server) : SimpleServer( server ), _request("") {
 
 void TestServer::launch() {
 	while (true) {
-		std::cout << "Waiting for a connection...\n";
+		std::cout << "Waiting for a connection...\n\n";
 		accepter();
 		handler();
 		responder();
-		std::cout << "Done\n";
 	}
 }
 
 void TestServer::accepter() {
-	std::cout << "Accepting...\n";
 	memset(_buffer, 0, 300 );
 	struct sockaddr_in address = get_socket()->get_address();
 	int addrlen = sizeof(address);
@@ -40,8 +51,8 @@ void TestServer::handler() {
 	// _request.setRequest( _buffer );
 	_request.handleRequest();
 	std::string method = _request.getMethod();
-	std::cout << "Method: " << method << std::endl;
 
+	std::cout << MAGENTA;
 	if (method == "GET") {
 		std::cout << "GET request\n";
 		handleGet(_request);
@@ -57,11 +68,13 @@ void TestServer::handler() {
 	else {
 		std::cout << "Unsupported method\n";
 	}
+	std::cout << "\n" << RESET;
 }
 
 void TestServer::responder() {
 	// HandleResponse response;
 	// Check if the request is a GET request
+	std::cout << YELLOW;
 	std::cout << "Responding...\n";
 	std::string path = _request.getPath();
 	if (_routes.find(path) != _routes.end()) {
@@ -70,17 +83,21 @@ void TestServer::responder() {
 		handleError(_request);
 	}
 	shutdown(_new_socket, SHUT_RDWR);
+	std::cout << "\n" << RESET;
 }
 
 void TestServer::handleGet(HandleRequest &request) {
 	std::cout << "Handling GET request\n";
 	std::string path = request.getPath();
 	std::cout << "Path: " << path << std::endl;
-	if (path == "/home") {
+	if (path == "/home" || path == "/testHome.html") {
 		handleRoot(request);
 	} else if (path == "/styles.css") {
 		handleCss(request);
-	} else {
+	} else if (path == "/form" || path == "/testForm.html") {
+		handleForm(request);
+	}
+	else {
 		handleError(request);
 	}
 }
@@ -135,6 +152,29 @@ void TestServer::handleCss(HandleRequest &request)
 
 	std::string responseHeaders = "HTTP/1.1 200 Ok\r\n";
 	responseHeaders += "Content-Type: text/css\r\n";
+	responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
+
+	std::string response = responseHeaders + "\r\n" + responseBody;
+
+	send(_new_socket, response.c_str(), response.size(), 0);
+}
+
+void TestServer::handleForm(HandleRequest &request)
+{
+	std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/siteForm.html");
+
+	if (!file.is_open())
+	{
+		// handle the error, e.g. by logging it and returning
+		std::cerr << "Failed to open handleForm\n";
+		return;
+	}
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	std::string responseBody = buffer.str();
+
+	std::string responseHeaders = "HTTP/1.1 200 Ok\r\n";
+	responseHeaders += "Content-Type: text/html\r\n";
 	responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
 
 	std::string response = responseHeaders + "\r\n" + responseBody;
