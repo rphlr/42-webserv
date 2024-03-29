@@ -31,11 +31,10 @@ ListeningSocket * TestServer::get_socket() {
 // /* *********************************** *
 // **  Canonical Form ******************* *
 // * *********************************** */
-TestServer::TestServer( Server &server ) : _request(""){
-	int domain = AF_INET;
-	int service = SOCK_STREAM;
-	int protocol = 0;
-	int port = server.getPort();
+TestServer::TestServer( Server &server ) : _request("") {
+	int on = 1;
+	_new_socket = -1;
+	_port = server.getPort();
 	u_long interface;
 	if (!server.getHost().compare("127.0.0.1")){
 		interface = INADDR_LOOPBACK;
@@ -44,12 +43,36 @@ TestServer::TestServer( Server &server ) : _request(""){
 		interface = inet_addr(server.getHost().c_str());
 	}
 	int bklg = 10;
-	_socket = new ListeningSocket( domain, service, protocol, port, interface, bklg );
+	// _socket = new ListeningSocket( domain, service, protocol, port, interface, bklg );
 		// Create a function to setup routes
+	_listen_socket = socket(AF_INET, SOCK_STREAM, 0);
+
 	_routes["/home"] = &TestServer::handleRoot;
 	_routes["/styles.css"] = &TestServer::handleCss;
 	_routes["/upload"] = &TestServer::handlePost;
 	// _routes["/form"] = &TestServer::handleForm;
+
+	// memset(&_address, 0, sizeof(_address));
+	_address.sin_family = AF_INET;
+	_address.sin_port = htons(_port);
+	_address.sin_addr.s_addr = htonl(interface);
+
+	_rc = setsockopt(_listen_socket, SOL_SOCKET,  SO_REUSEADDR,
+		(char *)&on, sizeof(on));
+	if (_rc < 0) {
+		close(_listen_socket);
+		exit(-1);
+	}
+	_rc = bind(_listen_socket,
+		(struct sockaddr *)&_address, sizeof(_address));
+	if (_rc < 0) {
+		close(_listen_socket);
+		exit(-1);
+	}
+	memset(_fds, 0 , sizeof(_fds));
+	_fds[0].fd = _listen_socket;
+	_fds[0].events = POLLIN;
+	_timeout = 180000;
 
 	launch();
 }

@@ -8,6 +8,10 @@
 #include <map>
 #include <functional>
 #include <sstream>
+#include <sys/poll.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <netinet/in.h>
 
 // class TestServer : public SimpleServer {
 // 	public:
@@ -34,7 +38,17 @@ public:
 private:
 	char _buffer[3000];
 	int _new_socket;
+	int _listen_socket;
 	ListeningSocket * _socket;
+	struct sockaddr_in _address;
+	struct pollfd _fds[200];
+	int _nfds;
+	int _timeout;
+	int _close_conn;
+	int _rc;
+
+
+
 		/* *********************************** *
 	**  Server config ******************** *
 	* *********************************** */
