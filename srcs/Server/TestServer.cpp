@@ -7,7 +7,10 @@
 // }
 
 TestServer::TestServer(Server &server) : SimpleServer( server ), _request("") {
+	// Create a function to setup routes
 	_routes["/home"] = &TestServer::handleRoot;
+	_routes["/styles.css"] = &TestServer::handleCss;
+	// _routes["/form"] = &TestServer::handleForm;
 
 	launch();
 }
@@ -32,19 +35,149 @@ void TestServer::accepter() {
 }
 
 void TestServer::handler() {
-	// std::cout << "Handling...\n";
-	// std::cout << _buffer << std::endl;
-	_request.setRequest( _buffer );
+	std::cout << "Handling...\n";
+	HandleRequest _request( _buffer);
+	// _request.setRequest( _buffer );
 	_request.handleRequest();
+	std::string method = _request.getMethod();
+	std::cout << "Method: " << method << std::endl;
+
+	if (method == "GET") {
+		std::cout << "GET request\n";
+		handleGet(_request);
+	}
+	else if (method == "POST") {
+		// handlePost();
+		std::cout << "POST request\n";
+	}
+	else if (method == "DELETE") {
+		// handleDelete();
+		std::cout << "DELETE request\n";
+	}
+	else {
+		std::cout << "Unsupported method\n";
+	}
 }
 
 void TestServer::responder() {
 	// HandleResponse response;
+	// Check if the request is a GET request
 	std::cout << "Responding...\n";
-	handleRoot( _request );
-	// const char* response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Salut a tous</h1></body></html>";
-	// send(_new_socket, response, strlen(response), 0);
+	std::string path = _request.getPath();
+	if (_routes.find(path) != _routes.end()) {
+		(this->*_routes[path])(_request);
+	} else {
+		handleError(_request);
+	}
 	shutdown(_new_socket, SHUT_RDWR);
+}
+
+
+
+// void TestServer::handleGet(HandleRequest &request) {
+// 	std::string path = _request.getPath();
+// 	if (path == "/home") {
+// 		handleRoot(request);
+// 	} else if (path == "/styles.css") {
+// 		handleCss(request);
+// 	} else {
+// 		handleError(request);
+// 	}
+// }
+
+void TestServer::handleGet(HandleRequest &request) {
+	std::cout << "Handling GET request\n";
+	std::string path = request.getPath();
+	std::cout << "Path: " << path << std::endl;
+	if (path == "/home") {
+		handleRoot(request);
+	} else if (path == "/styles.css") {
+		handleCss(request);
+	} else {
+		handleError(request);
+	}
+}
+
+void TestServer::handlePost(HandleRequest &request) {
+	// Implement the POST request
+	// send(_new_socket, response.c_str(), response.size(), 0);
+	return;
+}
+
+void TestServer::handleDelete(HandleRequest &request) {
+	// Implement the DELETE request
+	// send(_new_socket, response.c_str(), response.size(), 0);
+	return;
+}
+
+void TestServer::handleRoot(HandleRequest &request)
+{
+	// 
+	std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/siteHome.html");
+
+	if (!file.is_open())
+	{
+		// handle the error, e.g. by logging it and returning
+		std::cerr << "Failed to open file handle-root\n";
+		return;
+	}
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	std::string responseBody = buffer.str();
+
+	std::string responseHeaders = "HTTP/1.1 200 Ok\r\n";
+	responseHeaders += "Content-Type: text/html\r\n";
+	responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
+
+	std::string response = responseHeaders + "\r\n" + responseBody;
+
+	send(_new_socket, response.c_str(), response.size(), 0);
+}
+
+void TestServer::handleCss(HandleRequest &request)
+{
+	std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/styles.css");
+
+	if (!file.is_open())
+	{
+		// handle the error, e.g. by logging it and returning
+		std::cerr << "Failed to open handleCss\n";
+		return;
+	}
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	std::string responseBody = buffer.str();
+
+	std::string responseHeaders = "HTTP/1.1 200 Ok\r\n";
+	responseHeaders += "Content-Type: text/css\r\n";
+	responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
+
+	std::string response = responseHeaders + "\r\n" + responseBody;
+
+	send(_new_socket, response.c_str(), response.size(), 0);
+}
+
+void TestServer::handleError(HandleRequest &request)
+
+{
+	std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/error_webpages/custom_404.html");
+
+	if (!file.is_open())
+	{
+		std::cerr << "Failed to open delete\n";
+		return;
+	}
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	std::string responseBody = buffer.str();
+
+	std::string responseHeaders = "HTTP/1.1 404 Not Found\r\n";
+	responseHeaders += "Content-Type: text/html\r\n";
+	responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
+
+	std::string response = responseHeaders + "\r\n" + responseBody;
+
+	send(_new_socket, response.c_str(), response.size(), 0);
 }
 
 
