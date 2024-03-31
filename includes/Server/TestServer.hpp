@@ -51,6 +51,9 @@ private:
 	void handleCss(HandleRequest &request);
 	void handleForm(HandleRequest &request);
 	void handleError(HandleRequest &request);
+	void handleUpload(HandleRequest &request);
+
+	std::string determineCgiScriptPath(const std::string &path);
 
 };
 

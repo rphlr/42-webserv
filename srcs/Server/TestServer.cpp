@@ -1,6 +1,7 @@
 #include "../../includes/Server/TestServer.hpp"
 #include "../../includes/Server/HandleRequest.hpp"
 #include "../../includes/Server/HandleResponse.hpp"
+#include "../../includes/Server/HandleCGI.hpp"
 
 #define RESET "\033[0m"
 #define BLACK "\033[30m"
@@ -25,6 +26,7 @@ TestServer::TestServer(Server &server) : SimpleServer( server ), _request("") {
 	_routes["/home"] = &TestServer::handleHome;
 	_routes["/form"] = &TestServer::handleForm;
 	_routes["/styles.css"] = &TestServer::handleCss;
+	_routes["/upload"] = &TestServer::handlePost;
 	// _routes["/form"] = &TestServer::handleForm;
 
 	launch();
@@ -62,6 +64,7 @@ void TestServer::handler() {
 	else if (method == "POST") {
 		// handlePost();
 		std::cout << "POST request\n";
+		handlePost(_request);
 	}
 	else if (method == "DELETE") {
 		// handleDelete();
@@ -72,6 +75,27 @@ void TestServer::handler() {
 	}
 	std::cout << "\n" << RESET;
 }
+
+// void TestServer::handlePost(HandleRequest &request) {
+//     // Implémentez ici le traitement spécifique aux données POST.
+//     std::string contentType = request.getHeader("Content-Type");
+//     // Vérifiez si c'est une requête de téléchargement de fichier
+//     if (contentType.find("multipart/form-data") != std::string::npos) {
+//         // Vous devez parser le corps de la requête pour extraire le fichier
+//         // et le traiter selon les spécifications de votre application.
+        
+//         // Après avoir traité le fichier, envoyez une réponse appropriée.
+//         std::string responseBody = "<html><body><h1>Fichier téléchargé avec succès</h1></body></html>";
+//         std::string responseHeaders = "HTTP/1.1 200 OK\r\n";
+//         responseHeaders += "Content-Type: text/html\r\n";
+//         responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n\r\n";
+
+//         std::string response = responseHeaders + responseBody;
+//         send(_new_socket, response.c_str(), response.size(), 0);
+//     } else {
+//         // Si ce n'est pas une requête de téléchargement de fichier, traitez-la normalement.
+//     }
+// }
 
 void TestServer::responder() {
 	// HandleResponse response;
@@ -89,26 +113,95 @@ void TestServer::responder() {
 }
 
 void TestServer::handleGet(HandleRequest &request) {
-	std::cout << "Handling GET request\n";
-	std::string path = request.getPath();
-	std::cout << "Path: " << path << std::endl;
-	if (path == "/home" || path == "/testHome.html") {
-		handleHome(request);
-	} else if (path == "/styles.css") {
-		handleCss(request);
-	} else if (path == "/form" || path == "/testForm.html") {
-		handleForm(request);
+    std::cout << "Handling GET request\n";
+    std::string path = request.getPath();
+    std::cout << "Path: " << path << std::endl;
+
+	if (path.substr(path.size() - 4) == ".css") {
+		std::cout << "Handling css\n";
+        handleCss(request);
+    } else if (path == "/home" || path == "/testHome.html") {
+		std::cout << "Handling home\n";
+        handleHome(request);
+    } else if (path == "/form" || path == "/testForm.html") {
+		std::cout << "Handling form\n";
+        handleForm(request);
+	} else if (path == "/upload") {
+		std::cout << "Handling upload\n";
+		handleUpload(request);
+    } else {
+        handleError(request);
+    }
+}
+
+void TestServer::handleUpload(HandleRequest &request) {
+	std::string filePath = this->_rootPath + "/default_webpages/siteUpDownload.html";
+	std::cout << "Root path: " << filePath << std::endl;
+	std::ifstream file(filePath);
+	if (!file.is_open())
+	{
+		std::cerr << "Failed to open handleUpload\n";
+		return;
 	}
-	else {
-		handleError(request);
-	}
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	std::string responseBody = buffer.str();
+
+	std::string responseHeaders = "HTTP/1.1 200 Ok\r\n";
+	responseHeaders += "Content-Type: text/html\r\n";
+	responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
+
+	std::string response = responseHeaders + "\r\n" + responseBody;
+
+	std::cout << "Response: " << response << std::endl;
+	send(_new_socket, response.c_str(), response.size(), 0);
+}
+
+std::string TestServer::determineCgiScriptPath(const std::string& requestPath) {
+	std::cout << "Request path: " << requestPath << std::endl;
+	return this->_rootPath  + "/cgi-bin" + requestPath.substr(8);
 }
 
 void TestServer::handlePost(HandleRequest &request) {
-	// Implement the POST request
-	// send(_new_socket, response.c_str(), response.size(), 0);
-	return;
+    std::cout << "Handling POST request\n";
+    std::string path = request.getPath();
+    std::cout << "Path: " << path << std::endl;
+
+    if (path.substr(0, 9) == "/cgi-bin/") {
+		std::cout << "Handling CGI\n";
+        std::map<std::string, std::string> cgiEnv;
+        cgiEnv["REQUEST_METHOD"] = "POST";
+
+        std::string scriptPath = determineCgiScriptPath(path);
+
+		std::cout << "Script path: " << scriptPath << std::endl;
+        std::string postData = request.getBody();
+		std::cout << "Post data: " << postData << std::endl;
+        cgiEnv["CONTENT_LENGTH"] = std::to_string(postData.size());
+		std::cout << "Content length: " << cgiEnv["CONTENT_LENGTH"] << std::endl;
+        cgiEnv["CONTENT_TYPE"] = request.getHeader("Content-Type");
+
+		std::cout << "Script path: " << scriptPath << std::endl;
+        HandleCGI cgiHandler(scriptPath, cgiEnv, postData);
+		std::cout << "Executing CGI\n";
+        std::string cgiOutput = cgiHandler.execute();
+
+		std::cout << "CGI output: " << cgiOutput << std::endl;
+        send(_new_socket, cgiOutput.c_str(), cgiOutput.size(), 0);
+    }
 }
+
+
+// void TestServer::handlePost(HandleRequest &request) {
+// 	// implement the POST request
+// 	std::string contentType = request.getHeader("Content-Type");
+// 	std::string path = request.getPath();
+// 	std::string responseBody;
+// 	std::string responseHeaders;
+// 	std::string response;
+
+
+// }
 
 void TestServer::handleDelete(HandleRequest &request) {
 	// Implement the DELETE request
