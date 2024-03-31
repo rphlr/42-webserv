@@ -33,8 +33,6 @@ void HandleRequest::setRequest( std::string request ) {
 	_request = request;
 }
 
-
-
 void HandleRequest::handleRequest() {
 	// First line is the method path and protocol
 	std::string extracted_request = _request.substr(0, _request.find("\n"));
@@ -91,4 +89,23 @@ void HandleRequest::handleRequest() {
 	std::cout << RESET;
 }
 
-HandleRequest::~HandleRequest() {}
+HandleRequest::~HandleRequest() {
+    auto contentLengthHeader = _headers.find("Content-Length");
+    if (contentLengthHeader != _headers.end()) {
+        int contentLength = std::stoi(contentLengthHeader->second);
+        // Now read 'contentLength' bytes from the request into '_body'
+    }
+}
+
+std::string HandleRequest::getBody() const {
+	return _body;
+}
+
+std::string HandleRequest::getHeader(const std::string& headerName) const {
+    auto it = _headers.find(headerName);
+	std::cout << "Header-ID:[" << it->first << "] \t\t\t\t";
+    if (it != _headers.end()) {
+        return it->second;
+    }
+    return ""; // Retournez une chaîne vide si l'en-tête n'est pas trouvé
+}
