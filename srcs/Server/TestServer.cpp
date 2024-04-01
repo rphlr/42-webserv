@@ -38,17 +38,23 @@ void TestServer::init()
 		std::cerr << "setsockopt" << std::endl;
 		exit(-1);
 	}
+	if (fcntl(_listen_socket, F_SETFL, O_NONBLOCK) < 0) {
+		close(_listen_socket);
+		std::cerr << "fcntl failed" << std::endl;
+		exit(-1);
+	}
 	//bind the socket
 	if (bind(_listen_socket, (sockaddr *)&_address, _addr_len) < 0) {
 		std::cerr << "binding socket failed" << std::endl;
 		close(_listen_socket);
 		exit(-1);
 	}
-	if (listen(_listen_socket, 32) < 0) {
+	if (listen(_listen_socket, 1) < 0) {
 		std::cerr << "listen() failed" << std::endl;
 		close(_listen_socket);
 		exit(-1);
 	}
+	_new_socket = -1;
 	//initialize the fd_sets for clients
 	FD_ZERO(&_master_set);
 	FD_ZERO(&_working_set);
@@ -61,6 +67,7 @@ void TestServer::init()
 }
 
 void TestServer::launch() {
+
 	while (_end_server == false) {
 		std::cout << "Waiting for a connection...\n";
 		//copy masterset to workingset
@@ -68,56 +75,56 @@ void TestServer::launch() {
 
 		if (select(_max_sockets + 1, &_working_set, NULL, NULL, &_timeout) <= 0) {
 			std::cerr << "select() failed or timeout" << std::endl;
-			exit(-1);
+			break;
 		}
-		for (int i = 0; i < _max_sockets; i++) {
+		std::cout << "maxsockets: " << _max_sockets << std::endl;
+		for (int i = 0; i <= _max_sockets; i++) {
 			//check if descriptor is readable, if yes, look for others
 			if (FD_ISSET(i, &_working_set) && i == _listen_socket) {
 				//accept all incoming new connections and add them to the set
-				while (_new_socket != -1) {
-					_new_socket = accept(_listen_socket, (struct sockaddr *)&_address, (socklen_t*)&_addr_len);
+				_new_socket = accept(_listen_socket, NULL, NULL);
+				//if not EWOULDBLOCK it means that accept() returned < 0 because of an error
+				if (_new_socket < 0 && errno != EWOULDBLOCK) {
+					std::cerr << "accept() failed" << std::endl;
+					_end_server = true;
+				}
+				else {
+					if (fcntl(_new_socket, F_SETFL, O_NONBLOCK) < 0) {
+						std::cerr << "fcntl failed" << std::endl;
+						close(_new_socket);
+					}
 					FD_SET(_new_socket, &_master_set);
 					if (_max_sockets < _new_socket)
 						_max_sockets = _new_socket;
 				}
-				//if not EWOULDBLOCK it means that accept() returned < 0 because of an errror
-				if (errno != EWOULDBLOCK) {
-					std::cerr << "accept() failed" << std::endl;
-					_end_server = true;
-				}
-				break ;
 			}
 			//i != listen_socket, which means and existing socket requests something
-			if (FD_ISSET(i, &_working_set) && i != _listen_socket) {
-				_close_connection = false;
-				//receive all incoming data on this socket
-				// while(true) {
-					memset(_buffer, 0, sizeof(_buffer));
-					//check if client closed connection or if no more data on the socket
-					if (recv(i, _buffer, sizeof(_buffer), 0) <= 0) {
-						if (errno != EWOULDBLOCK) {
-							std::cerr << "recv() failed" << std::endl;
-						}
-						FD_CLR(i, &_master_set);
+			else {
+				memset(_buffer, 0, sizeof(_buffer));
+
+				int rc = recv(i, _buffer, sizeof(_buffer), 0);
+				std::cout << _buffer << std::endl;
+				if (rc <= 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
+					std::cerr << "recv() failed or client closed connection" << std::endl;
+					close(i);
+					FD_CLR(i, &_master_set);
+				}
+				else {
+					std::cout << "send to handler" << std::endl;
+					if (send(i, "hello", 6, 0) < 0) {
+						// handler();
 						close(i);
-						if (i == _max_sockets) {
-						while (FD_ISSET(_max_sockets, &_master_set) == false)
-							_max_sockets--;
-						}
-						// break ;
+						FD_CLR(i, &_master_set);
 					}
-					else
-						handler();
-				break;
+				}
 			}
 		}
-
-		responder();
-		for (int i = 0; i < _max_sockets; i++) {
-			if (FD_ISSET(i, &_master_set))
-				close(i);
-		}
-		std::cout << "Done\n";
+	}
+	std::cout << "Done\n";
+	// responder();
+	for (int i = 0; i <= _max_sockets; i++) {
+		if (FD_ISSET(i, &_master_set) && i != _listen_socket)
+			close(i);
 	}
 }
 
@@ -173,6 +180,7 @@ void TestServer::handleGet(HandleRequest &request) {
 	std::string path = request.getPath();
 	std::cout << "Path: " << path << std::endl;
 	if (path == "/home") {
+		std::cout << "GET: handle root\n";
 		handleRoot(request);
 	} else if (path == "/styles.css") {
 		handleCss(request);
