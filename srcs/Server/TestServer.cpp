@@ -61,9 +61,6 @@ void TestServer::init()
 	_max_sockets = _listen_socket;
 	FD_SET(_listen_socket, &_master_set);
 
-	//timeout after 3 minutes of inactivity
-	_timeout.tv_sec = 180;
-	_timeout.tv_usec = 0;
 }
 
 void TestServer::launch() {
@@ -73,51 +70,44 @@ void TestServer::launch() {
 		//copy masterset to workingset
 		memcpy(&_working_set, &_master_set, sizeof(_master_set));
 
-		if (select(_max_sockets + 1, &_working_set, NULL, NULL, &_timeout) <= 0) {
+		if (select(_max_sockets + 1, &_working_set, NULL, NULL, NULL) <= 0) {
 			std::cerr << "select() failed or timeout" << std::endl;
 			break;
 		}
-		std::cout << "maxsockets: " << _max_sockets << std::endl;
 		for (int i = 0; i <= _max_sockets; i++) {
-			//check if descriptor is readable, if yes, look for others
 			if (FD_ISSET(i, &_working_set) && i == _listen_socket) {
-				//accept all incoming new connections and add them to the set
 				_new_socket = accept(_listen_socket, NULL, NULL);
-				//if not EWOULDBLOCK it means that accept() returned < 0 because of an error
 				if (_new_socket < 0 && errno != EWOULDBLOCK) {
 					std::cerr << "accept() failed" << std::endl;
 					_end_server = true;
 				}
-				else {
-					if (fcntl(_new_socket, F_SETFL, O_NONBLOCK) < 0) {
-						std::cerr << "fcntl failed" << std::endl;
-						close(_new_socket);
-					}
-					FD_SET(_new_socket, &_master_set);
-					if (_max_sockets < _new_socket)
-						_max_sockets = _new_socket;
+				if (fcntl(_new_socket, F_SETFL, O_NONBLOCK) < 0) {
+					std::cerr << "fcntl failed" << std::endl;
+					close(_new_socket);
 				}
+				FD_SET(_new_socket, &_master_set);
+				if (_max_sockets < _new_socket)
+					_max_sockets = _new_socket;
 			}
-			//i != listen_socket, which means and existing socket requests something
-			else {
+			if (FD_ISSET(i, &_working_set) && i != _listen_socket) {
 				memset(_buffer, 0, sizeof(_buffer));
-
-				int rc = recv(i, _buffer, sizeof(_buffer), 0);
+				int rc = recv(i, _buffer, 3000, 0);
 				std::cout << _buffer << std::endl;
-				if (rc <= 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
+				if (rc <= 0) {
 					std::cerr << "recv() failed or client closed connection" << std::endl;
 					close(i);
 					FD_CLR(i, &_master_set);
 				}
 				else {
 					std::cout << "send to handler" << std::endl;
-					if (send(i, "hello", 6, 0) < 0) {
-						// handler();
+					// handler();
+					if (send(i, "hello", 5, 0) < 0)
 						close(i);
-						FD_CLR(i, &_master_set);
-					}
+					// while (FD_ISSET(_max_sockets, &_master_set) == false)
+					// 	_max_sockets--;
 				}
 			}
+			// std::cout << "maxsockets: " << _max_sockets << std::endl;
 		}
 	}
 	std::cout << "Done\n";
