@@ -54,7 +54,7 @@ void TestServer::init()
 	}
 	_new_socket = -1;
 	FD_ZERO(&_master_read_fds);
-	FD_ZERO(&_write_fds);
+	// FD_ZERO(&_write_fds);
 	FD_ZERO(&_working_read_fds);
 	_max_sockets = _listen_socket;
 	FD_SET(_listen_socket, &_master_read_fds);
@@ -69,7 +69,7 @@ void TestServer::launch() {
 		std::cout << "Waiting for a connection...\n";
 		memcpy(&_working_read_fds, &_master_read_fds, sizeof(_master_read_fds));
 
-		if (select(_max_sockets + 1, &_working_read_fds, &_write_fds, NULL, &_timeout) <= 0) {
+		if (select(_max_sockets + 1, &_working_read_fds, NULL, NULL, &_timeout) <= 0) {
 			std::cerr << "select() failed or timeout" << std::endl;
 			break;
 		}
@@ -85,7 +85,7 @@ void TestServer::launch() {
 					close(_new_socket);
 				}
 				FD_SET(_new_socket, &_master_read_fds);
-				FD_SET(_new_socket, &_write_fds);
+				// FD_SET(_new_socket, &_write_fds);
 				if (_max_sockets < _new_socket)
 					_max_sockets = _new_socket;
 			}
@@ -97,7 +97,7 @@ void TestServer::launch() {
 					std::cerr << "recv() failed or client closed connection" << std::endl;
 					close(i);
 					FD_CLR(i, &_master_read_fds);
-					FD_CLR(i, &_write_fds);
+					// FD_CLR(i, &_write_fds);
 				}
 				else {
 					std::cout << "send to handler" << std::endl;
