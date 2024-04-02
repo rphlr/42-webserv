@@ -53,25 +53,27 @@ void TestServer::init()
 		exit(-1);
 	}
 	_new_socket = -1;
-	FD_ZERO(&_master_set);
-	FD_ZERO(&_working_set);
+	FD_ZERO(&_master_read_fds);
+	FD_ZERO(&_working_read_fds);
 	_max_sockets = _listen_socket;
-	FD_SET(_listen_socket, &_master_set);
+	FD_SET(_listen_socket, &_master_read_fds);
 
+	_timeout.tv_sec = 180;
+	_timeout.tv_usec = 0;
 }
 
 void TestServer::launch() {
 
 	while (_end_server == false) {
 		std::cout << "Waiting for a connection...\n";
-		memcpy(&_working_set, &_master_set, sizeof(_master_set));
+		memcpy(&_working_read_fds, &_master_read_fds, sizeof(_master_read_fds));
 
-		if (select(_max_sockets + 1, &_working_set, NULL, NULL, NULL) <= 0) {
+		if (select(_max_sockets + 1, &_working_read_fds, NULL, NULL, &_timeout) <= 0) {
 			std::cerr << "select() failed or timeout" << std::endl;
 			break;
 		}
 		for (int i = 0; i <= _max_sockets; i++) {
-			if (FD_ISSET(i, &_working_set) && i == _listen_socket) {
+			if (FD_ISSET(i, &_working_read_fds) && i == _listen_socket) {
 				_new_socket = accept(_listen_socket, NULL, NULL);
 				if (_new_socket < 0 && errno != EWOULDBLOCK) {
 					std::cerr << "accept() failed" << std::endl;
@@ -81,25 +83,25 @@ void TestServer::launch() {
 					std::cerr << "fcntl failed" << std::endl;
 					close(_new_socket);
 				}
-				FD_SET(_new_socket, &_master_set);
+				FD_SET(_new_socket, &_master_read_fds);
 				if (_max_sockets < _new_socket)
 					_max_sockets = _new_socket;
 			}
-			if (FD_ISSET(i, &_working_set) && i != _listen_socket) {
+			if (FD_ISSET(i, &_working_read_fds) && i != _listen_socket) {
 				memset(_buffer, 0, sizeof(_buffer));
 				int rc = recv(i, _buffer, 3000, 0);
 				std::cout << _buffer << std::endl;
 				if (rc <= 0) {
 					std::cerr << "recv() failed or client closed connection" << std::endl;
 					close(i);
-					FD_CLR(i, &_master_set);
+					FD_CLR(i, &_master_read_fds);
 				}
 				else {
 					std::cout << "send to handler" << std::endl;
 					// handler();
 					if (send(i, "hello", 5, 0) < 0)
 						close(i);
-					// while (FD_ISSET(_max_sockets, &_master_set) == false)
+					// while (FD_ISSET(_max_sockets, &_master_read_fds) == false)
 					// 	_max_sockets--;
 				}
 			}
@@ -109,7 +111,7 @@ void TestServer::launch() {
 	std::cout << "Done\n";
 	// responder();
 	for (int i = 0; i <= _max_sockets; i++) {
-		if (FD_ISSET(i, &_master_set) && i != _listen_socket)
+		if (FD_ISSET(i, &_master_read_fds) && i != _listen_socket)
 			close(i);
 	}
 }

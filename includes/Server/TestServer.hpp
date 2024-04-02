@@ -29,10 +29,12 @@ private:
 	int _max_sockets;
 	struct sockaddr_in _address;
 	int	_addr_len;
+	struct timeval _timeout;
 	bool _end_server;
 	bool _close_connection;
-	fd_set _master_set;
-	fd_set _working_set;
+	fd_set _master_read_fds;
+	fd_set _working_read_fds;
+	fd_set _write_fds;
 
 
 
