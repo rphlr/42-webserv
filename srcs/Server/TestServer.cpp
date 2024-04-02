@@ -118,15 +118,6 @@ void TestServer::launch() {
 	}
 }
 
-void TestServer::accepter() {
-	// std::cout << "Accepting...\n";
-	// memset(_buffer, 0, 300 );
-	// struct sockaddr_in address = get_socket()->get_address();
-	// int addrlen = sizeof(address);
-	// _new_socket = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t*)&addrlen);
-	// read( _new_socket, _buffer, 300 );
-}
-
 void TestServer::handler() {
 	std::cout << "Handling...\n";
 	HandleRequest _request( _buffer);
