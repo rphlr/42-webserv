@@ -54,6 +54,7 @@ void TestServer::init()
 	}
 	_new_socket = -1;
 	FD_ZERO(&_master_read_fds);
+	FD_ZERO(&_write_fds);
 	FD_ZERO(&_working_read_fds);
 	_max_sockets = _listen_socket;
 	FD_SET(_listen_socket, &_master_read_fds);
@@ -84,10 +85,11 @@ void TestServer::launch() {
 					close(_new_socket);
 				}
 				FD_SET(_new_socket, &_master_read_fds);
+				FD_SET(_new_socket, &_write_fds);
 				if (_max_sockets < _new_socket)
 					_max_sockets = _new_socket;
 			}
-			if (FD_ISSET(i, &_working_read_fds) && i != _listen_socket) {
+			if (FD_ISSET(i, &_working_read_fds) && FD_ISSET(i, &_write_fds) && i != _listen_socket) {
 				memset(_buffer, 0, sizeof(_buffer));
 				int rc = recv(i, _buffer, 3000, 0);
 				std::cout << _buffer << std::endl;
@@ -95,6 +97,7 @@ void TestServer::launch() {
 					std::cerr << "recv() failed or client closed connection" << std::endl;
 					close(i);
 					FD_CLR(i, &_master_read_fds);
+					FD_CLR(i, &_write_fds);
 				}
 				else {
 					std::cout << "send to handler" << std::endl;
