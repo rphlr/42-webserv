@@ -69,7 +69,7 @@ void TestServer::launch() {
 		std::cout << "Waiting for a connection...\n";
 		memcpy(&_working_read_fds, &_master_read_fds, sizeof(_master_read_fds));
 
-		if (select(_max_sockets + 1, &_working_read_fds, NULL, NULL, &_timeout) <= 0) {
+		if (select(_max_sockets + 1, &_working_read_fds, &_write_fds, NULL, &_timeout) <= 0) {
 			std::cerr << "select() failed or timeout" << std::endl;
 			break;
 		}
