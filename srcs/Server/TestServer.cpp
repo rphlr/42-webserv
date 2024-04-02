@@ -25,13 +25,11 @@ void TestServer::init()
 {
 	int on = 1;
 
-	//initialize server socket
 	_listen_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (_listen_socket < 0) {
 		std::cerr << "initializing server socket failed" << std::endl;
 		exit(-1);
 	}
-		//allow socket descriptor to be reusable
 	if (setsockopt(_listen_socket, SOL_SOCKET,  SO_REUSEADDR,
 		(char *)&on, sizeof(on)) < 0) {
 		close(_listen_socket);
@@ -55,7 +53,6 @@ void TestServer::init()
 		exit(-1);
 	}
 	_new_socket = -1;
-	//initialize the fd_sets for clients
 	FD_ZERO(&_master_set);
 	FD_ZERO(&_working_set);
 	_max_sockets = _listen_socket;
@@ -67,7 +64,6 @@ void TestServer::launch() {
 
 	while (_end_server == false) {
 		std::cout << "Waiting for a connection...\n";
-		//copy masterset to workingset
 		memcpy(&_working_set, &_master_set, sizeof(_master_set));
 
 		if (select(_max_sockets + 1, &_working_set, NULL, NULL, NULL) <= 0) {
