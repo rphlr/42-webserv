@@ -64,7 +64,7 @@ void TestServer::init()
 void TestServer::launch() {
 
 	while (_end_server == false) {
-		std::cout << "Waiting for a connection...\n";
+		std::cout << "Waiting for a connection " << _port << " ...\n";
 		FD_ZERO(&_write_fds);
 		FD_ZERO(&_working_read_fds);
 		memcpy(&_working_read_fds, &_master_read_fds, sizeof(_master_read_fds));
@@ -101,7 +101,7 @@ void TestServer::launch() {
 				else
 					FD_SET(i, &_write_fds);
 			if (FD_ISSET(i, &_write_fds)) {
-					std::cout << "send to handler" << std::endl;
+					std::cout << "send to handler: " << i << std::endl;
 					// handler();
 					if (send(i, "hello", 5, 0) < 0)
 						close(i);
