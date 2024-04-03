@@ -36,7 +36,7 @@ private:
 	fd_set _working_read_fds;
 	fd_set _write_fds;
 
-
+	int	get_socket();
 
 		/* *********************************** *
 	**  Server config ******************** *
@@ -50,7 +50,6 @@ private:
 	// std::map<int, std::string> _error_pages;
 	// std::vector<Location> _locations;
 
-	void accepter();
 	void handler();
 	void responder();
 

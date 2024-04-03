@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ParserConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/20 15:03:02 by nvaubien         ###   ########.fr       */
+/*   Updated: 2024/04/03 15:15:43 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,11 +108,11 @@ vector<Server>	Parser::parseFile(string doc)
 		std::cout << "server:" << servers[i] << std::endl;
 	}
 
-	//testing if servers are the same or different by comparing name, port and host
-	// if (servers[0] == servers[1])
-	// 	std::cout << "they're the same" << std::endl;
-	// else
-	// 	std::cout << "they're different" << std::endl;
+	// testing if servers are the same or different by comparing name, port and host
+	if (servers[0] == servers[1])
+		std::cout << "they're the same" << std::endl;
+	else
+		std::cout << "they're different" << std::endl;
 
 	inputFile.close();
 	return servers;

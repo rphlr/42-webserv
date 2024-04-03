@@ -18,7 +18,7 @@ TestServer::TestServer( Server &server ) : _request("") {
 	// _routes["/form"] = &TestServer::handleForm;
 
 	init();
-	launch();
+	// launch();
 }
 
 void TestServer::init()
