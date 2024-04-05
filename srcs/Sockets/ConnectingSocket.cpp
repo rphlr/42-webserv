@@ -1,4 +1,4 @@
-#include "../../includes/Networking/ConnectingSocket.hpp"
+#include "../../includes/Sockets/ConnectingSocket.hpp"
 
 /* *********************************** *
 **  Canonical Form ******************* *

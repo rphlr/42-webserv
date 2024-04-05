@@ -1,11 +1,11 @@
-#include "../../includes/Networking/SimpleSocket.hpp"
+#include "../../includes/Sockets/SimpleSocket.hpp"
 
 
 /* *********************************** *
 **  Canonical Form ******************* *
 * *********************************** */
 SimpleSocket::SimpleSocket( int domain, int service, int protocol, int port, u_long interface) {
-	// std::cout << "SimpleSocket constructor called\n";
+	std::cout << "SimpleSocket constructor called\n";
 	_sock = socket(domain, service, protocol);
 	_address.sin_family = domain;
 	_address.sin_port = htons(port);
@@ -24,7 +24,7 @@ void SimpleSocket::test_connection(int to_test) {
 		exit(1);
 	}
 	else {
-		// std::cout << "Connection established\n";
+		std::cout << "Connection established\n";
 	}
 }
 
