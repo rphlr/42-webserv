@@ -18,7 +18,7 @@ class TestServer
 {
 public:
 	TestServer(Server &server);
-	void launch();
+	void run();
 	void init();
 	//need to implement canonical form
 
@@ -30,17 +30,12 @@ private:
 	struct sockaddr_in _address;
 	int	_addr_len;
 	struct timeval _timeout;
-	bool _end_server;
-	bool _close_connection;
 	fd_set _master_read_fds;
 	fd_set _working_read_fds;
 	fd_set _write_fds;
 
 	int	get_socket();
 
-		/* *********************************** *
-	**  Server config ******************** *
-	* *********************************** */
 	std::string _server_name;
 	int _port;
 	std::string _host;
@@ -50,22 +45,21 @@ private:
 	// std::map<int, std::string> _error_pages;
 	// std::vector<Location> _locations;
 
-	void handler();
-	void responder();
+	void handler(int response_socket);
+	// void responder();
 
+	// HandleRequest _request;
 
-	HandleRequest _request;
-
-	typedef void (TestServer::*RouteHandler)(HandleRequest &request);
+	typedef void (TestServer::*RouteHandler)(int response_socket);
 	std::map<std::string, RouteHandler> _routes;
 
-	void handleGet(HandleRequest &request);
-	void handlePost(HandleRequest &request);
-	void handleDelete(HandleRequest &request);
+	void handleGet(HandleRequest &new_request, int response_socket);
+	void handlePost(HandleRequest &new_request, int response_socket);
+	void handleDelete(HandleRequest &new_request, int response_socket);
 
-	void handleRoot(HandleRequest &request);
-	void handleCss(HandleRequest &request);
-	void handleError(HandleRequest &request);
+	void handleRoot(int response_socket);
+	void handleCss(int response_socket);
+	void handleError(int response_socket);
 
 };
 

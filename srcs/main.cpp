@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:03:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/04/03 15:33:25 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/05 16:56:56 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,11 @@ int	main(int ac, char **av)
 			TestServer init_new_server(*it);
 			run_servers.push_back(init_new_server);
 		}
-		for (int i = 0; i < run_servers.size(); i++) {
-			run_servers[i].launch();
+		while(1) {
+			for (int i = 0; i < run_servers.size(); i++) {
+				run_servers[i].run();
+			}
 		}
-		// TestServer	server(*parsing.getNthServer(0));
 	}
 	catch (std::exception &e)
 	{
