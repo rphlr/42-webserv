@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:03:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/04/05 17:12:33 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/05 17:29:17 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 void sig_handler(int sig)
 {
+	(void)sig;
 	throw std::runtime_error("Signal problem");
 }
 
@@ -39,7 +40,7 @@ int	main(int ac, char **av)
 			run_servers.push_back(init_new_server);
 		}
 		while(1) {
-			for (int i = 0; i < run_servers.size(); i++) {
+			for (size_t i = 0; i < run_servers.size(); i++) {
 				run_servers[i].run();
 			}
 		}

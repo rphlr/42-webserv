@@ -151,12 +151,16 @@ void TestServer::handleGet(HandleRequest &new_request, int response_socket) {
 }
 
 void TestServer::handlePost(HandleRequest &new_request, int response_socket) {
+	(void)new_request;
+	(void)response_socket;
 	// Implement the POST request
 	// send(_new_socket, response.c_str(), response.size(), 0);
 	return;
 }
 
 void TestServer::handleDelete(HandleRequest &new_request, int response_socket) {
+	(void)new_request;
+	(void)response_socket;
 	// Implement the DELETE request
 	// send(_new_socket, response.c_str(), response.size(), 0);
 	return;

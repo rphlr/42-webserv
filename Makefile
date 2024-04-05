@@ -6,7 +6,7 @@
 #    By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/29 12:40:01 by rrouille          #+#    #+#              #
-#    Updated: 2024/04/05 17:15:14 by ckarl            ###   ########.fr        #
+#    Updated: 2024/04/05 17:28:36 by ckarl            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -141,8 +141,8 @@ debug:
 # Rebuild the entire project
 re:
 				@printf "\n┌──────────\n│ Cleaning and ${GREEN}recompiling${ENDCOLOR}...\n"
-				@${MAKE} fclean r
-				@${MAKE} all r
+				@${MAKE} fclean
+				@${MAKE} all
 
 # **************************************************************************** #
 #                                 UTILITIES                                    #
