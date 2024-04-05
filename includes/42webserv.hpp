@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   webserv.hpp                                        :+:      :+:    :+:   */
+/*   42webserv.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:04:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/03/22 19:21:18 by rrouille         ###   ########.fr       */
+/*   Updated: 2024/04/05 17:13:33 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,35 +19,10 @@
 #include <map>
 #include <fstream>
 #include <sstream>
-
-#include <stdio.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <iostream>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <cstring>
-#include <stdlib.h>
-#include <cerrno>
 
-#include "Sockets/BindingSocket.hpp"
-#include "Sockets/ListeningSocket.hpp"
-#include "Sockets/SimpleSocket.hpp"
-#include "Sockets/ConnectingSocket.hpp"
-
-#include "Server/SimpleServer.hpp"
-#include "Server/TestServer.hpp"
-
-#define BUFFER_SIZE 1024
-
-class Webserv
-{
-	public:
-		Webserv(std::string config_file);
-		~Webserv(void);
-		void	run(void);
-	private:
-		std::string	_config_file;
-};
+#include "./Networking/Networking.hpp"
+#include "./Config/Config.hpp"
+#include "./Server/TestServer.hpp"
 
 #endif

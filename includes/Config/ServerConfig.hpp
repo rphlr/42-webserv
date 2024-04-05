@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
+/*   ServerConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
+/*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:12:22 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/06 18:17:27 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/20 12:51:25 by nvaubien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,11 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <unordered_map>
-#include "Errors.hpp"
-#include "Location.hpp"
 
-// class Location;
+#include "../Errors.hpp"
+#include "./LocationConfig.hpp"
 
 using std::string;
-using std::unordered_map;
 using std::vector;
 
 class Server

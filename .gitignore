@@ -1,5 +1,6 @@
-webserv
-obj/**
-obj
+Webserv
+objs/**
+objs
 .vscode/**
+Prompts
 

@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Location.cpp                                       :+:      :+:    :+:   */
+/*   LocationConfig.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
+/*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/21 22:34:00 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/01 15:37:11 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/20 12:52:29 by nvaubien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Location.hpp"
+#include "../../includes/Config/LocationConfig.hpp"
 
 Location::Location(void) : _path(""), _redirect(""), _directory_listing(false) {}
 

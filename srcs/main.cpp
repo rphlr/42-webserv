@@ -3,47 +3,54 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:03:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/03/22 19:21:05 by rrouille         ###   ########.fr       */
+/*   Updated: 2024/04/05 17:12:33 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "webserv.hpp"
-#include "Parser.hpp"
+#include "../includes/42webserv.hpp"
+
+void sig_handler(int sig)
+{
+	throw std::runtime_error("Signal problem");
+}
 
 int	main(int ac, char **av)
 {
 	Parser	parsing;
+	std::vector<Server> config_servers;
+	std::vector<TestServer> run_servers;
+	std::string	config;
+
 
 	if (ac > 2) {
 		std::cout << "Usage: ./webserv <config_file>" << std::endl;
 		return (-1);
 	}
 	try {
-		TestServer t;
-		std::string	config;
+
+		signal(SIGPIPE, sig_handler);
 		config = (ac == 1 ? "configs/default.conf" : av[1]);
-		parsing.parseFile(config);
+		config_servers = parsing.parseFile(config);
+		for (std::vector<Server>::iterator it = config_servers.begin(); it != config_servers.end(); it++) {
+			TestServer init_new_server(*it);
+			run_servers.push_back(init_new_server);
+		}
+		while(1) {
+			for (int i = 0; i < run_servers.size(); i++) {
+				run_servers[i].run();
+			}
+		}
 	}
 	catch (std::exception &e)
 	{
 		std::cout << "\033[1;31mERROR \033[0m" << e.what() << std::endl;
 	}
 
-	// std::string	config_file;
 
-	// if (ac == 1)
-	// 	config_file = "config/default.conf";
-	// else if (ac != 2)
-	// {
-	// 	std::cout << "Usage: ./webserv <config_file>" << std::endl;
-	// 	return (1);
-	// }
-	// else
-	// 	config_file = av[1];
-	// Webserv webserv(config_file);
-	// webserv.run();
+
+
 	return (0);
 }

@@ -1,0 +1,21 @@
+Understanding HTTP: Take time to read and understand the HTTP protocol, especially HTTP/1.1 on which the project is based. Try to understand the format of HTTP requests and responses thoroughly.
+
+Code Structure: Based on the source code you have shared, you are on the right path with a neatly organized code structure. You have arranged the code in a simple-to-complex hierarchy, which makes it easier to maintain and debug in the long run.
+
+Configuration File: Create a parser to read the configuration file properly. This configuration file should take into account the server details such as host, port, server names, error pages, client body size limit, routes, accepted methods, etc. Make sure to manage default configuration in case some options are not provided.
+
+Socket Programming: Since the server might have to handle multiple clients simultaneously, an understanding of socket programming, specially non-blocking sockets is crucial. Familiarize yourself with poll(), select(), or event-based mechanisms (epoll(), kqueue()) based on your preference and OS.
+
+Server Implementation:
+
+a) Creating the server: Use the socket API to create a server which can listen for connections on the specified port. Your server needs to be able to handle multiple clients, so ensure you're using a mechanism like poll() or select().
+
+b) Handling requests: When a client sends an HTTP request, parse the request and determine the appropriate response. Your server must handle at least the GET, POST, DELETE methods.
+
+c) Error handling: Make sure to implement error codes in your server's responses so that clients know when something goes wrong. Display appropriate error pages for the HTTP status code.
+
+d) Implement routes: Depending on the routes setup in the configuration, respond accordingly. For example, a directory or file search, enabling / disabling directory listing, default response file, handling CGI requests (especially GET and POST), managing file uploads, etc.
+
+Testing: Perform extensive testing to verify all functionalities. Test with regular browsers and devices. Additionally, conduct stress tests on the server by simulating multiple simultaneous connections or high loads.
+
+Remember, this is a challenging project! As you get into implementation, you might encounter unexpected obstacles. Refer to your notes and the internet to troubleshoot as needed. Happy coding!

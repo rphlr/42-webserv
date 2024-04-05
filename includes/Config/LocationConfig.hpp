@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
+/*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/21 22:33:57 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/29 18:00:13 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/15 10:12:36 by nvaubien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,12 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <unordered_map>
+#include <algorithm>
 #include "Errors.hpp"
 
 class Server;
 
 using std::string;
-using std::unordered_map;
 using std::vector;
 
 /*

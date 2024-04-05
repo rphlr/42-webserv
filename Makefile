@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+         #
+#    By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/29 12:40:01 by rrouille          #+#    #+#              #
-#    Updated: 2024/03/23 13:58:30 by rrouille         ###   ########.fr        #
+#    Updated: 2024/04/05 17:15:14 by ckarl            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -202,7 +202,7 @@ clean:
 				fi
 
 # Clean everything including the executable
-fclean: 
+fclean:
 				@printf "┌──────────\n"
 				@if [ -d "./${OBJSDIR}" ]; then \
 					printf "│\tRemoving ${RED}${OBJSDIR}${ENDCOLOR} for ${YELLOW}${NAME}${ENDCOLOR}\n"; \

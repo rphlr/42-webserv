@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Parser.hpp                                         :+:      :+:    :+:   */
+/*   ParserConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
+/*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 17:21:27 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/05 15:52:50 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/20 14:42:30 by nvaubien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,15 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <unordered_map>
 #include <sstream>
 #include <fstream>
-#include "Server.hpp"
+#include <algorithm>
+
+#include "./ServerConfig.hpp"
 
 class Server;
 
 using std::string;
-using std::unordered_map;
 using std::vector;
 
 class Parser
@@ -40,6 +40,7 @@ public:
 	void	handleLine(string &line);
 	void	handleSetting(string &key, string &value);
 
+	Server *getNthServer(int n);
 	//check all servers in the end -> isComplete, double ports, other errors ? double locations (not sure if this is an error)
 
 protected:
@@ -48,8 +49,6 @@ protected:
 	bool	inErr;
 	vector<Server> servers;
 	Server	*currentServer;
-
-
 };
 
 namespace sign {
