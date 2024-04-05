@@ -6,7 +6,7 @@
 #    By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/29 12:40:01 by rrouille          #+#    #+#              #
-#    Updated: 2024/03/31 16:55:22 by rrouille         ###   ########.fr        #
+#    Updated: 2024/04/01 12:25:35 by rrouille         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -125,6 +125,9 @@ CC_PROG			= ${CC} ${CFLAGS} ${OBJS} -o ${NAME}
 COMPILATION		= ${CC_PROG}
 
 run:
+				@if [ ! -f "${NAME}" ]; then \
+					${MAKE} all; \
+				fi
 				@printf "┌──────────\n"
 				@printf "│\tRunning ${GREEN}${NAME}${ENDCOLOR}...\n"
 				@printf "└──────────\n"
