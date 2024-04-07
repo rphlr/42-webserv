@@ -14,9 +14,9 @@ HandleCGI::HandleCGI(const std::string& scriptPath,
 HandleCGI::~HandleCGI() {}
 
 void HandleCGI::prepareEnvironment() {
-    for (const auto& pair : env) {
-        setenv(pair.first.c_str(), pair.second.c_str(), 1);
-        std::cout << "Key: " << pair.first << ", Value: " << pair.second << std::endl;
+    for (std::map<std::string, std::string>::const_iterator it = env.begin(); it != env.end(); ++it) {
+        setenv(it->first.c_str(), it->second.c_str(), 1);
+        std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
     }
 }
 

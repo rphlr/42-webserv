@@ -6,7 +6,7 @@
 #    By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/29 12:40:01 by rrouille          #+#    #+#              #
-#    Updated: 2024/04/01 12:25:35 by rrouille         ###   ########.fr        #
+#    Updated: 2024/04/07 18:25:19 by rrouille         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@
 # **************************************************************************** #
 
 # Name of the executable
-NAME				= Webserv
+NAME				= webserv
 
 # Arguments passed to the executable
 ARGS				= $(filter-out $@,${MAKECMDGOALS})
@@ -59,7 +59,7 @@ CLEAR				= \033c
 # Source and object files
 SRCS				= $(shell find ${SRCSDIR} -type f -name '*.cpp')
 OBJS				= $(SRCS:${SRCSDIR}/%.cpp=${OBJSDIR}/%.opp)
-# CFLAGS				= -Wall -Wextra -Werror -std=c++98
+CFLAGS				= -Wall -Wextra -Werror -std=c++98
 # LDFLAGS			= -g3 -fsanitize=address
 CC					= c++
 RM					= rm -rf

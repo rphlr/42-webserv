@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   42webserv.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:04:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/03/20 12:45:27 by nvaubien         ###   ########.fr       */
+/*   Updated: 2024/04/05 17:13:33 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@
 #include <sstream>
 #include <sys/socket.h>
 
-#include "./Server/Server.hpp"
 #include "./Networking/Networking.hpp"
 #include "./Config/Config.hpp"
+#include "./Server/TestServer.hpp"
 
 #endif

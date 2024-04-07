@@ -90,10 +90,15 @@ void HandleRequest::handleRequest() {
 }
 
 HandleRequest::~HandleRequest() {
-    auto contentLengthHeader = _headers.find("Content-Length");
+    std::map<std::string, std::string>::iterator contentLengthHeader = _headers.find("Content-Length");
     if (contentLengthHeader != _headers.end()) {
         int contentLength = std::stoi(contentLengthHeader->second);
         // Now read 'contentLength' bytes from the request into '_body'
+		char *body = new char[contentLength + 1];
+		memset(body, 0, contentLength + 1);
+		memcpy(body, _request.c_str() + _request.size() - contentLength, contentLength);
+		_body = body;
+		delete[] body;
     }
 }
 
@@ -102,7 +107,7 @@ std::string HandleRequest::getBody() const {
 }
 
 std::string HandleRequest::getHeader(const std::string& headerName) const {
-    auto it = _headers.find(headerName);
+    std::map<std::string, std::string>::const_iterator it = _headers.find(headerName);
 	std::cout << "Header-ID:[" << it->first << "] \t\t\t\t";
     if (it != _headers.end()) {
         return it->second;
