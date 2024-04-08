@@ -18,6 +18,12 @@ TestServer::TestServer( Server &server ) {
 	init();
 }
 
+void	custom_close(int i)
+{
+	if (close(i) < 0)
+		std::cerr << "close() failed with errno " << strerror(errno) << std::endl;
+}
+
 void TestServer::init()
 {
 	int on = 1;
@@ -29,84 +35,92 @@ void TestServer::init()
 	}
 	if (setsockopt(_listen_socket, SOL_SOCKET,  SO_REUSEADDR,
 		(char *)&on, sizeof(on)) < 0) {
-		close(_listen_socket);
+		custom_close(_listen_socket);
 		std::cerr << "setsockopt" << std::endl;
 		exit(-1);
 	}
 	if (fcntl(_listen_socket, F_SETFL, O_NONBLOCK) < 0) {
-		close(_listen_socket);
+		custom_close(_listen_socket);
 		std::cerr << "fcntl failed" << std::endl;
 		exit(-1);
 	}
 	if (bind(_listen_socket, (sockaddr *)&_address, _addr_len) < 0) {
 		std::cerr << "binding socket failed" << std::endl;
-		close(_listen_socket);
+		custom_close(_listen_socket);
 		exit(-1);
 	}
 	if (listen(_listen_socket, 1) < 0) {
 		std::cerr << "listen() failed" << std::endl;
-		close(_listen_socket);
+		custom_close(_listen_socket);
 		exit(-1);
 	}
 	_new_socket = -1;
-	FD_ZERO(&_master_read_fds);
-	_max_sockets = _listen_socket;
-	FD_SET(_listen_socket, &_master_read_fds);
+	FD_ZERO(&_master_fds);
+	_max_nbr_of_sockets = _listen_socket;
+	FD_SET(_listen_socket, &_master_fds);
 
-	_timeout.tv_sec = 1;
-	_timeout.tv_usec = 0;
+	_timeout.tv_sec = 0;
+	_timeout.tv_usec = 1000;
 }
 
 void TestServer::run() {
-	std::cout << "Waiting for a connection on port: " << _port << std::endl;
+	//std::cout << "Waiting for a connection on port: " << _port << std::endl;
 	FD_ZERO(&_write_fds);
-	FD_ZERO(&_working_read_fds);
-	memcpy(&_working_read_fds, &_master_read_fds, sizeof(_master_read_fds));
+	FD_ZERO(&_read_fds);
+	memcpy(&_read_fds, &_master_fds, sizeof(_master_fds));
 
-	int select_value = select(_max_sockets + 1, &_working_read_fds, &_write_fds, NULL, &_timeout);
-	if (select_value < 0) {
+	int select_value = select(_max_nbr_of_sockets + 1, &_read_fds, &_write_fds, NULL, &_timeout);
+	if (select_value < 0 || select_value > FD_SETSIZE) {
 		std::cerr << "select() failed" << std::endl;
-		for (int i = 0; i <= _max_sockets; i++) {
-			if (FD_ISSET(i, &_master_read_fds) && i != _listen_socket)
-			close(i);
+		for (int i = 0; i <= _max_nbr_of_sockets; i++) {
+			if (FD_ISSET(i, &_master_fds) && i != _listen_socket) {
+				custom_close(i);
+			}
 		}
-		return ;
+		throw std::runtime_error("select() failed, server closed");
 	}
 	else if (select_value == 0) {
-		std::cerr << "select() timeout" << std::endl;
+		// std::cerr << "select() timeout" << std::endl;
 		return ;
 	}
-	for (int i = 0; i <= _max_sockets; i++) {
-		if (FD_ISSET(i, &_working_read_fds) && i == _listen_socket) {
+	for (int i = 0; i <= _max_nbr_of_sockets; i++) {
+		if (FD_ISSET(i, &_read_fds) && i == _listen_socket) {
+			std::cout << "New client on port: " << _port << std::endl;
 			_new_socket = accept(_listen_socket, NULL, NULL);
 			if (_new_socket < 0 && errno != EWOULDBLOCK) {
-				std::cerr << "accept() failed" << std::endl;
+				std::cerr << "accept() failed for fd " << i << std::endl;
 				return ;
 			}
 			if (fcntl(_new_socket, F_SETFL, O_NONBLOCK) < 0) {
-				std::cerr << "fcntl failed" << std::endl;
-				close(_new_socket);
+				std::cerr << "fcntl failed for fd " << i << std::endl;
+				custom_close(_new_socket);
 			}
-			FD_SET(_new_socket, &_master_read_fds);
-			if (_max_sockets < _new_socket)
-				_max_sockets = _new_socket;
+			else {
+				FD_SET(_new_socket, &_master_fds);
+				if (_max_nbr_of_sockets < _new_socket)
+					_max_nbr_of_sockets = _new_socket;
+			}
 		}
-		if (FD_ISSET(i, &_working_read_fds) && i != _listen_socket) {
+		if (FD_ISSET(i, &_read_fds) && i != _listen_socket) {
 			memset(_buffer, 0, sizeof(_buffer));
 			int rc = recv(i, _buffer, 3000, 0);
-			std::cout << _buffer << std::endl;
+			// std::cout << _buffer << std::endl;
 			if (rc <= 0) {
-				std::cerr << "recv() failed or client closed connection" << std::endl;
-				close(i);
-				FD_CLR(i, &_master_read_fds);
+				std::cout << (rc == 0 ? "Client closed connection on fd " : "recv() error for fd ") << i << std::endl;
+				custom_close(i);
+				FD_CLR(i, &_master_fds);
 				FD_CLR(i, &_write_fds);
+				while (FD_ISSET(_max_nbr_of_sockets, &_master_fds) == false)
+					_max_nbr_of_sockets--;
 			}
 			else {
 				FD_SET(i, &_write_fds);
-				std::cout << "send to handler: " << i << std::endl;
-				handler(i);
-				// if (send(i, "hello", 5, 0) < 0)
-				// 	close(i);
+				// std::cout << "send to handler: " << i << std::endl;
+				// handler(i);
+				if (send(i, "hello\n", 6, MSG_NOSIGNAL) < 0) {
+					std::cout << "send() error on fd " << i << std::endl;
+					custom_close(i);
+				}
 			}
 		}
 	}
@@ -235,6 +249,11 @@ void TestServer::handleError(int response_socket)
 
 	if (send(response_socket, response.c_str(), response.size(), 0) < 0)
 		close(response_socket);
+}
+
+std::string &TestServer::getName()
+{
+	return _server_name;
 }
 
 // void TestServer::responder() {

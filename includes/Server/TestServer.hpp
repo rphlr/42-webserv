@@ -20,21 +20,24 @@ public:
 	TestServer(Server &server);
 	void run();
 	void init();
+
+	std::string &getName();
 	//need to implement canonical form
 
 private:
 	char _buffer[3000];
 	int _new_socket;
 	int _listen_socket;
-	int _max_sockets;
+	int _max_nbr_of_sockets;
 	struct sockaddr_in _address;
 	int	_addr_len;
 	struct timeval _timeout;
-	fd_set _master_read_fds;
-	fd_set _working_read_fds;
+	fd_set _master_fds;
+	fd_set _read_fds;
 	fd_set _write_fds;
 
 	int	get_socket();
+
 
 	std::string _server_name;
 	int _port;

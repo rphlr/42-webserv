@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:03:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/04/05 17:29:17 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/08 21:54:25 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,9 @@
 
 void sig_handler(int sig)
 {
-	(void)sig;
-	throw std::runtime_error("Signal problem");
+	// (void)sig;
+	// throw std::runtime_error("Signal problem");
+	std::cerr << "Signal received: " << sig << std::endl;
 }
 
 int	main(int ac, char **av)
@@ -32,7 +33,8 @@ int	main(int ac, char **av)
 	}
 	try {
 
-		signal(SIGPIPE, sig_handler);
+		// signal(SIGINT, sig_handler);
+		signal(SIGPIPE, SIG_IGN);
 		config = (ac == 1 ? "configs/default.conf" : av[1]);
 		config_servers = parsing.parseFile(config);
 		for (std::vector<Server>::iterator it = config_servers.begin(); it != config_servers.end(); it++) {
@@ -41,17 +43,17 @@ int	main(int ac, char **av)
 		}
 		while(1) {
 			for (size_t i = 0; i < run_servers.size(); i++) {
-				run_servers[i].run();
+				try { run_servers[i].run(); }
+				catch (std::exception &e) {
+					std::cout << "Server " << run_servers[i].getName() << " closed due to a select() failure" << std::endl;
+					run_servers.erase(run_servers.begin()+i);
+				}
 			}
 		}
 	}
-	catch (std::exception &e)
-	{
+	catch (std::exception &e) {
 		std::cout << "\033[1;31mERROR \033[0m" << e.what() << std::endl;
 	}
-
-
-
 
 	return (0);
 }
