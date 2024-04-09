@@ -60,7 +60,7 @@ void TestServer::init()
 	FD_SET(_listen_socket, &_master_fds);
 
 	_timeout.tv_sec = 0;
-	_timeout.tv_usec = 1000;
+	_timeout.tv_usec = 1;
 }
 
 void TestServer::run() {
@@ -115,14 +115,21 @@ void TestServer::run() {
 			}
 			else {
 				FD_SET(i, &_write_fds);
-				// std::cout << "send to handler: " << i << std::endl;
-				// handler(i);
-				if (send(i, "hello\n", 6, MSG_NOSIGNAL) < 0) {
-					std::cout << "send() error on fd " << i << std::endl;
-					custom_close(i);
-				}
+				handler(i);
+				// if (send(i, "hello\n", 6, 0) < 0) {
+				// 		std::cout << "send() error on fd " << i << std::endl;
+				// 		custom_close(i);
+				// }
 			}
 		}
+		// if (FD_ISSET(i, &_write_fds)) {
+		// 	// std::cout << "send to handler: " << i << std::endl;
+		// 	handler(i);
+		// 	// if (send(i, "hello\n", 6, 0) < 0) {
+		// 	// 	std::cout << "send() error on fd " << i << std::endl;
+		// 	// 	custom_close(i);
+		// 	// }
+		// }
 	}
 }
 
