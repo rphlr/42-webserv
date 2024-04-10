@@ -25,6 +25,7 @@ public:
 	//need to implement canonical form
 
 private:
+	std::string _rootPath;
 	char _buffer[3000];
 	int _new_socket;
 	int _listen_socket;

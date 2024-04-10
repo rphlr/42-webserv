@@ -1,6 +1,9 @@
 #include "../../includes/Server/TestServer.hpp"
 
 TestServer::TestServer( Server &server ) {
+	char *cwd = getcwd(NULL, 0);
+	this->_rootPath = std::string(cwd) + "/" + server.getRoot();
+	free(cwd);
 	u_long interface;
 	_port = server.getPort();
 	_address.sin_family = AF_INET;
@@ -197,7 +200,10 @@ void TestServer::handleDelete(HandleRequest &new_request, int response_socket) {
 
 void TestServer::handleRoot(int response_socket)
 {
-	std::ifstream file("/Users/ckarl/Desktop/webserv/webpages/default_webpage/siteHome.html");
+	// (void) response_socket;
+	std::string filePath = this->_rootPath + "/default_webpages/siteUpDownload.html";
+	std::cout << "Root path: " << filePath << std::endl;
+	std::ifstream file(filePath);
 	if (!file.is_open())
 	{
 		// handle the error, e.g. by logging it and returning
@@ -223,7 +229,11 @@ void TestServer::handleRoot(int response_socket)
 
 void TestServer::handleCss(int response_socket)
 {
-	std::ifstream file("/Users/ckarl/Desktop/webserv/webpages/default_webpage/styles.css");
+
+	// (void) response_socket;
+	std::string filePath = this->_rootPath + "/default_webpage/styles.css";
+	std::cout << "Root path: " << filePath << std::endl;
+	std::ifstream file(filePath);
 
 	if (!file.is_open())
 	{
