@@ -81,13 +81,11 @@ void TestServer::run() {
 			}
 		}
 		return;
-		// throw std::runtime_error("select() failed, server closed");
 	}
 	else if (select_value == 0) {
 		for (int i = 0; i <= _max_nbr_of_sockets; i++) {
 			if (FD_ISSET(i, &_read_fds) && i != _listen_socket) {
 				FD_CLR(i, &_read_fds);
-				// FD_CLR(i, &_read_fds);
 				custom_close(i);
 			}
 		}
@@ -120,19 +118,11 @@ void TestServer::run() {
 				std::cout << (rc == 0 ? "Client closed connection on fd " : "recv() error for fd ") << i << std::endl;
 				custom_close(i);
 				FD_CLR(i, &_master_fds);
-				// FD_CLR(i, &_read_fds);
-				// FD_CLR(i, &_write_fds);
 				while (FD_ISSET(_max_nbr_of_sockets, &_master_fds) == false)
 					_max_nbr_of_sockets--;
 			}
 			else {
 				FD_SET(i, &_write_fds);
-				// handler(i);
-				// if (send(i, "hello\n", 6, 0) < 0) {
-				// 		std::cout << "send() error on fd " << i << std::endl;
-				// 		FD_CLR(i, &_master_write_fds);
-				// 		custom_close(i);
-				// }
 			}
 		}
 		if (FD_ISSET(i, &_write_fds)) {
@@ -141,7 +131,7 @@ void TestServer::run() {
 			FD_CLR(i, &_write_fds);
 			// if (send(i, "hello\n", 6, 0) < 0) {
 			// 	std::cout << "send() error on fd " << i << std::endl;
-			// 	FD_CLR(i, &_master_write_fds);
+			// 	FD_CLR(i, &_write_fds);
 			// 	custom_close(i);
 			// }
 		}
