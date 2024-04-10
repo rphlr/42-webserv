@@ -261,7 +261,9 @@ void TestServer::handleCss(int response_socket)
 void TestServer::handleError(int response_socket)
 
 {
-	std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/error_webpages/custom_404.html");
+	std::string filePath = this->_rootPath + "/error_webpage/custom404.html";
+	std::cout << "Root path: " << filePath << std::endl;
+	std::ifstream file(filePath);
 
 	if (!file.is_open())
 	{
