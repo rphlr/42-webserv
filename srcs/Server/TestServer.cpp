@@ -80,7 +80,7 @@ void TestServer::init()
 		close(_listen_socket);
 		exit(-1);
 	}
-	if (listen(_listen_socket, 1) < 0) {
+	if (listen(_listen_socket, 255) < 0) {
 		std::cerr << "listen() failed" << std::endl;
 		close(_listen_socket);
 		exit(-1);
@@ -90,7 +90,7 @@ void TestServer::init()
 	_max_sockets = _listen_socket;
 	FD_SET(_listen_socket, &_master_read_fds);
 
-	_timeout.tv_sec = 1;
+	_timeout.tv_sec = 0;
 	_timeout.tv_usec = 0;
 }
 
@@ -105,21 +105,22 @@ void TestServer::init()
 
 void TestServer::run() {
 	std::cout << "Waiting for a connection on port: " << _port << std::endl;
-	FD_ZERO(&_write_fds);
-	FD_ZERO(&_working_read_fds);
-	memcpy(&_working_read_fds, &_master_read_fds, sizeof(_master_read_fds));
+	// FD_ZERO(&_write_fds);
+	// FD_ZERO(&_working_read_fds);
+	// memcpy(&_working_read_fds, &_master_read_fds, sizeof(_master_read_fds));
+	FD_COPY(&_master_read_fds, &_working_read_fds);
 
 	int select_value = select(_max_sockets + 1, &_working_read_fds, &_write_fds, NULL, &_timeout);
 	if (select_value < 0) {
 		std::cerr << "select() failed" << std::endl;
 		for (int i = 0; i <= _max_sockets; i++) {
 			if (FD_ISSET(i, &_master_read_fds) && i != _listen_socket)
-			close(i);
+				close(i);
 		}
 		return ;
 	}
 	else if (select_value == 0) {
-		std::cerr << "select() timeout" << std::endl;
+		// std::cerr << "select() timeout" << std::endl;
 		return ;
 	}
 	for (int i = 0; i <= _max_sockets; i++) {
