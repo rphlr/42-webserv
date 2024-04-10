@@ -59,8 +59,8 @@ void TestServer::init()
 	}
 	_new_socket = -1;
 	FD_ZERO(&_master_fds);
-	// FD_ZERO(&_write_fds);
-	// FD_ZERO(&_read_fds);
+	FD_ZERO(&_write_fds);
+	FD_ZERO(&_read_fds);
 	_max_nbr_of_sockets = _listen_socket;
 	FD_SET(_listen_socket, &_master_fds);
 
@@ -69,18 +69,14 @@ void TestServer::init()
 }
 
 void TestServer::run() {
-	//std::cout << "Waiting for a connection on port: " << _port << std::endl;
-	// FD_ZERO(&_write_fds);
-	// FD_ZERO(&_read_fds);
 	FD_COPY(&_master_fds, &_read_fds);
 
 	int select_value = select(_max_nbr_of_sockets + 1, &_read_fds, &_write_fds, NULL, &_timeout);
 	if (select_value < 0) { //|| select_value > FD_SETSIZE
 		std::cerr << "select() failed" << std::endl;
 		for (int i = 0; i <= _max_nbr_of_sockets; i++) {
-			if (FD_ISSET(i, &_master_fds) && i != _listen_socket) {
-				FD_CLR(i, &_master_fds);
-				// FD_CLR(i, &_read_fds);
+			if (FD_ISSET(i, &_read_fds) && i != _listen_socket) {
+				FD_CLR(i, &_read_fds);
 				custom_close(i);
 			}
 		}
@@ -88,6 +84,13 @@ void TestServer::run() {
 		// throw std::runtime_error("select() failed, server closed");
 	}
 	else if (select_value == 0) {
+		for (int i = 0; i <= _max_nbr_of_sockets; i++) {
+			if (FD_ISSET(i, &_read_fds) && i != _listen_socket) {
+				FD_CLR(i, &_read_fds);
+				// FD_CLR(i, &_read_fds);
+				custom_close(i);
+			}
+		}
 		// std::cerr << "select() timeout" << std::endl;
 		return ;
 	}
@@ -124,23 +127,24 @@ void TestServer::run() {
 			}
 			else {
 				FD_SET(i, &_write_fds);
-				handler(i);
-				FD_CLR(i, &_write_fds);
+				// handler(i);
 				// if (send(i, "hello\n", 6, 0) < 0) {
 				// 		std::cout << "send() error on fd " << i << std::endl;
+				// 		FD_CLR(i, &_master_write_fds);
 				// 		custom_close(i);
 				// }
 			}
 		}
-		// if (FD_ISSET(i, &_write_fds)) {
-			// std::cout << "send to handler: " << i << std::endl;
-			// handler(i);
-			// FD_CLR(i, &_write_fds);
+		if (FD_ISSET(i, &_write_fds)) {
+			std::cout << "send to handler: " << i << std::endl;
+			handler(i);
+			FD_CLR(i, &_write_fds);
 			// if (send(i, "hello\n", 6, 0) < 0) {
 			// 	std::cout << "send() error on fd " << i << std::endl;
+			// 	FD_CLR(i, &_master_write_fds);
 			// 	custom_close(i);
 			// }
-		// }
+		}
 	}
 }
 
@@ -222,7 +226,7 @@ void TestServer::handleRoot(int response_socket)
 
 	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
 		std::cout << "send() error on fd " << response_socket << std::endl;
-		FD_CLR(response_socket, &_master_fds);
+		FD_CLR(response_socket, &_write_fds);
 		custom_close(response_socket);
 	}
 }
@@ -253,7 +257,7 @@ void TestServer::handleCss(int response_socket)
 
 	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
 		std::cout << "send() error on fd " << response_socket << std::endl;
-		FD_CLR(response_socket, &_master_fds);
+		FD_CLR(response_socket, &_write_fds);
 		custom_close(response_socket);
 	}
 }
@@ -282,7 +286,7 @@ void TestServer::handleError(int response_socket)
 
 	if (send(response_socket, response.c_str(), response.size(), 0) < 0){
 		std::cout << "send() error on fd " << response_socket << std::endl;
-		FD_CLR(response_socket, &_master_fds);
+		FD_CLR(response_socket, &_write_fds);
 		custom_close(response_socket);
 	}
 }

@@ -34,6 +34,7 @@ private:
 	int	_addr_len;
 	struct timeval _timeout;
 	fd_set _master_fds;
+	fd_set _master_write_fds;
 	fd_set _read_fds;
 	fd_set _write_fds;
 
