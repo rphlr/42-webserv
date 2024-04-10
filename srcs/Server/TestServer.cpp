@@ -201,7 +201,7 @@ void TestServer::handleDelete(HandleRequest &new_request, int response_socket) {
 void TestServer::handleRoot(int response_socket)
 {
 	// (void) response_socket;
-	std::string filePath = this->_rootPath + "/default_webpages/siteUpDownload.html";
+	std::string filePath = this->_rootPath + "/default_webpage/siteUpDownload.html";
 	std::cout << "Root path: " << filePath << std::endl;
 	std::ifstream file(filePath);
 	if (!file.is_open())
