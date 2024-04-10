@@ -10,14 +10,15 @@ def open_webpage(client_id):
         try:
             response = requests.get(url)
             print(f"Client {client_id} Request to {url} - Status Code: {response.status_code}")
+            break
         except requests.exceptions.RequestException as e:
             print(f"Client {client_id} Error making request to {url}: {e}")
             time.sleep(2)
-    print(f"Client {client_id} - Failed to make request to {url} after {retries} retries")
+    #print(f"Client {client_id} - Failed to make request to {url} after {retries} retries")
 
 if __name__ == '__main__':
     # Number of times to open the webpage simultaneously
-    num_clients = 3
+    num_clients = 10
 
     # List to hold processes
     processes = []

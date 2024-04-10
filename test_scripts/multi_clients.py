@@ -6,7 +6,7 @@ from signal import signal, SIGPIPE, SIG_DFL
 
 SERVER_HOST = '127.0.0.1'
 SERVER_PORTS = [8888, 8000, 8080, 8008, 8800]
-NUM_CLIENTS = 10
+NUM_CLIENTS = 50
 
 def client_task(server_port):
     try:

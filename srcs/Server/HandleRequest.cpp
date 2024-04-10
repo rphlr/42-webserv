@@ -51,11 +51,11 @@ void HandleRequest::handleRequest() {
 	_path = segments[1];
 	_protocol = segments[2];
 
-	std::cout << CYAN;
-	std::cout << "/ *** Request Parsing *** /\n";
-	std::cout << "Method:[" << _method << "]" << std::endl;
-	std::cout << "Path: [" << _path << "]" << std::endl;
-	std::cout << "Protocol: [" << _protocol << "]" << std::endl;
+	// std::cout << CYAN;
+	// std::cout << "/ *** Request Parsing *** /\n";
+	// std::cout << "Method:[" << _method << "]" << std::endl;
+	// std::cout << "Path: [" << _path << "]" << std::endl;
+	// std::cout << "Protocol: [" << _protocol << "]" << std::endl;
 
 	// Next lines are the headers
 	size_t headers_start = _request.find("\n") + 1;
@@ -80,13 +80,13 @@ void HandleRequest::handleRequest() {
 
 	// std::cout << "!!! Headers parsed !!!\n";
 	// Loop over the header the c+98 way
-	for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it) {
-		std::cout << "Header-ID:[" << it->first << "] \t\t\t\t";
-		std::cout << "Header-Value:[" << it->second << "]" << std::endl;
-	}
-	
-	std::cout << "Body:[]\n";
-	std::cout << _body << std::endl;
+	// for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it) {
+	// 	std::cout << "Header-ID:[" << it->first << "] \t\t\t\t";
+	// 	std::cout << "Header-Value:[" << it->second << "]" << std::endl;
+	// }
+
+	// std::cout << "Body:[]\n";
+	// std::cout << _body << std::endl;
 
 	std::cout << RESET;
 }
