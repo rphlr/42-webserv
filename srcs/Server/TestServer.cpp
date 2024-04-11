@@ -104,15 +104,15 @@ void TestServer::init()
 // }
 
 void TestServer::run() {
-	std::cout << "Waiting for a connection on port: " << _port << std::endl;
+	// std::cout << "Waiting for a connection on port: " << _port << std::endl;
 	// FD_ZERO(&_write_fds);
 	// FD_ZERO(&_working_read_fds);
-	// memcpy(&_working_read_fds, &_master_read_fds, sizeof(_master_read_fds));
-	FD_COPY(&_master_read_fds, &_working_read_fds);
+	memcpy(&_working_read_fds, &_master_read_fds, sizeof(_master_read_fds));
+	// FD_COPY(&_master_read_fds, &_working_read_fds);
 
 	int select_value = select(_max_sockets + 1, &_working_read_fds, &_write_fds, NULL, &_timeout);
 	if (select_value < 0) {
-		std::cerr << "select() failed" << std::endl;
+		// std::cerr << "select() failed" << std::endl;
 		for (int i = 0; i <= _max_sockets; i++) {
 			if (FD_ISSET(i, &_master_read_fds) && i != _listen_socket)
 				close(i);
@@ -120,7 +120,6 @@ void TestServer::run() {
 		return ;
 	}
 	else if (select_value == 0) {
-		// std::cerr << "select() timeout" << std::endl;
 		return ;
 	}
 	for (int i = 0; i <= _max_sockets; i++) {
@@ -141,7 +140,7 @@ void TestServer::run() {
 		if (FD_ISSET(i, &_working_read_fds) && i != _listen_socket) {
 			memset(_buffer, 0, sizeof(_buffer));
 			int rc = recv(i, _buffer, 3000, 0);
-			std::cout << _buffer << std::endl;
+			std::cout << YELLOW << "Raw request:" << _buffer << RESET << "\n\n";
 			if (rc <= 0) {
 				std::cerr << "recv() failed or client closed connection" << std::endl;
 				close(i);
@@ -150,7 +149,7 @@ void TestServer::run() {
 			}
 			else {
 				FD_SET(i, &_write_fds);
-				std::cout << "send to handler: " << i << std::endl;
+				std::cout << MAGENTA << "Send to handler: " << i << RESET << "\n\n";
 				handler(i);
 				// if (send(i, "hello", 5, 0) < 0)
 				// 	close(i);
@@ -160,19 +159,15 @@ void TestServer::run() {
 }
 
 void TestServer::handler(int response_socket) {
-	std::cout << "Handling...\n";
 	HandleRequest new_request(_buffer);
 	new_request.handleRequest();
 	std::string method = new_request.getMethod();
-	std::cout << "Method: " << method << std::endl;
 
 	if (method == "GET") {
-		std::cout << "GET request\n";
 		handleGet(new_request, response_socket);
 	}
 	else if (method == "POST") {
 		// handlePost();
-		std::cout << "POST request\n";
 		handlePost(new_request, response_socket);
 	}
 	else if (method == "DELETE") {
@@ -184,84 +179,10 @@ void TestServer::handler(int response_socket) {
 	}
 }
 
-// void TestServer::accepter() {
-// 	memset(_buffer, 0, 300 );
-// 	struct sockaddr_in address = get_socket()->get_address();
-// 	int addrlen = sizeof(address);
-// 	_new_socket = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t*)&addrlen);
-// 	read( _new_socket, _buffer, 300 );
-// }
-
-// void TestServer::handler() {
-// 	std::cout << "Handling...\n";
-// 	HandleRequest _request( _buffer);
-// 	// _request.setRequest( _buffer );
-// 	_request.handleRequest();
-// 	std::string method = _request.getMethod();
-
-// 	std::cout << MAGENTA;
-// 	if (method == "GET") {
-// 		std::cout << "GET request\n";
-// 		handleGet(_request);
-// 	}
-// 	else if (method == "POST") {
-// 		// handlePost();
-// 		std::cout << "POST request\n";
-// 		handlePost(_request);
-// 	}
-// 	else if (method == "DELETE") {
-// 		// handleDelete();
-// 		std::cout << "DELETE request\n";
-// 	}
-// 	else {
-// 		std::cout << "Unsupported method\n";
-// 	}
-// 	std::cout << "\n" << RESET;
-// }
-
-// void TestServer::handlePost(HandleRequest &request) {
-//     // Implémentez ici le traitement spécifique aux données POST.
-//     std::string contentType = request.getHeader("Content-Type");
-//     // Vérifiez si c'est une requête de téléchargement de fichier
-//     if (contentType.find("multipart/form-data") != std::string::npos) {
-//         // Vous devez parser le corps de la requête pour extraire le fichier
-//         // et le traiter selon les spécifications de votre application.
-        
-//         // Après avoir traité le fichier, envoyez une réponse appropriée.
-//         std::string responseBody = "<html><body><h1>Fichier téléchargé avec succès</h1></body></html>";
-//         std::string responseHeaders = "HTTP/1.1 200 OK\r\n";
-//         responseHeaders += "Content-Type: text/html\r\n";
-//         responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n\r\n";
-
-//         std::string response = responseHeaders + responseBody;
-//         send(_new_socket, response.c_str(), response.size(), 0);
-//     } else {
-//         // Si ce n'est pas une requête de téléchargement de fichier, traitez-la normalement.
-//     }
-// }
-
-// void TestServer::responder() {
-// 	// HandleResponse response;
-// 	// Check if the request is a GET request
-// 	std::cout << YELLOW;
-// 	std::cout << "Responding...\n";
-// 	std::string path = _request.getPath();
-// 	if (_routes.find(path) != _routes.end()) {
-// 		(this->*_routes[path])(_request);
-// 	} else {
-// 		handleError(_request);
-// 	}
-// 	shutdown(_new_socket, SHUT_RDWR);
-// 	std::cout << "\n" << RESET;
-// }
-
 void TestServer::handleGet(HandleRequest &request, int response_socket) {
-    std::cout << "Handling GET request\n";
     std::string path = request.getPath();
-    std::cout << "Path: " << path << std::endl;
 
 	if (path.substr(path.size() - 4) == ".css") {
-		std::cout << "Handling css\n";
         handleCss(response_socket);
     } else if (path == "/home" || path == "/testHome.html") {
 		std::cout << "Handling home\n";
@@ -280,7 +201,7 @@ void TestServer::handleGet(HandleRequest &request, int response_socket) {
 void TestServer::handleUpload(int response_socket) {
 	(void) response_socket;
 	std::string filePath = this->_rootPath + "/default_webpages/siteUpDownload.html";
-	std::cout << "Root path: " << filePath << std::endl;
+	std::cout << "Root path: " << filePath << "\n\n";
 	std::ifstream file(filePath);
 	if (!file.is_open())
 	{
@@ -308,9 +229,7 @@ std::string TestServer::determineCgiScriptPath(const std::string& requestPath) {
 
 void TestServer::handlePost(HandleRequest &request, int response_socket) {
 	(void) response_socket;
-    std::cout << "Handling POST request\n";
     std::string path = request.getPath();
-    std::cout << "Path: " << path << std::endl;
 
     if (path.substr(0, 9) == "/cgi-bin/") {
 		std::cout << "Handling CGI\n";
@@ -359,7 +278,7 @@ void TestServer::handleDelete(HandleRequest &request, int response_socket) {
 void TestServer::handleRoot(int response_socket)
 {
 	std::string filePath = this->_rootPath + "/default_webpages/siteHome.html";
-	std::cout << "Root path: " << filePath << std::endl;
+	std::cout << "Root path: " << filePath << "\n\n";
 	std::ifstream file(filePath);
 	// std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/siteHome.html");
 	if (!file.is_open())
@@ -430,7 +349,8 @@ void TestServer::handleForm(int response_socket)
 
 	std::string response = responseHeaders + "\r\n" + responseBody;
 
-	send(_new_socket, response.c_str(), response.size(), 0);
+	if (send(response_socket, response.c_str(), response.size(), 0) < 0)
+		close(response_socket);
 }
 
 void TestServer::handleError(int response_socket)

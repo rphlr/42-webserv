@@ -72,9 +72,10 @@ void HandleRequest::handleRequest() {
 	}
 
 	// Last line is the body
-	if (headers_end != std::string::npos) {
-		_body = _request.substr(headers_end + 2);
-	}
+	size_t body_start = _request.find("\r\n\r\n");
+    if (body_start != std::string::npos) {
+        _body = _request.substr(body_start + 4);
+    }
 
 	// std::cout << "!!! Headers parsed !!!\n";
 	// Loop over the header the c+98 way
@@ -83,8 +84,7 @@ void HandleRequest::handleRequest() {
 		std::cout << "Header-Value:[" << it->second << "]" << std::endl;
 	}
 	
-	std::cout << "Body:[]\n";
-	std::cout << _body << std::endl;
+	std::cout << "Body:[" << _body << "]\n\n";
 
 	std::cout << RESET;
 }
