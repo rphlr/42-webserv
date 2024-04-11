@@ -17,10 +17,6 @@
 
 #include <cstdlib> 
 
-// TestServer::TestServer() : SimpleServer( AF_INET, SOCK_STREAM, 0, 6545, INADDR_ANY, 10 ) {
-// 	launch();
-// }
-
 TestServer::TestServer( Server &server ) {
 
 	char *cwd = getcwd(NULL, 0);
@@ -43,17 +39,6 @@ TestServer::TestServer( Server &server ) {
 
 	init();
 }
-
-// TestServer::TestServer(Server &server) : SimpleServer( server ), _request("") {
-// 	// Create a function to setup routes
-// 	_routes["/home"] = &TestServer::handleHome;
-// 	_routes["/form"] = &TestServer::handleForm;
-// 	_routes["/styles.css"] = &TestServer::handleCss;
-// 	_routes["/upload"] = &TestServer::handlePost;
-// 	// _routes["/form"] = &TestServer::handleForm;
-
-// 	launch();
-// }
 
 void TestServer::init()
 {
@@ -94,21 +79,8 @@ void TestServer::init()
 	_timeout.tv_usec = 0;
 }
 
-// void TestServer::launch() {
-// 	while (true) {
-// 		std::cout << "Waiting for a connection...\n\n";
-// 		accepter();
-// 		handler();
-// 		responder();
-// 	}
-// }
-
 void TestServer::run() {
-	// std::cout << "Waiting for a connection on port: " << _port << std::endl;
-	// FD_ZERO(&_write_fds);
-	// FD_ZERO(&_working_read_fds);
 	memcpy(&_working_read_fds, &_master_read_fds, sizeof(_master_read_fds));
-	// FD_COPY(&_master_read_fds, &_working_read_fds);
 
 	int select_value = select(_max_sockets + 1, &_working_read_fds, &_write_fds, NULL, &_timeout);
 	if (select_value < 0) {
@@ -151,11 +123,13 @@ void TestServer::run() {
 				FD_SET(i, &_write_fds);
 				std::cout << MAGENTA << "Send to handler: " << i << RESET << "\n\n";
 				handler(i);
-				// if (send(i, "hello", 5, 0) < 0)
-				// 	close(i);
 			}
 		}
 	}
+}
+
+void TestServer::run() {
+	/* This function should be able to process chunks of data */
 }
 
 void TestServer::handler(int response_socket) {
@@ -199,7 +173,6 @@ void TestServer::handleGet(HandleRequest &request, int response_socket) {
 }
 
 void TestServer::handleUpload(int response_socket) {
-	(void) response_socket;
 	std::string filePath = this->_rootPath + "/default_webpages/siteUpDownload.html";
 	std::cout << "Root path: " << filePath << "\n\n";
 	std::ifstream file(filePath);
@@ -228,7 +201,6 @@ std::string TestServer::determineCgiScriptPath(const std::string& requestPath) {
 }
 
 void TestServer::handlePost(HandleRequest &request, int response_socket) {
-	(void) response_socket;
     std::string path = request.getPath();
 
     if (path.substr(0, 9) == "/cgi-bin/") {
@@ -254,18 +226,6 @@ void TestServer::handlePost(HandleRequest &request, int response_socket) {
         send(_new_socket, cgiOutput.c_str(), cgiOutput.size(), 0);
     }
 }
-
-
-// void TestServer::handlePost(HandleRequest &request) {
-// 	// implement the POST request
-// 	std::string contentType = request.getHeader("Content-Type");
-// 	std::string path = request.getPath();
-// 	std::string responseBody;
-// 	std::string responseHeaders;
-// 	std::string response;
-
-
-// }
 
 void TestServer::handleDelete(HandleRequest &request, int response_socket) {
 	(void) request;
@@ -329,7 +289,6 @@ void TestServer::handleCss(int response_socket)
 
 void TestServer::handleForm(int response_socket)
 {
-	(void) response_socket;
 	std::string filePath = this->_rootPath + "/default_webpages/siteForm.html";
 	std::ifstream file(filePath);
 	// std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/siteForm.html");
@@ -355,16 +314,6 @@ void TestServer::handleForm(int response_socket)
 
 void TestServer::handleError(int response_socket)
 {
-    // std::string responseBody = "404 Not Found\nThe requested URL " + request.getPath() + " was not found on this server.";
-
-    // std::string responseHeaders = "HTTP/1.1 404 Not Found\r\n";
-    // responseHeaders += "Content-Type: text/plain\r\n";
-    // responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
-
-    // std::string response = responseHeaders + "\r\n" + responseBody;
-
-    // send(_new_socket, response.c_str(), response.size(), 0);
-
 	std::string filePath = this->_rootPath + "/error_webpages/custom404.html";\
 	std::ifstream file(filePath);
 	if (!file.is_open())
@@ -385,50 +334,3 @@ void TestServer::handleError(int response_socket)
 	if (send(response_socket, response.c_str(), response.size(), 0) < 0)
 		close(response_socket);
 }
-
-
-/* TESTING */
-
-// void TestServer::launch() 
-// {
-// 	fd_set current_sockets, ready_sockets;
-// 	FD_ZERO(&current_sockets); // Clears the fd_set
-
-// 	// Add listening socket to the set
-// 	FD_SET(get_socket()->get_sock(), &current_sockets);
-
-// 	int max_fd = get_socket()->get_sock();
-
-// 	while (true) 
-// 	{
-// 		ready_sockets = current_sockets;
-
-// 		if (select(max_fd + 1, &ready_sockets, NULL, NULL, NULL) == -1) 
-// 		{
-// 			std::cerr << "Select error: " << strerror(errno);
-// 			break;
-// 		}
-
-// 		// Check each socket for readiness
-// 		for(int i = 0; i <= max_fd; i++) 
-// 		{
-// 			if (FD_ISSET(i, &ready_sockets)) 
-// 			{
-// 				if (i == max_fd) 
-// 				{
-// 					// Accept new connection
-// 					accepter();
-// 				} 
-// 				else 
-// 				{
-// 					handler();
-
-// 					if(strlen(_buffer) !=  0) // Check if there's data in the buffer
-// 					{
-// 						responder();
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// }
