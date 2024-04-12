@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:03:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/04/12 16:25:48 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/12 17:23:16 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,11 +45,6 @@ int	main(int ac, char **av)
 		while(1) {
 			for (size_t i = 0; i < run_servers.size(); i++) {
 				run_servers[i].run();
-				// try { run_servers[i].run(); }
-				// catch (std::exception &e) {
-				// 	std::cout << "Server " << run_servers[i].getName() << " closed due to a select() failure" << std::endl;
-				// 	run_servers.erase(run_servers.begin()+i);
-				// }
 			}
 		}
 	}

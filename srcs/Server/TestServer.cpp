@@ -90,26 +90,16 @@ void TestServer::run() {
 	FD_COPY(&_master_fds, &_read_fds);
 
 	int select_value = select(_max_nbr_of_sockets + 1, &_read_fds, &_write_fds, NULL, &_timeout);
-	if (select_value < 0) { //|| select_value > FD_SETSIZE
+	if (select_value < 0 || select_value > FD_SETSIZE) {
 		std::cerr << "select() failed" << std::endl;
 		for (int i = 0; i <= _max_nbr_of_sockets; i++) {
-			if (FD_ISSET(i, &_read_fds) && i != _listen_socket) {
+			if (FD_ISSET(i, &_master_fds) && i != _listen_socket) {				//double check if isset master or isset read
+				FD_CLR(i, &_read_fds);
 				FD_CLR(i, &_master_fds);
-				FD_CLR(i, &_write_fds);
 				custom_close(i);
 			}
 		}
 		return;
-	}
-	else if (select_value == 0) {
-		for (int i = 0; i <= _max_nbr_of_sockets; i++) {
-			if (FD_ISSET(i, &_read_fds) && i != _listen_socket) {
-				FD_CLR(i, &_master_fds);
-				FD_CLR(i, &_write_fds);
-				custom_close(i);
-			}
-		}
-		// std::cerr << "select() timeout" << std::endl;
 	}
 	for (int i = 0; i <= _max_nbr_of_sockets; i++) {
 		if (FD_ISSET(i, &_read_fds) && i == _listen_socket) {
@@ -119,10 +109,6 @@ void TestServer::run() {
 				std::cerr << "accept() failed for fd " << i << std::endl;
 				return ;
 			}
-			// if (fcntl(_new_socket, F_SETFL, O_NONBLOCK) < 0) {
-			// 	std::cerr << "fcntl failed for fd " << i << std::endl;
-			// 	custom_close(_new_socket);
-			// }
 			else {
 				FD_SET(_new_socket, &_master_fds);
 				if (_max_nbr_of_sockets < _new_socket)
@@ -132,26 +118,23 @@ void TestServer::run() {
 		if (FD_ISSET(i, &_read_fds) && i != _listen_socket) {
 			memset(_buffer, 0, sizeof(_buffer));
 			int rc = recv(i, _buffer, 3000, 0);
-			std::cout << YELLOW << "Raw request:" << _buffer << RESET << "\n\n";
+			// std::cout << YELLOW << "Raw request:" << _buffer << RESET << "\n\n";
 			if (rc <= 0) {
 				std::cout << (rc == 0 ? "Client closed connection on fd " : "recv() error for fd ") << i << std::endl;
 				FD_CLR(i, &_master_fds);
+				FD_CLR(i, &_read_fds);
 				custom_close(i);
 				while (FD_ISSET(_max_nbr_of_sockets, &_master_fds) == false)
 					_max_nbr_of_sockets--;
 			}
 			else {
+				handler(i);
 				FD_SET(i, &_write_fds);
 			}
 		}
 		if (FD_ISSET(i, &_write_fds)) {
 			std::cout << MAGENTA << "Send to handler: " << i << RESET << "\n\n";
 			handler(i);
-			// if (send(i, "hello\n", 6, 0) < 0) {
-			// 	std::cout << "send() error on fd " << i << std::endl;
-			// 	FD_CLR(i, &_write_fds);
-			// 	custom_close(i);
-			// }
 			FD_CLR(i, &_write_fds);
 		}
 	}
@@ -184,13 +167,13 @@ void TestServer::handleGet(HandleRequest &request, int response_socket) {
 	if (path.substr(path.size() - 4) == ".css") {
         handleCss(response_socket);
     } else if (path == "/home" || path == "/testHome.html") {
-		std::cout << "Handling home\n";
+		// std::cout << "Handling home\n";
         handleRoot(response_socket);
     } else if (path == "/form" || path == "/testForm.html") {
-		std::cout << "Handling form\n";
+		// std::cout << "Handling form\n";
         handleForm(response_socket);
 	} else if (path == "/upload") {
-		std::cout << "Handling upload\n";
+		// std::cout << "Handling upload\n";
 		handleUpload(response_socket);
     } else {
         handleError(response_socket);
@@ -216,7 +199,7 @@ void TestServer::handleUpload(int response_socket) {
 
 	std::string response = responseHeaders + "\r\n" + responseBody;
 
-	std::cout << "Response: " << response << std::endl;
+	// std::cout << "Response: " << response << std::endl;
 	send(_new_socket, response.c_str(), response.size(), 0);
 }
 
@@ -263,7 +246,7 @@ void TestServer::handleDelete(HandleRequest &request, int response_socket) {
 void TestServer::handleRoot(int response_socket)
 {
 	std::string filePath = this->_rootPath + "/default_webpages/siteHome.html";
-	std::cout << "Root path: " << filePath << "\n\n";
+	// std::cout << "Root path: " << filePath << "\n\n";
 	std::ifstream file(filePath);
 	// std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/siteHome.html");
 	if (!file.is_open())
@@ -313,7 +296,7 @@ void TestServer::handleCss(int response_socket)
 
 	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
 		std::cout << "send() error on fd " << response_socket << std::endl;
-		FD_CLR(response_socket, &_write_fds);
+		// FD_CLR(response_socket, &_write_fds);
 		custom_close(response_socket);
 	}
 }
@@ -341,7 +324,7 @@ void TestServer::handleForm(int response_socket)
 
 	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
 		std::cout << "send() error on fd " << response_socket << std::endl;
-		FD_CLR(response_socket, &_write_fds);
+		// FD_CLR(response_socket, &_write_fds);
 		custom_close(response_socket);
 	}
 }
@@ -349,7 +332,7 @@ void TestServer::handleForm(int response_socket)
 void TestServer::handleError(int response_socket)
 {
 	std::string filePath = this->_rootPath + "/error_webpage/custom404.html";
-	std::cout << "Root path: " << filePath << std::endl;
+	// std::cout << "Root path: " << filePath << std::endl;
 	std::ifstream file(filePath);
 	if (!file.is_open())
 	{
@@ -368,7 +351,7 @@ void TestServer::handleError(int response_socket)
 
 	if (send(response_socket, response.c_str(), response.size(), 0) < 0){
 		std::cout << "send() error on fd " << response_socket << std::endl;
-		FD_CLR(response_socket, &_write_fds);
+		// FD_CLR(response_socket, &_write_fds);
 		custom_close(response_socket);
 	}
 }

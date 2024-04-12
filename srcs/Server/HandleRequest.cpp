@@ -79,15 +79,15 @@ void HandleRequest::handleRequest() {
 
 	// std::cout << "!!! Headers parsed !!!\n";
 	// Loop over the header the c+98 way
-	for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it) {
-		std::cout << "Header-ID:[" << it->first << "] \t\t\t\t";
-		std::cout << "Header-Value:[" << it->second << "]" << std::endl;
-	}
+	// for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it) {
+	// 	std::cout << "Header-ID:[" << it->first << "] \t\t\t\t";
+	// 	std::cout << "Header-Value:[" << it->second << "]" << std::endl;
+	// }
 
-	std::cout << "Body:[]\n";
-	std::cout << _body << std::endl;
+	// std::cout << "Body:[]\n";
+	// std::cout << _body << std::endl;
 
-	std::cout << RESET;
+	// std::cout << RESET;
 }
 
 HandleRequest::~HandleRequest() {
