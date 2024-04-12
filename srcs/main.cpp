@@ -6,11 +6,12 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:03:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/04/10 14:46:50 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/12 16:25:48 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/42webserv.hpp"
+#include <signal.h>
 
 void sig_handler(int sig)
 {

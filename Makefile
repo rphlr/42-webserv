@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+         #
+#    By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/29 12:40:01 by rrouille          #+#    #+#              #
-#    Updated: 2024/04/05 17:28:36 by ckarl            ###   ########.fr        #
+#    Updated: 2024/04/11 21:28:48 by nvaubien         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@
 # **************************************************************************** #
 
 # Name of the executable
-NAME				= Webserv
+NAME				= webserv
 
 # Arguments passed to the executable
 ARGS				= $(filter-out $@,${MAKECMDGOALS})
@@ -58,8 +58,9 @@ CLEAR				= \033c
 
 # Source and object files
 SRCS				= $(shell find ${SRCSDIR} -type f -name '*.cpp')
-OBJS				= $(SRCS:${SRCSDIR}/%.cpp=${OBJSDIR}/%.o)
-CFLAGS				= -Wall -Wextra -Werror -std=c++98
+OBJS				= $(SRCS:${SRCSDIR}/%.cpp=${OBJSDIR}/%.opp)
+# CFLAGS				= -Wall -Wextra -Werror -std=c++98
+# LDFLAGS			= -g3 -fsanitize=address
 CC					= c++
 RM					= rm -rf
 MAKE				= make
@@ -89,10 +90,9 @@ all:			${NAME}
 
 # Rule to compile the main executable
 ${NAME}:		prog_name ${WAIT_CMD} ${OBJS}
-				# @make prog_name
 				${COMPILATION}
-				@if [ -d "${OBJSDIR}" ] && [ "$$(ls ${OBJSDIR}/*.o 2>/dev/null)" ]; then \
-					newest_obj=$$(ls -t ${OBJSDIR}/*.o ${OBJSDIR}/*/*.o ${OBJSDIR}/*/*/*.o | head -1); \
+				@if [ -d "${OBJSDIR}" ] && [ "$$(ls ${OBJSDIR}/*.opp 2>/dev/null)" ]; then \
+					newest_obj=$$(ls -t ${OBJSDIR}/*.opp ${OBJSDIR}/*/*.opp ${OBJSDIR}/*/*/*.opp | head -1); \
 					if [ -f "${NAME}" ] && [ "${NAME}" -nt "$$newest_obj" ]; then \
 						printf "\033[A\033[2K"; \
 						printf "┌──────────\n"; \
@@ -104,11 +104,13 @@ ${NAME}:		prog_name ${WAIT_CMD} ${OBJS}
 						printf "├──────────\n├─>>> ${GREEN}${NAME}${ENDCOLOR} compiled!\n└──────────\n"; \
 					fi \
 				else \
-					echo "No object files to compare with."; \
+					printf "\033[A\033[2K"; \
+					printf "┌──────────\n"; \
+					printf "│\tNothing to be done for ${GREEN}${NAME}${ENDCOLOR}.\n└──────────\n"; \
 				fi
 
 # Rule to compile object files
-${OBJSDIR}/%.o:	${SRCSDIR}/%.cpp
+${OBJSDIR}/%.opp:	${SRCSDIR}/%.cpp
 				@${MKDIR} ${@D}
 				@if [[ $(if $(filter dbg,${MAKECMDGOALS}),1,0) == "1" ]]; then \
 					printf "│\t > ${YELLOW}DEBUG${ENDCOLOR} Compiling ${YELLOW}$<${ENDCOLOR} with ${YELLOW}${DFLAGS}${ENDCOLOR} and ${YELLOW}${LDFLAGS}${ENDCOLOR}...\r"; \
@@ -123,6 +125,9 @@ CC_PROG			= ${CC} ${CFLAGS} ${OBJS} -o ${NAME}
 COMPILATION		= ${CC_PROG}
 
 run:
+				@if [ ! -f "${NAME}" ]; then \
+					${MAKE} all; \
+				fi
 				@printf "┌──────────\n"
 				@printf "│\tRunning ${GREEN}${NAME}${ENDCOLOR}...\n"
 				@printf "└──────────\n"
@@ -139,10 +144,10 @@ debug:
 				@printf "├──────────\n├─>>> ${YELLOW}DEBUG${ENDCOLOR} ${GREEN}${NAME}${ENDCOLOR} compiled!\n└──────────\n"
 
 # Rebuild the entire project
-re:
-				@printf "\n┌──────────\n│ Cleaning and ${GREEN}recompiling${ENDCOLOR}...\n"
-				@${MAKE} fclean
-				@${MAKE} all
+re:				fclean ${WAIT_CMD} all
+				# @printf "\n┌──────────\n│ Cleaning and ${GREEN}recompiling${ENDCOLOR}...\n"
+				# @${MAKE} fclean r
+				# @${MAKE} all r
 
 # **************************************************************************** #
 #                                 UTILITIES                                    #
@@ -202,7 +207,7 @@ clean:
 				fi
 
 # Clean everything including the executable
-fclean:
+fclean: 
 				@printf "┌──────────\n"
 				@if [ -d "./${OBJSDIR}" ]; then \
 					printf "│\tRemoving ${RED}${OBJSDIR}${ENDCOLOR} for ${YELLOW}${NAME}${ENDCOLOR}\n"; \

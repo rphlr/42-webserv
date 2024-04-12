@@ -1,6 +1,7 @@
-Webserv
+webserv
 objs/**
 objs
 .vscode/**
 Prompts
-
+Session.vim
+webpages/uploads/**

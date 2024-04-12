@@ -33,8 +33,6 @@ void HandleRequest::setRequest( std::string request ) {
 	_request = request;
 }
 
-
-
 void HandleRequest::handleRequest() {
 	// First line is the method path and protocol
 	std::string extracted_request = _request.substr(0, _request.find("\n"));
@@ -74,21 +72,46 @@ void HandleRequest::handleRequest() {
 	}
 
 	// Last line is the body
-	if (headers_end != std::string::npos) {
-		_body = _request.substr(headers_end + 2);
-	}
+	size_t body_start = _request.find("\r\n\r\n");
+    if (body_start != std::string::npos) {
+        _body = _request.substr(body_start + 4);
+    }
 
 	// std::cout << "!!! Headers parsed !!!\n";
 	// Loop over the header the c+98 way
-	// for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it) {
-	// 	std::cout << "Header-ID:[" << it->first << "] \t\t\t\t";
-	// 	std::cout << "Header-Value:[" << it->second << "]" << std::endl;
-	// }
+	for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it) {
+		std::cout << "Header-ID:[" << it->first << "] \t\t\t\t";
+		std::cout << "Header-Value:[" << it->second << "]" << std::endl;
+	}
 
-	// std::cout << "Body:[]\n";
-	// std::cout << _body << std::endl;
+	std::cout << "Body:[]\n";
+	std::cout << _body << std::endl;
 
 	std::cout << RESET;
 }
 
-HandleRequest::~HandleRequest() {}
+HandleRequest::~HandleRequest() {
+    std::map<std::string, std::string>::iterator contentLengthHeader = _headers.find("Content-Length");
+    if (contentLengthHeader != _headers.end()) {
+        int contentLength = std::stoi(contentLengthHeader->second);
+        // Now read 'contentLength' bytes from the request into '_body'
+		char *body = new char[contentLength + 1];
+		memset(body, 0, contentLength + 1);
+		memcpy(body, _request.c_str() + _request.size() - contentLength, contentLength);
+		_body = body;
+		delete[] body;
+    }
+}
+
+std::string HandleRequest::getBody() const {
+	return _body;
+}
+
+std::string HandleRequest::getHeader(const std::string& headerName) const {
+    std::map<std::string, std::string>::const_iterator it = _headers.find(headerName);
+	std::cout << "Header-ID:[" << it->first << "] \t\t\t\t";
+    if (it != _headers.end()) {
+        return it->second;
+    }
+    return ""; // Retournez une chaîne vide si l'en-tête n'est pas trouvé
+}

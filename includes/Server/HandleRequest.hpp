@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <cstring>
 
 class HandleRequest {
 	public:
@@ -26,7 +27,8 @@ class HandleRequest {
 		std::string getPath() const;
 		std::string getProtocol() const;
 		std::map<std::string, std::string> getHeaders() const;
-		std::string getBody() const;
+        std::string getHeader(const std::string& headerName) const;
+        std::string getBody() const;
 
 	private:
 		std::string _request;
