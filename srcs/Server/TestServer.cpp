@@ -104,7 +104,7 @@ void TestServer::init()
 // }
 
 void TestServer::run() {
-	std::cout << "Waiting for a connection on port: " << _port << std::endl;
+	// std::cout << "Waiting for a connection on port: " << _port << std::endl;
 	// FD_ZERO(&_write_fds);
 	// FD_ZERO(&_working_read_fds);
 	// memcpy(&_working_read_fds, &_master_read_fds, sizeof(_master_read_fds));
