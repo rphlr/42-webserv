@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:03:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/04/15 14:08:44 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/15 17:34:53 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ int	main(int ac, char **av)
 	std::string	config;
 	std::vector<ServerRunning> run_servers;
 
-	signal(SIGPIPE, SIG_IGN);
+	// signal(SIGPIPE, SIG_IGN);
 	if (ac > 2) {
 		std::cout << "Usage: ./webserv <config_file>" << std::endl;
 		return (-1);
