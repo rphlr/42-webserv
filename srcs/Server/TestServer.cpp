@@ -93,7 +93,7 @@ void TestServer::run() {
 	if (select_value < 0 || select_value > FD_SETSIZE) {
 		std::cerr << "select() failed" << std::endl;
 		for (int i = 0; i <= _max_nbr_of_sockets; i++) {
-			if (FD_ISSET(i, &_master_fds) && i != _listen_socket) {				//double check if isset master or isset read
+			if (FD_ISSET(i, &_read_fds) && i != _listen_socket) {				//double check if isset master or isset read
 				FD_CLR(i, &_read_fds);
 				FD_CLR(i, &_master_fds);
 				custom_close(i);
@@ -200,7 +200,10 @@ void TestServer::handleUpload(int response_socket) {
 	std::string response = responseHeaders + "\r\n" + responseBody;
 
 	// std::cout << "Response: " << response << std::endl;
-	send(_new_socket, response.c_str(), response.size(), 0);
+	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
+		std::cout << "send() error on fd " << response_socket << std::endl;
+		custom_close(response_socket);
+	}
 }
 
 std::string TestServer::determineCgiScriptPath(const std::string& requestPath) {
@@ -231,7 +234,10 @@ void TestServer::handlePost(HandleRequest &request, int response_socket) {
         std::string cgiOutput = cgiHandler.execute();
 
 		std::cout << "CGI output: " << cgiOutput << std::endl;
-        send(_new_socket, cgiOutput.c_str(), cgiOutput.size(), 0);
+		if (send(response_socket, cgiOutput.c_str(), cgiOutput.size(), 0) < 0) {
+			std::cout << "send() error on fd " << response_socket << std::endl;
+			custom_close(response_socket);
+		}
     }
 }
 
@@ -267,7 +273,6 @@ void TestServer::handleRoot(int response_socket)
 
 	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
 		std::cout << "send() error on fd " << response_socket << std::endl;
-		FD_CLR(response_socket, &_write_fds);
 		custom_close(response_socket);
 	}
 }
@@ -296,7 +301,6 @@ void TestServer::handleCss(int response_socket)
 
 	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
 		std::cout << "send() error on fd " << response_socket << std::endl;
-		// FD_CLR(response_socket, &_write_fds);
 		custom_close(response_socket);
 	}
 }
@@ -324,7 +328,6 @@ void TestServer::handleForm(int response_socket)
 
 	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
 		std::cout << "send() error on fd " << response_socket << std::endl;
-		// FD_CLR(response_socket, &_write_fds);
 		custom_close(response_socket);
 	}
 }
@@ -351,7 +354,6 @@ void TestServer::handleError(int response_socket)
 
 	if (send(response_socket, response.c_str(), response.size(), 0) < 0){
 		std::cout << "send() error on fd " << response_socket << std::endl;
-		// FD_CLR(response_socket, &_write_fds);
 		custom_close(response_socket);
 	}
 }

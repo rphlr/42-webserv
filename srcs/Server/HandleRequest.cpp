@@ -44,7 +44,8 @@ void HandleRequest::handleRequest() {
 	while (std::getline(iss, segment, ' ')) {
 		segments.push_back(segment);
 	}
-
+	if (segments.size() != 3)
+		return;
 	_method = segments[0];
 	_path = segments[1];
 	_protocol = segments[2];
