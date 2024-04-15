@@ -111,7 +111,7 @@ void TestServer::handlePost(HandleRequest &request, int response_socket) {
 	}
 	
 
-    if (path.substr(0, 9) == "/cgi-bin/") {
+    else if (path.substr(0, 9) == "/cgi-bin/") {
 		std::cout << "Handling CGI\n";
         std::map<std::string, std::string> cgiEnv;
         cgiEnv["REQUEST_METHOD"] = "POST";
