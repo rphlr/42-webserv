@@ -1,5 +1,5 @@
-#ifndef TEST_SERVER_HPP
-#define TEST_SERVER_HPP
+#ifndef SERVERRUNNING_HPP
+#define SERVERRUNNING_HPP
 
 #include "../../includes/Config/Config.hpp"
 #include "../../includes/Server/HandleRequest.hpp"
@@ -38,7 +38,7 @@ public:
 
 	void run();
 	void init();
-	std::string &getName();
+	std::string &get_name();
 
 private:
 	std::string _rootPath;
@@ -55,6 +55,7 @@ private:
 	fd_set _write_fds;
 
 	int	get_socket();
+	void custom_close(int i);
 
 
 	std::string _server_name;
@@ -81,6 +82,7 @@ private:
 	void handleError(int response_socket);
 	void handleForm(int response_socket);
 	void handleUpload(int response_socket);
+	void handleNotImplemented(HandleRequest &new_request, int response_socket);
 
 	std::string determineCgiScriptPath(const std::string &path);
 };

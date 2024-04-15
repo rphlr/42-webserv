@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:04:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/04/15 14:08:44 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/15 17:51:16 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include <sstream>
 #include <sys/socket.h>
 #include <csignal>
+#include <signal.h>
 
 #include "./Networking/Networking.hpp"
 #include "./Config/Config.hpp"
