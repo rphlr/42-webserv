@@ -53,7 +53,7 @@ private:
 	void handler(int response_socket);
 	// void responder();
 
-	// HandleRequest _request;
+	// HandleRequest _new_request;
 
 	typedef void (TestServer::*RouteHandler)(int response_socket);
 	std::map<std::string, RouteHandler> _routes;
@@ -61,6 +61,7 @@ private:
 	void handleGet(HandleRequest &new_request, int response_socket);
 	void handlePost(HandleRequest &new_request, int response_socket);
 	void handleDelete(HandleRequest &new_request, int response_socket);
+	void handleNotImplemented(HandleRequest &new_request, int response_socket);
 
 	void handleRoot(int response_socket);
 	void handleCss(int response_socket);
@@ -68,8 +69,12 @@ private:
 	void handleForm(int response_socket);
 	void handleUpload(int response_socket);
 
+	
+
     std::string determineCgiScriptPath(const std::string &path);
 };
+
+void custom_close(int i);
 
 #endif
 
