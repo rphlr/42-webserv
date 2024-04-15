@@ -3,7 +3,6 @@
 
 #include "../../includes/Config/Config.hpp"
 #include "../../includes/Server/HandleRequest.hpp"
-#include "../../includes/Networking/Networking.hpp"
 #include "../../includes/Server/HandleCGI.hpp"
 
 #include <map>
@@ -15,6 +14,8 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 #include <cstdlib>
+#include <arpa/inet.h>
+#include <unistd.h>
 
 #define RESET "\033[0m"
 #define BLACK "\033[30m"
