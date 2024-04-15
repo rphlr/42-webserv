@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:03:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/04/15 13:17:09 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/15 14:08:44 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,10 @@ void sig_handler(int sig)
 
 void	server_running(std::vector<Server> config_servers)
 {
-	std::vector<TestServer> run_servers;
+	std::vector<ServerRunning> run_servers;
 
 	for (std::vector<Server>::iterator it = config_servers.begin(); it != config_servers.end(); it++) {
-			TestServer init_new_server(*it);
+			ServerRunning init_new_server(*it);
 			run_servers.push_back(init_new_server);
 	}
 	while(1) {
@@ -38,7 +38,7 @@ int	main(int ac, char **av)
 	Parser	parsing;
 	std::vector<Server> config_servers;
 	std::string	config;
-	std::vector<TestServer> run_servers;
+	std::vector<ServerRunning> run_servers;
 
 	signal(SIGPIPE, SIG_IGN);
 	if (ac > 2) {
