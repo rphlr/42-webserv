@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:03:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/04/15 17:50:59 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/15 18:22:07 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ void	server_running(std::vector<Server> config_servers)
 	}
 	while(1) {
 		for (size_t i = 0; i < run_servers.size(); i++) {
+			// std::cout << "in run servers" << std::endl;
 			run_servers[i].run();
 		}
 	}
@@ -46,7 +47,7 @@ int	main(int ac, char **av)
 	}
 	try {
 
-		// signal(SIGPIPE, sig_handler);
+		signal(SIGPIPE, sig_handler);
 		config = (ac == 1 ? "configfiles/default.conf" : av[1]);
 		config_servers = parsing.parseFile(config);
 		server_running(config_servers);

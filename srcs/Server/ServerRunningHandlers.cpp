@@ -20,30 +20,26 @@ void ServerRunning::handleNotImplemented(HandleRequest &new_request, int respons
 
 	std::string response = responseHeaders + "\r\n" + responseBody;
 
-	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
-		std::cout << "send() error on fd " << response_socket << std::endl;
-		custom_close(response_socket);
-	}
+	custom_send(response_socket, response.c_str(), response.size());
 }
 
-
 void ServerRunning::handleGet(HandleRequest &request, int response_socket) {
-    std::string path = request.getPath();
+	std::string path = request.getPath();
 
 	if (path.substr(path.size() - 4) == ".css") {
-        handleCss(response_socket);
-    } else if (path == "/home" || path == "/testHome.html") {
+		handleCss(response_socket);
+	} else if (path == "/home" || path == "/testHome.html") {
 		// std::cout << "Handling home\n";
-        handleRoot(response_socket);
-    } else if (path == "/form" || path == "/testForm.html") {
+		handleRoot(response_socket);
+	} else if (path == "/form" || path == "/testForm.html") {
 		// std::cout << "Handling form\n";
-        handleForm(response_socket);
+		handleForm(response_socket);
 	} else if (path == "/upload") {
 		// std::cout << "Handling upload\n";
 		handleUpload(response_socket);
-    } else {
-        handleError(response_socket);
-    }
+	} else {
+		handleError(response_socket);
+	}
 }
 
 void ServerRunning::handleUpload(int response_socket) {
@@ -66,10 +62,7 @@ void ServerRunning::handleUpload(int response_socket) {
 	std::string response = responseHeaders + "\r\n" + responseBody;
 
 	// std::cout << "Response: " << response << std::endl;
-	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
-		std::cout << "send() error on fd " << response_socket << std::endl;
-		custom_close(response_socket);
-	}
+	custom_send(response_socket, response.c_str(), response.size());
 }
 
 std::string ServerRunning::determineCgiScriptPath(const std::string& requestPath) {
@@ -78,7 +71,7 @@ std::string ServerRunning::determineCgiScriptPath(const std::string& requestPath
 }
 
 void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
-    std::string path = request.getPath();
+	std::string path = request.getPath();
 
 	if (std::stoi(request.getHeader("Content-Length")) > _max_body_size)
 	{
@@ -100,40 +93,31 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 
 		std::string response = responseHeaders + "\r\n" + responseBody;
 
-		if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
-			std::cout << "send() error on fd " << response_socket << std::endl;
-			custom_close(response_socket);
-		}
+		custom_send(response_socket, response.c_str(), response.size());
 		return;
 	}
-
-
-    else if (path.substr(0, 9) == "/cgi-bin/") {
+	else if (path.substr(0, 9) == "/cgi-bin/") {
 		std::cout << "Handling CGI\n";
-        std::map<std::string, std::string> cgiEnv;
-        cgiEnv["REQUEST_METHOD"] = "POST";
+		std::map<std::string, std::string> cgiEnv;
+		cgiEnv["REQUEST_METHOD"] = "POST";
 
-        std::string scriptPath = determineCgiScriptPath(path);
+		std::string scriptPath = determineCgiScriptPath(path);
 
 		std::cout << "Script path: " << scriptPath << std::endl;
-        std::string postData = request.getBody();
+		std::string postData = request.getBody();
 		std::cout << "Post data: " << postData << std::endl;
-        cgiEnv["CONTENT_LENGTH"] = std::to_string(postData.size());
+		cgiEnv["CONTENT_LENGTH"] = std::to_string(postData.size());
 		std::cout << "Content length: " << cgiEnv["CONTENT_LENGTH"] << std::endl;
-        cgiEnv["CONTENT_TYPE"] = request.getHeader("Content-Type");
+		cgiEnv["CONTENT_TYPE"] = request.getHeader("Content-Type");
 
 		std::cout << "Script path: " << scriptPath << std::endl;
-        HandleCGI cgiHandler(scriptPath, cgiEnv, postData);
+		HandleCGI cgiHandler(scriptPath, cgiEnv, postData);
 		std::cout << "Executing CGI\n";
-        std::string cgiOutput = cgiHandler.execute();
+		std::string cgiOutput = cgiHandler.execute();
 
 		std::cout << "CGI output: " << cgiOutput << std::endl;
-		if (send(response_socket, cgiOutput.c_str(), cgiOutput.size(), 0) < 0) {
-			std::cout << "send() error on fd " << response_socket << std::endl;
-			custom_close(response_socket);
-		}
+		custom_send(response_socket, cgiOutput.c_str(), cgiOutput.size());
 	}
-
 	else {
 		std::string filePath = this->_rootPath + "/default_webpages/siteHome.html";
 		std::ifstream file(filePath);
@@ -152,11 +136,7 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 
 		std::string response = responseHeaders + "\r\n" + responseBody;
 
-		if (send(response_socket, response.c_str(), response.size(), 0) < 0)
-		{
-			std::cout << "send() error on fd " << response_socket << std::endl;
-			custom_close(response_socket);
-		}
+		custom_send(response_socket, response.c_str(), response.size());
 	}
 }
 
@@ -173,7 +153,6 @@ void ServerRunning::handleRoot(int response_socket)
 	std::string filePath = this->_rootPath + "/default_webpages/siteHome.html";
 	// std::cout << "Root path: " << filePath << "\n\n";
 	std::ifstream file(filePath);
-	// std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/siteHome.html");
 	if (!file.is_open())
 	{
 		// handle the error, e.g. by logging it and returning
@@ -190,17 +169,13 @@ void ServerRunning::handleRoot(int response_socket)
 
 	std::string response = responseHeaders + "\r\n" + responseBody;
 
-	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
-		std::cout << "send() error on fd " << response_socket << std::endl;
-		custom_close(response_socket);
-	}
+	custom_send(response_socket, response.c_str(), response.size());
 }
 
 void ServerRunning::handleCss(int response_socket)
 {
 	std::string filePath = this->_rootPath + "/default_webpages/styles.css";
 	std::ifstream file(filePath);
-	// std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/styles.css");
 
 	if (!file.is_open())
 	{
@@ -218,17 +193,13 @@ void ServerRunning::handleCss(int response_socket)
 
 	std::string response = responseHeaders + "\r\n" + responseBody;
 
-	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
-		std::cout << "send() error on fd " << response_socket << std::endl;
-		custom_close(response_socket);
-	}
+	custom_send(response_socket, response.c_str(), response.size());
 }
 
 void ServerRunning::handleForm(int response_socket)
 {
 	std::string filePath = this->_rootPath + "/default_webpages/siteForm.html";
 	std::ifstream file(filePath);
-	// std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/siteForm.html");
 
 	if (!file.is_open())
 	{
@@ -246,10 +217,7 @@ void ServerRunning::handleForm(int response_socket)
 
 	std::string response = responseHeaders + "\r\n" + responseBody;
 
-	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
-		std::cout << "send() error on fd " << response_socket << std::endl;
-		custom_close(response_socket);
-	}
+	custom_send(response_socket, response.c_str(), response.size());
 }
 
 void ServerRunning::handleError(int response_socket)
@@ -272,19 +240,5 @@ void ServerRunning::handleError(int response_socket)
 
 	std::string response = responseHeaders + "\r\n" + responseBody;
 
-	if (send(response_socket, response.c_str(), response.size(), 0) < 0){
-		std::cout << "send() error on fd " << response_socket << std::endl;
-		custom_close(response_socket);
-	}
-}
-
-void ServerRunning::custom_close(int i)
-{
-	if (close(i) < 0)
-		std::cerr << "close() failed with errno " << strerror(errno) << std::endl;
-}
-
-std::string &ServerRunning::get_name()
-{
-	return _server_name;
+	custom_send(response_socket, response.c_str(), response.size());
 }

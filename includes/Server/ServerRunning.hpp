@@ -50,12 +50,12 @@ private:
 	int	_addr_len;
 	struct timeval _timeout;
 	fd_set _master_fds;
-	fd_set _master_write_fds;
 	fd_set _read_fds;
 	fd_set _write_fds;
 
 	int	get_socket();
 	void custom_close(int i);
+	void custom_send(int response_socket, const char *response_str, size_t response_size);
 
 
 	std::string _server_name;

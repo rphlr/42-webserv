@@ -3,12 +3,30 @@
 ServerRunning::~ServerRunning() {}
 ServerRunning::ServerRunning(const ServerRunning &t)
 {
-	//implement
+	*this = t;
 }
 
 ServerRunning &ServerRunning::operator = (const ServerRunning &t)
 {
-	//implement
+	if (this != &t)
+	{
+		_rootPath = t._rootPath;
+		memcpy(_buffer, t._buffer, sizeof(t._buffer));
+		_new_socket = t._new_socket;
+		_listen_socket = t._listen_socket;
+		_max_nbr_of_sockets = t._max_nbr_of_sockets;
+		_address = t._address;
+		_addr_len = t._addr_len;
+		_timeout = t._timeout;
+		_master_fds = t._master_fds;
+		_read_fds = t. _read_fds;
+		_write_fds = t._write_fds;
+		_server_name = t._server_name;
+		_port = t._port;
+		_host = t._host;
+		_max_body_size = t._max_body_size;
+	}
+	return *this;
 }
 
 ServerRunning::ServerRunning( Server &server ) {
@@ -100,6 +118,7 @@ void ServerRunning::run() {
 	}
 	for (int i = 0; i <= _max_nbr_of_sockets; i++)
 	{
+		// std::cout << "in run loop" << std::endl;
 		if (FD_ISSET(i, &_read_fds) && i == _listen_socket)
 		{
 			std::cout << "New client on port: " << _port << std::endl;
