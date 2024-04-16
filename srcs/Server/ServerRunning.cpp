@@ -107,6 +107,8 @@ void ServerRunning::run() {
 		std::cerr << "select() failed" << std::endl;
 		for (int i = 0; i <= _max_nbr_of_sockets; i++)
 		{
+			if (FD_ISSET(i, &_write_fds) && i != _listen_socket)
+				FD_CLR(i, &_write_fds);
 			if (FD_ISSET(i, &_read_fds) && i != _listen_socket)
 			{ // double check if isset master or isset read
 				FD_CLR(i, &_read_fds);
@@ -151,7 +153,6 @@ void ServerRunning::run() {
 			}
 			else
 			{
-				handler(i);
 				FD_SET(i, &_write_fds);
 			}
 		}
@@ -159,7 +160,6 @@ void ServerRunning::run() {
 		{
 			std::cout << MAGENTA << "Send to handler: " << i << RESET << "\n\n";
 			handler(i);
-			FD_CLR(i, &_write_fds);
 		}
 	}
 }

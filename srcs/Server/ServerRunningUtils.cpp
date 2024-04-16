@@ -10,9 +10,9 @@ void ServerRunning::custom_send(int response_socket, const char *response_str, s
 {
 	if (send(response_socket, response_str, response_size, 0) < 0){
 		std::cout << "send() error on fd " << response_socket << std::endl;
-		FD_CLR(response_socket, &_master_fds);
-		FD_CLR(response_socket, &_read_fds);
-		custom_close(response_socket);
+		FD_CLR(response_socket, &_write_fds);
+		if (FD_ISSET(response_socket, &_read_fds))
+			custom_close(response_socket);
 	}
 }
 
