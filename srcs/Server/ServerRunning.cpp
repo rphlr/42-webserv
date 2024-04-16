@@ -104,13 +104,13 @@ void ServerRunning::run() {
 	int select_value = select(_max_nbr_of_sockets + 1, &_read_fds, &_write_fds, NULL, &_timeout);
 	if (select_value < 0 || select_value > FD_SETSIZE)
 	{
-		std::cerr << "select() failed" << std::endl;
+		std::cerr << RED << "select() failed" << RESET << std::endl;
 		for (int i = 0; i <= _max_nbr_of_sockets; i++)
 		{
 			if (FD_ISSET(i, &_write_fds) && i != _listen_socket)
 				FD_CLR(i, &_write_fds);
 			if (FD_ISSET(i, &_read_fds) && i != _listen_socket)
-			{ // double check if isset master or isset read
+			{
 				FD_CLR(i, &_read_fds);
 				FD_CLR(i, &_master_fds);
 				custom_close(i);
@@ -120,14 +120,12 @@ void ServerRunning::run() {
 	}
 	for (int i = 0; i <= _max_nbr_of_sockets; i++)
 	{
-		// std::cout << "in run loop" << std::endl;
 		if (FD_ISSET(i, &_read_fds) && i == _listen_socket)
 		{
-			std::cout << "New client on port: " << _port << std::endl;
 			_new_socket = accept(_listen_socket, NULL, NULL);
 			if (_new_socket < 0 && errno != EWOULDBLOCK)
 			{
-				std::cerr << "accept() failed for fd " << i << std::endl;
+				std::cerr << RED << "accept() failed for fd " << i << RESET << std::endl;
 				return;
 			}
 			else
@@ -136,29 +134,28 @@ void ServerRunning::run() {
 				if (_max_nbr_of_sockets < _new_socket)
 					_max_nbr_of_sockets = _new_socket;
 			}
+			std::cout << BLUE << "New client on port: " << _port << " with fd " << _new_socket << RESET << std::endl;
 		}
 		if (FD_ISSET(i, &_read_fds) && i != _listen_socket)
 		{
 			memset(_buffer, 0, sizeof(_buffer));
-			int rc = recv(i, _buffer, 3000, 0);
-			// std::cout << YELLOW << "Raw request:" << _buffer << RESET << "\n\n";
-			if (rc <= 0)
+			if (recv(i, _buffer, 3000, 0) <= 0)
 			{
-				std::cout << (rc == 0 ? "Client closed connection on fd " : "recv() error for fd ") << i << std::endl;
+				std::cerr << "Could not read from client on fd " << i << ", removing client" << std::endl;
 				FD_CLR(i, &_master_fds);
 				FD_CLR(i, &_read_fds);
+				if (FD_ISSET(i, &_write_fds))
+					FD_CLR(i, &_write_fds);
 				custom_close(i);
 				while (FD_ISSET(_max_nbr_of_sockets, &_master_fds) == false)
 					_max_nbr_of_sockets--;
 			}
 			else
-			{
 				FD_SET(i, &_write_fds);
-			}
 		}
 		if (FD_ISSET(i, &_write_fds))
 		{
-			std::cout << MAGENTA << "Send to handler: " << i << RESET << "\n\n";
+			std::cout << MAGENTA << "Sending to client on fd " << i << RESET << "\n\n";
 			handler(i);
 		}
 	}
