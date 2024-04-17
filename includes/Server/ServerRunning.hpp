@@ -85,7 +85,7 @@ private:
 	// void handleError(int response_socket);
 	// void handleForm(int response_socket);
 	// void handleUpload(int response_socket);
-	void handleNotImplemented(HandleRequest &new_request, int response_socket);
+	// void handleNotImplemented(HandleRequest &new_request, int response_socket);
 
 	std::string determineCgiScriptPath(const std::string &path);
 };
