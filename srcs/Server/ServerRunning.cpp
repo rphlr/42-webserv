@@ -25,6 +25,10 @@ ServerRunning &ServerRunning::operator = (const ServerRunning &t)
 		_port = t._port;
 		_host = t._host;
 		_max_body_size = t._max_body_size;
+		_default_file = t._default_file;
+		_error_pages = t._error_pages;
+		_response_code = t._response_code;
+		_locations = t._locations;
 	}
 	return *this;
 }
@@ -42,6 +46,15 @@ ServerRunning::ServerRunning( Server &server ) {
 		std::cout << "loopback host or not valid" << std::endl;
 	_addr_len = sizeof(_address);
 	_max_body_size = server.getSize();
+	_default_file = server.getDefFile();
+	_error_pages = server.getErrorPages();
+	_locations = server.getLocations();
+	_response_code.insert(std::make_pair(200, "Ok"));
+	_response_code.insert(std::make_pair(404, "Not Found"));
+	_response_code.insert(std::make_pair(413, "Content Too Large"));
+	_response_code.insert(std::make_pair(418, "I'm a Teapot"));
+	_response_code.insert(std::make_pair(501, "Not Implemented"));
+	_response_code.insert(std::make_pair(502, "Bad Gateway"));
 
 	// Create a function to setup routes
 	_routes["/home"] = &ServerRunning::handleRoot;

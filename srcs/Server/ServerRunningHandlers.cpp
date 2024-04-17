@@ -27,19 +27,44 @@ void ServerRunning::handleGet(HandleRequest &request, int response_socket) {
 	std::string path = request.getPath();
 
 	if (path.substr(path.size() - 4) == ".css") {
+		std::cout << "in handle css" << std::endl;
 		handleCss(response_socket);
-	} else if (path == "/home" || path == "/testHome.html") {
-		// std::cout << "Handling home\n";
-		handleRoot(response_socket);
-	} else if (path == "/form" || path == "/testForm.html") {
-		// std::cout << "Handling form\n";
-		handleForm(response_socket);
-	} else if (path == "/upload") {
-		// std::cout << "Handling upload\n";
-		handleUpload(response_socket);
-	} else {
-		handleError(response_socket);
 	}
+	else {
+		//determine if request is directory or file
+		//if directory -> determine which file in another function
+		handleFilePath(response_socket, path);
+	}
+}
+
+void ServerRunning::handleFilePath(int response_socket, std::string path)
+{
+	std::string fullResponse;
+	std::stringstream buffer;
+	int status_code;
+	std::string filePath = _rootPath + path;
+	std::ifstream file(filePath);
+	if (!file.good() || file.fail())
+	{
+		status_code = 404;
+		filePath = _rootPath + _error_pages.at(404);
+		std::ifstream errorFile(filePath);
+		buffer << errorFile.rdbuf();
+	}
+	else {
+		status_code = 200;
+		std::ifstream okayFile(filePath);
+		buffer << okayFile.rdbuf();
+	}
+	std::string responseBody = buffer.str();
+	std::string responseHeaders = "HTTP/1.1 " + std::to_string(status_code) + " " + _response_code.at(status_code) +"\r\n";
+	responseHeaders += "Content-Type: text/html\r\n";
+	responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
+	fullResponse = responseHeaders + "\r\n" + responseBody;
+
+	// std::cout << "Response: " << fullResponse << std::endl;
+
+	custom_send(response_socket, fullResponse.c_str(), fullResponse.size());
 }
 
 void ServerRunning::handleUpload(int response_socket) {

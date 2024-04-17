@@ -63,10 +63,11 @@ private:
 	int _port;
 	std::string _host;
 	int _max_body_size;
-	// std::string _root;
-	// std::string _default_file;
-	// std::map<int, std::string> _error_pages;
-	// std::vector<Location> _locations;
+	std::string _root;
+	std::string _default_file;
+	std::map<int, std::string> _error_pages;
+	std::map<int, std::string> _response_code;
+	std::vector<Location> _locations;
 
 	void handler(int response_socket);
 	// HandleRequest _request;
@@ -78,6 +79,7 @@ private:
 	void handlePost(HandleRequest &new_request, int response_socket);
 	void handleDelete(HandleRequest &new_request, int response_socket);
 
+	void handleFilePath(int response_socket, std::string path);
 	void handleRoot(int response_socket);
 	void handleCss(int response_socket);
 	void handleError(int response_socket);
