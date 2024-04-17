@@ -57,10 +57,10 @@ ServerRunning::ServerRunning( Server &server ) {
 	_response_code.insert(std::make_pair(502, "Bad Gateway"));
 
 	// Create a function to setup routes
-	_routes["/home"] = &ServerRunning::handleRoot;
-	_routes["/styles.css"] = &ServerRunning::handleCss;
-	_routes["/upload"] = &ServerRunning::handleUpload;
-	_routes["/form"] = &ServerRunning::handleForm;
+	// _routes["/home"] = &ServerRunning::handleRoot;
+	// _routes["/styles.css"] = &ServerRunning::handleCss;
+	// _routes["/upload"] = &ServerRunning::handleUpload;
+	// _routes["/form"] = &ServerRunning::handleForm;
 
 	init();
 }
