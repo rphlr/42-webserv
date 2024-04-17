@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/04/16 18:32:37 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/17 14:04:20 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,14 +94,10 @@ vector<Server>	Parser::parseFile(string doc)
 		}
 		handleLine(line);
 	}
-	for (vector<Server>::iterator it = servers.begin(); it != servers.end() - 1; it++)
-	{
-		for (vector<Server>::iterator it2 = it + 1; it2 != servers.end(); it2++)
-		{
-			std::cout << "comparing it == it2: " << (*it == *it2) << std::endl;
-			// std::cout << "it: " << *it << " and it2: " << *it2 << std::endl;
+	for (vector<Server>::iterator it = servers.begin(); it != (servers.end() - 1); it++) {
+		for (vector<Server>::iterator it2 = it + 1; it2 != servers.end(); it2++) {
 			if (*it == *it2)
-				throw std::runtime_error("Two or more servers have the same name, port and host");
+				throw std::runtime_error("Two or more servers have the same name, port or host");
 		}
 	}
 	inputFile.close();

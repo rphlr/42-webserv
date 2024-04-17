@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:40:45 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/20 12:35:24 by nvaubien         ###   ########.fr       */
+/*   Updated: 2024/04/17 14:10:11 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,7 @@ bool	Server::operator == ( const Server &comp )
 	bool	portSame = _port == comp._port;
 	bool	hostSame = _host == comp._host;
 
-	return nameSame && portSame && hostSame;
+	return nameSame || (portSame && hostSame);
 }
 
 //outstream overload operator (non-member function)
