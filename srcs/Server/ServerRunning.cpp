@@ -51,6 +51,7 @@ ServerRunning::ServerRunning( Server &server ) {
 	_locations = server.getLocations();
 	_response_code.insert(std::make_pair(200, "Ok"));
 	_response_code.insert(std::make_pair(404, "Not Found"));
+	_response_code.insert(std::make_pair(405, "Method Not Allowed"));
 	_response_code.insert(std::make_pair(413, "Content Too Large"));
 	_response_code.insert(std::make_pair(418, "I'm a Teapot"));
 	_response_code.insert(std::make_pair(501, "Not Implemented"));
@@ -196,6 +197,6 @@ void ServerRunning::handler(int response_socket) {
 	else
 	{
 		std::cout << "Unsupported method\n";
-		handleNotImplemented(new_request, response_socket);
+		handleErrorFilePath(response_socket, 501);
 	}
 }

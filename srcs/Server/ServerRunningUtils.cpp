@@ -19,7 +19,21 @@ void ServerRunning::custom_send(int response_socket, const char *response_str, s
 	}
 }
 
-std::string &ServerRunning::get_name()
+bool	ServerRunning::pathExists(std::string &path_to_check)
 {
-	return _server_name;
+	std::ifstream file(_rootPath + path_to_check);
+	if (!file.good())
+		return false;
+	return true;
+}
+
+void	ServerRunning::sendResponse(int response_socket, std::string bufferstr, int status_code, std::string content_type)
+{
+	std::string responseBody = bufferstr;
+	std::string responseHeaders = "HTTP/1.1 " + std::to_string(status_code) + " " + _response_code.at(status_code) +"\r\n";
+	responseHeaders += "Content-Type: " + content_type + "\r\n";
+	responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
+	std::string fullResponse = responseHeaders + "\r\n" + responseBody;
+
+	custom_send(response_socket, fullResponse.c_str(), fullResponse.size());
 }

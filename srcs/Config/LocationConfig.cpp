@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   LocationConfig.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/21 22:34:00 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/20 12:52:29 by nvaubien         ###   ########.fr       */
+/*   Updated: 2024/04/18 17:41:24 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,16 @@ void	Location::setDirList(string &d)		//check for double listing?
 	}
 	else
 		throw std::invalid_argument(INVALID_CONF + "location directory_listing (empty)");
+}
+
+bool	Location::checkMethod(string &m)
+{
+	for (vector<string>::iterator it = _methods.begin(); it != _methods.end(); it++)
+	{
+		if (*it == m)
+			return true;
+	}
+	return false;
 }
 
 string	&Location::getPath(void) { return _path; }

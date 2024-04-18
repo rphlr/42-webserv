@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:03:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/04/16 15:50:15 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/18 15:59:53 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ int	main(int ac, char **av)
 		return (-1);
 	}
 	try {
-		signal(SIGPIPE, sig_handler);
+		signal(SIGPIPE, SIG_IGN);
 		config = (ac == 1 ? "configfiles/default.conf" : av[1]);
 		config_servers = parsing.parseFile(config);
 		server_running(config_servers);
