@@ -66,10 +66,6 @@ private:
 	std::map<int, std::string> _response_code;
 
 	void handler(int response_socket);
-
-	// typedef void (ServerRunning::*RouteHandler)(int response_socket);
-	// std::map<std::string, RouteHandler> _routes;
-
 	void handleGet(HandleRequest &new_request, int response_socket);
 	void handlePost(HandleRequest &new_request, int response_socket);
 	void handleDelete(HandleRequest &new_request, int response_socket);
@@ -77,6 +73,7 @@ private:
 	void handleFilePath(int response_socket, std::string &path);
 	void handleErrorFilePath(int response_socket, int error_code);
 	void handleCss(int response_socket);
+
 	void checkRedirection(int response_socket, std::string &path_to_check, std::string &method);
 	std::string generateDirectoryListing(const std::string& directoryPath);
 	bool	pathExists(std::string &path_to_check);

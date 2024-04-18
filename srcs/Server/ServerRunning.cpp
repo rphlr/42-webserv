@@ -57,12 +57,6 @@ ServerRunning::ServerRunning( Server &server ) {
 	_response_code.insert(std::make_pair(501, "Not Implemented"));
 	_response_code.insert(std::make_pair(502, "Bad Gateway"));
 
-	// Create a function to setup routes
-	// _routes["/home"] = &ServerRunning::handleRoot;
-	// _routes["/styles.css"] = &ServerRunning::handleCss;
-	// _routes["/upload"] = &ServerRunning::handleUpload;
-	// _routes["/form"] = &ServerRunning::handleForm;
-
 	init();
 }
 
@@ -153,7 +147,7 @@ void ServerRunning::run() {
 		if (FD_ISSET(i, &_read_fds) && i != _listen_socket)
 		{
 			memset(_buffer, 0, sizeof(_buffer));
-			if (recv(i, _buffer, 3000, 0) <= 0)
+			if (recv(i, _buffer, 3000, 0) < 0)
 			{
 				std::cerr << "Could not read from client on fd " << i << ", removing client" << std::endl;
 				FD_CLR(i, &_master_fds);
@@ -182,21 +176,23 @@ void ServerRunning::handler(int response_socket) {
 
 	if (method == "GET")
 	{
+		std::cout << "GET method" << std::endl;
 		handleGet(new_request, response_socket);
 	}
 	else if (method == "POST")
 	{
-		// handlePost();
+		std::cout << "POST method" << std::endl;
 		handlePost(new_request, response_socket);
 	}
 	else if (method == "DELETE")
 	{
 		// handleDelete(new_request, response_socket);
-		std::cout << "DELETE request\n";
+		std::cout << "DELETE method" << std::endl;
 	}
 	else
 	{
-		std::cout << "Unsupported method\n";
+		if (method.empty())
+			std::cout << "Unsupported method (it's empty) " << std::endl;
 		handleErrorFilePath(response_socket, 501);
 	}
 }

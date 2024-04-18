@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:40:45 by ckarl             #+#    #+#             */
-/*   Updated: 2024/04/18 18:19:04 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/18 19:17:08 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,6 @@ bool	Server::isComplete(void)
 
 void	Server::addLocationChangePointer(void)
 {
-	// std::cout << "server name: " << _server_name << std::endl;
 	_locations.push_back(Location());
 	_currentLoc = &_locations.back();
 

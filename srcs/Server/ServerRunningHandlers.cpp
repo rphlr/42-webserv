@@ -3,7 +3,6 @@
 void ServerRunning::handleGet(HandleRequest &request, int response_socket) {
 	std::string path = request.getPath();
 	std::string method = request.getMethod();
-	std::cout << "path in handleGet: " << path << std::endl;
 
 	if (path.size() >= 4 && path.substr(path.size() - 4) == ".css") {
 		handleCss(response_socket);
@@ -11,78 +10,6 @@ void ServerRunning::handleGet(HandleRequest &request, int response_socket) {
 	else {
 		checkRedirection(response_socket, path, method);
 	}
-}
-
-std::string generateDirectoryListing(const std::string& directoryPath)
-{
-	std::stringstream ss;
-	ss << "<html><head><title>Directory Listing</title></head><body><h1>Directory Listing: " << directoryPath << "</h1><ul>";
-
-	// Open the directory
-	DIR* dir = opendir(directoryPath.c_str());
-	if (dir == NULL) {
-		ss << "<p>Error: Unable to open directory</p></body></html>";
-		return ss.str();
-	}
-
-	// Read directory entries
-	struct dirent* entry;
-	while ((entry = readdir(dir)) != NULL) {
-		std::string name = entry->d_name;
-		if (name != "." && name != "..") {
-			ss << "<li><a href=\"" << name << "\">" << name << "</a></li>";
-		}
-	}
-	closedir(dir);
-	ss << "</ul></body></html>";
-	return ss.str();
-}
-
-void ServerRunning::checkRedirection(int response_socket, std::string &path_to_check, std::string &method)
-{
-	if (path_to_check.find(".") != std::string::npos) {
-		handleFilePath(response_socket, path_to_check);
-		return;
-	}
-	for (std::vector<Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
-	{
-		if (path_to_check == (*it).getPath())
-		{
-			if ((*it).getRedirect().empty())
-			{
-				std::string inLocDefPath(path_to_check + _default_file);
-				if (!pathExists(inLocDefPath))
-				{
-					if ((*it).getDirList() == true)
-					{
-						std::cout << "in getdireLIst == true" << std::endl;
-						const std::string dirListPath = _rootPath + path_to_check;
-						std::string dirListHTML = generateDirectoryListing(dirListPath);
-						sendResponse(response_socket, dirListHTML, 200, "text/html");
-					}
-					else
-						handleErrorFilePath(response_socket, 404);
-				}
-				else
-					handleFilePath(response_socket, inLocDefPath);
-				return;
-			}
-			else
-			{
-				if ((*it).checkMethod(method) == false)
-					handleErrorFilePath(response_socket, 405);
-				else
-					handleFilePath(response_socket, (*it).getRedirect());
-				return;
-			}
-		}
-	}
-	std::string noLocDefPath(path_to_check + _default_file);
-	if (!pathExists(noLocDefPath))
-		handleErrorFilePath(response_socket, 404);
-	else
-		handleFilePath(response_socket, noLocDefPath);
-	return;
 }
 
 void ServerRunning::handleFilePath(int response_socket, std::string &path)
@@ -93,14 +20,12 @@ void ServerRunning::handleFilePath(int response_socket, std::string &path)
 	std::ifstream file(filePath);
 	if (!file.good())
 	{
-		std::cout << "handleFilePath: not found 404" << std::endl;
 		status_code = 404;
 		filePath = _rootPath + _error_pages.at(404);
 		std::ifstream errorFile(filePath);
 		buffer << errorFile.rdbuf();
 	}
 	else {
-		std::cout << "handleFilePath: okay 200" << std::endl;
 		status_code = 200;
 		std::ifstream okayFile(filePath);
 		buffer << okayFile.rdbuf();
@@ -112,8 +37,7 @@ void ServerRunning::handleErrorFilePath(int response_socket, int error_code)
 {
 	if (_error_pages.find(error_code) == _error_pages.end())
 	{
-		std::cerr << "Unknown error page requested" << std::endl;
-		return;
+		error_code = 404;
 	}
 	std::stringstream buffer;
 	std::string filePath = _rootPath + _error_pages.at(error_code);
