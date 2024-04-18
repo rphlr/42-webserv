@@ -15,14 +15,9 @@
 #define BRIGHT_BLACK "\033[90m"
 #define BRIGHT_RED "\033[91m"
 
-#include <cstdlib> 
-
-// TestServer::TestServer() : SimpleServer( AF_INET, SOCK_STREAM, 0, 6545, INADDR_ANY, 10 ) {
-// 	launch();
-// }
+#include <cstdlib>
 
 TestServer::TestServer( Server &server ) {
-
 	char *cwd = getcwd(NULL, 0);
 	this->_rootPath = std::string(cwd) + "/" + server.getRoot();
 	free(cwd);
@@ -42,18 +37,11 @@ TestServer::TestServer( Server &server ) {
 	_routes["/form"] = &TestServer::handleForm;
 
 	init();
+} 
+
+void
+		std::cerr << "close() failed with errno " << strerror(errno) << std::endl;
 }
-
-// TestServer::TestServer(Server &server) : SimpleServer( server ), _request("") {
-// 	// Create a function to setup routes
-// 	_routes["/home"] = &TestServer::handleHome;
-// 	_routes["/form"] = &TestServer::handleForm;
-// 	_routes["/styles.css"] = &TestServer::handleCss;
-// 	_routes["/upload"] = &TestServer::handlePost;
-// 	// _routes["/form"] = &TestServer::handleForm;
-
-// 	launch();
-// }
 
 void TestServer::init()
 {
@@ -66,95 +54,86 @@ void TestServer::init()
 	}
 	if (setsockopt(_listen_socket, SOL_SOCKET,  SO_REUSEADDR,
 		(char *)&on, sizeof(on)) < 0) {
-		close(_listen_socket);
+		custom_close(_listen_socket);
 		std::cerr << "setsockopt" << std::endl;
 		exit(-1);
 	}
 	if (fcntl(_listen_socket, F_SETFL, O_NONBLOCK) < 0) {
-		close(_listen_socket);
+		custom_close(_listen_socket);
 		std::cerr << "fcntl failed" << std::endl;
 		exit(-1);
 	}
 	if (bind(_listen_socket, (sockaddr *)&_address, _addr_len) < 0) {
 		std::cerr << "binding socket failed" << std::endl;
-		close(_listen_socket);
+		custom_close(_listen_socket);
 		exit(-1);
 	}
 	if (listen(_listen_socket, 255) < 0) {
 		std::cerr << "listen() failed" << std::endl;
-		close(_listen_socket);
+		custom_close(_listen_socket);
 		exit(-1);
 	}
 	_new_socket = -1;
-	FD_ZERO(&_master_read_fds);
-	_max_sockets = _listen_socket;
-	FD_SET(_listen_socket, &_master_read_fds);
+	FD_ZERO(&_master_fds);
+	FD_ZERO(&_write_fds);
+	FD_ZERO(&_read_fds);
+	_max_nbr_of_sockets = _listen_socket;
+	FD_SET(_listen_socket, &_master_fds);
 
 	_timeout.tv_sec = 0;
 	_timeout.tv_usec = 0;
 }
 
-// void TestServer::launch() {
-// 	while (true) {
-// 		std::cout << "Waiting for a connection...\n\n";
-// 		accepter();
-// 		handler();
-// 		responder();
-// 	}
-// }
-
 void TestServer::run() {
-	// std::cout << "Waiting for a connection on port: " << _port << std::endl;
-	// FD_ZERO(&_write_fds);
-	// FD_ZERO(&_working_read_fds);
-	// memcpy(&_working_read_fds, &_master_read_fds, sizeof(_master_read_fds));
-	FD_COPY(&_master_read_fds, &_working_read_fds);
+	FD_COPY(&_master_fds, &_read_fds);
 
-	int select_value = select(_max_sockets + 1, &_working_read_fds, &_write_fds, NULL, &_timeout);
-	if (select_value < 0) {
+	int select_value = select(_max_nbr_of_sockets + 1, &_read_fds, &_write_fds, NULL, &_timeout);
+	if (select_value < 0 || select_value > FD_SETSIZE) {
 		std::cerr << "select() failed" << std::endl;
-		for (int i = 0; i <= _max_sockets; i++) {
-			if (FD_ISSET(i, &_master_read_fds) && i != _listen_socket)
-				close(i);
+		for (int i = 0; i <= _max_nbr_of_sockets; i++) {
+			if (FD_ISSET(i, &_read_fds) && i != _listen_socket) {				//double check if isset master or isset read
+				FD_CLR(i, &_read_fds);
+				FD_CLR(i, &_master_fds);
+				custom_close(i);
+			}
 		}
-		return ;
+		return;
 	}
-	else if (select_value == 0) {
-		// std::cerr << "select() timeout" << std::endl;
-		return ;
-	}
-	for (int i = 0; i <= _max_sockets; i++) {
-		if (FD_ISSET(i, &_working_read_fds) && i == _listen_socket) {
+	for (int i = 0; i <= _max_nbr_of_sockets; i++) {
+		if (FD_ISSET(i, &_read_fds) && i == _listen_socket) {
+			std::cout << "New client on port: " << _port << std::endl;
 			_new_socket = accept(_listen_socket, NULL, NULL);
 			if (_new_socket < 0 && errno != EWOULDBLOCK) {
-				std::cerr << "accept() failed" << std::endl;
+				std::cerr << "accept() failed for fd " << i << std::endl;
 				return ;
 			}
-			if (fcntl(_new_socket, F_SETFL, O_NONBLOCK) < 0) {
-				std::cerr << "fcntl failed" << std::endl;
-				close(_new_socket);
+			else {
+				FD_SET(_new_socket, &_master_fds);
+				if (_max_nbr_of_sockets < _new_socket)
+					_max_nbr_of_sockets = _new_socket;
 			}
-			FD_SET(_new_socket, &_master_read_fds);
-			if (_max_sockets < _new_socket)
-				_max_sockets = _new_socket;
 		}
-		if (FD_ISSET(i, &_working_read_fds) && i != _listen_socket) {
+		if (FD_ISSET(i, &_read_fds) && i != _listen_socket) {
 			memset(_buffer, 0, sizeof(_buffer));
 			int rc = recv(i, _buffer, 3000, 0);
-			std::cout << _buffer << std::endl;
+			// std::cout << YELLOW << "Raw request:" << _buffer << RESET << "\n\n";
 			if (rc <= 0) {
-				std::cerr << "recv() failed or client closed connection" << std::endl;
-				close(i);
-				FD_CLR(i, &_master_read_fds);
-				FD_CLR(i, &_write_fds);
+				std::cout << (rc == 0 ? "Client closed connection on fd " : "recv() error for fd ") << i << std::endl;
+				FD_CLR(i, &_master_fds);
+				FD_CLR(i, &_read_fds);
+				custom_close(i);
+				while (FD_ISSET(_max_nbr_of_sockets, &_master_fds) == false)
+					_max_nbr_of_sockets--;
 			}
 			else {
-				FD_SET(i, &_write_fds);
-				std::cout << "send to handler: " << i << std::endl;
 				handler(i);
-				// if (send(i, "hello", 5, 0) < 0)
-				// 	close(i);
+				FD_SET(i, &_write_fds);
 			}
+		}
+		if (FD_ISSET(i, &_write_fds)) {
+			std::cout << MAGENTA << "Send to handler: " << i << RESET << "\n\n";
+			handler(i);
+			FD_CLR(i, &_write_fds);
 		}
 	}
 }
@@ -174,125 +153,39 @@ bool isMultipart(const std::string& headers) {
 // }
 
 void TestServer::handler(int response_socket) {
-	std::cout << "Handling...\n";
+	HandleRequest new_request(_buffer);
+	new_request.handleRequest();
+	std::string method = new_request.getMethod();
 
-	// Pré-analyse pour déterminer le Content-Type
-    // std::string headers = extractHeaders(_buffer);
-    if (isMultipart(_buffer)) {
-        std::cout << "Multipart request, handling specially\n";
-        // handleMultipartRequest(_buffer, response_socket);
-    } else {
-		HandleRequest new_request(_buffer);
-		new_request.handleRequest();
-		std::string method = new_request.getMethod();
-		std::cout << "Method: " << method << std::endl;
-
-		if (method == "GET") {
-			std::cout << "GET request\n";
-			handleGet(new_request, response_socket);
-		}
-		else if (method == "POST") {
-			// handlePost();
-			std::cout << "POST request\n";
-			handlePost(new_request, response_socket);
-		}
-		else if (method == "DELETE") {
-			// handleDelete();
-			std::cout << "DELETE request\n";
-		}
-		else {
-			std::cout << "Unsupported method\n";
-		}
+	if (method == "GET") {
+		handleGet(new_request, response_socket);
+	}
+	else if (method == "POST") {
+		// handlePost();
+		handlePost(new_request, response_socket);
+	}
+	else if (method == "DELETE") {
+		// handleDelete();
+		std::cout << "DELETE request\n";
+	}
+	else {
+		std::cout << "Unsupported method\n";
 	}
 }
 
-// void TestServer::accepter() {
-// 	memset(_buffer, 0, 300 );
-// 	struct sockaddr_in address = get_socket()->get_address();
-// 	int addrlen = sizeof(address);
-// 	_new_socket = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t*)&addrlen);
-// 	read( _new_socket, _buffer, 300 );
-// }
-
-// void TestServer::handler() {
-// 	std::cout << "Handling...\n";
-// 	HandleRequest _request( _buffer);
-// 	// _request.setRequest( _buffer );
-// 	_request.handleRequest();
-// 	std::string method = _request.getMethod();
-
-// 	std::cout << MAGENTA;
-// 	if (method == "GET") {
-// 		std::cout << "GET request\n";
-// 		handleGet(_request);
-// 	}
-// 	else if (method == "POST") {
-// 		// handlePost();
-// 		std::cout << "POST request\n";
-// 		handlePost(_request);
-// 	}
-// 	else if (method == "DELETE") {
-// 		// handleDelete();
-// 		std::cout << "DELETE request\n";
-// 	}
-// 	else {
-// 		std::cout << "Unsupported method\n";
-// 	}
-// 	std::cout << "\n" << RESET;
-// }
-
-// void TestServer::handlePost(HandleRequest &request) {
-//     // Implémentez ici le traitement spécifique aux données POST.
-//     std::string contentType = request.getHeader("Content-Type");
-//     // Vérifiez si c'est une requête de téléchargement de fichier
-//     if (contentType.find("multipart/form-data") != std::string::npos) {
-//         // Vous devez parser le corps de la requête pour extraire le fichier
-//         // et le traiter selon les spécifications de votre application.
-        
-//         // Après avoir traité le fichier, envoyez une réponse appropriée.
-//         std::string responseBody = "<html><body><h1>Fichier téléchargé avec succès</h1></body></html>";
-//         std::string responseHeaders = "HTTP/1.1 200 OK\r\n";
-//         responseHeaders += "Content-Type: text/html\r\n";
-//         responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n\r\n";
-
-//         std::string response = responseHeaders + responseBody;
-//         send(_new_socket, response.c_str(), response.size(), 0);
-//     } else {
-//         // Si ce n'est pas une requête de téléchargement de fichier, traitez-la normalement.
-//     }
-// }
-
-// void TestServer::responder() {
-// 	// HandleResponse response;
-// 	// Check if the request is a GET request
-// 	std::cout << YELLOW;
-// 	std::cout << "Responding...\n";
-// 	std::string path = _request.getPath();
-// 	if (_routes.find(path) != _routes.end()) {
-// 		(this->*_routes[path])(_request);
-// 	} else {
-// 		handleError(_request);
-// 	}
-// 	shutdown(_new_socket, SHUT_RDWR);
-// 	std::cout << "\n" << RESET;
-// }
-
 void TestServer::handleGet(HandleRequest &request, int response_socket) {
-    std::cout << "Handling GET request\n";
     std::string path = request.getPath();
-    std::cout << "Path: " << path << std::endl;
 
 	if (path.substr(path.size() - 4) == ".css") {
-		std::cout << "Handling css\n";
         handleCss(response_socket);
     } else if (path == "/home" || path == "/testHome.html") {
-		std::cout << "Handling home\n";
+		// std::cout << "Handling home\n";
         handleRoot(response_socket);
     } else if (path == "/form" || path == "/testForm.html") {
-		std::cout << "Handling form\n";
+		// std::cout << "Handling form\n";
         handleForm(response_socket);
 	} else if (path == "/upload") {
-		std::cout << "Handling upload\n";
+		// std::cout << "Handling upload\n";
 		handleUpload(response_socket);
     } else {
         handleError(response_socket);
@@ -300,9 +193,8 @@ void TestServer::handleGet(HandleRequest &request, int response_socket) {
 }
 
 void TestServer::handleUpload(int response_socket) {
-	(void) response_socket;
 	std::string filePath = this->_rootPath + "/default_webpages/siteUpDownload.html";
-	std::cout << "Root path: " << filePath << std::endl;
+	std::cout << "Root path: " << filePath << "\n\n";
 	std::ifstream file(filePath);
 	if (!file.is_open())
 	{
@@ -319,8 +211,11 @@ void TestServer::handleUpload(int response_socket) {
 
 	std::string response = responseHeaders + "\r\n" + responseBody;
 
-	std::cout << "Response: " << response << std::endl;
-	send(_new_socket, response.c_str(), response.size(), 0);
+	// std::cout << "Response: " << response << std::endl;
+	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
+		std::cout << "send() error on fd " << response_socket << std::endl;
+		custom_close(response_socket);
+	}
 }
 
 std::string TestServer::determineCgiScriptPath(const std::string& requestPath) {
@@ -329,10 +224,7 @@ std::string TestServer::determineCgiScriptPath(const std::string& requestPath) {
 }
 
 void TestServer::handlePost(HandleRequest &request, int response_socket) {
-	(void) response_socket;
-    std::cout << "Handling POST request\n";
     std::string path = request.getPath();
-    std::cout << "Path: " << path << std::endl;
 
     if (path.substr(0, 9) == "/cgi-bin/" ) {
 		std::cout << "Handling CGI\n";
@@ -354,21 +246,12 @@ void TestServer::handlePost(HandleRequest &request, int response_socket) {
         std::string cgiOutput = cgiHandler.execute();
 
 		std::cout << "CGI output: " << cgiOutput << std::endl;
-        send(_new_socket, cgiOutput.c_str(), cgiOutput.size(), 0);
+		if (send(response_socket, cgiOutput.c_str(), cgiOutput.size(), 0) < 0) {
+			std::cout << "send() error on fd " << response_socket << std::endl;
+			custom_close(response_socket);
+		}
     }
 }
-
-
-// void TestServer::handlePost(HandleRequest &request) {
-// 	// implement the POST request
-// 	std::string contentType = request.getHeader("Content-Type");
-// 	std::string path = request.getPath();
-// 	std::string responseBody;
-// 	std::string responseHeaders;
-// 	std::string response;
-
-
-// }
 
 void TestServer::handleDelete(HandleRequest &request, int response_socket) {
 	(void) request;
@@ -381,7 +264,7 @@ void TestServer::handleDelete(HandleRequest &request, int response_socket) {
 void TestServer::handleRoot(int response_socket)
 {
 	std::string filePath = this->_rootPath + "/default_webpages/siteHome.html";
-	std::cout << "Root path: " << filePath << std::endl;
+	// std::cout << "Root path: " << filePath << "\n\n";
 	std::ifstream file(filePath);
 	// std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/siteHome.html");
 	if (!file.is_open())
@@ -400,8 +283,10 @@ void TestServer::handleRoot(int response_socket)
 
 	std::string response = responseHeaders + "\r\n" + responseBody;
 
-	if (send(response_socket, response.c_str(), response.size(), 0) < 0)
-		close(response_socket);
+	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
+		std::cout << "send() error on fd " << response_socket << std::endl;
+		custom_close(response_socket);
+	}
 }
 
 void TestServer::handleCss(int response_socket)
@@ -426,13 +311,14 @@ void TestServer::handleCss(int response_socket)
 
 	std::string response = responseHeaders + "\r\n" + responseBody;
 
-	if (send(response_socket, response.c_str(), response.size(), 0) < 0)
-		close(response_socket);
+	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
+		std::cout << "send() error on fd " << response_socket << std::endl;
+		custom_close(response_socket);
+	}
 }
 
 void TestServer::handleForm(int response_socket)
 {
-	(void) response_socket;
 	std::string filePath = this->_rootPath + "/default_webpages/siteForm.html";
 	std::ifstream file(filePath);
 	// std::ifstream file("/home/nate/Workspace/42projects/42-webserv/webpages/default_webpage/siteForm.html");
@@ -452,22 +338,16 @@ void TestServer::handleForm(int response_socket)
 
 	std::string response = responseHeaders + "\r\n" + responseBody;
 
-	send(_new_socket, response.c_str(), response.size(), 0);
+	if (send(response_socket, response.c_str(), response.size(), 0) < 0) {
+		std::cout << "send() error on fd " << response_socket << std::endl;
+		custom_close(response_socket);
+	}
 }
 
 void TestServer::handleError(int response_socket)
 {
-    // std::string responseBody = "404 Not Found\nThe requested URL " + request.getPath() + " was not found on this server.";
-
-    // std::string responseHeaders = "HTTP/1.1 404 Not Found\r\n";
-    // responseHeaders += "Content-Type: text/plain\r\n";
-    // responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
-
-    // std::string response = responseHeaders + "\r\n" + responseBody;
-
-    // send(_new_socket, response.c_str(), response.size(), 0);
-
-	std::string filePath = this->_rootPath + "/error_webpages/custom404.html";\
+	std::string filePath = this->_rootPath + "/error_webpage/custom404.html";
+	// std::cout << "Root path: " << filePath << std::endl;
 	std::ifstream file(filePath);
 	if (!file.is_open())
 	{
@@ -484,53 +364,13 @@ void TestServer::handleError(int response_socket)
 
 	std::string response = responseHeaders + "\r\n" + responseBody;
 
-	if (send(response_socket, response.c_str(), response.size(), 0) < 0)
-		close(response_socket);
+	if (send(response_socket, response.c_str(), response.size(), 0) < 0){
+		std::cout << "send() error on fd " << response_socket << std::endl;
+		custom_close(response_socket);
+	}
 }
 
-
-/* TESTING */
-
-// void TestServer::launch() 
-// {
-// 	fd_set current_sockets, ready_sockets;
-// 	FD_ZERO(&current_sockets); // Clears the fd_set
-
-// 	// Add listening socket to the set
-// 	FD_SET(get_socket()->get_sock(), &current_sockets);
-
-// 	int max_fd = get_socket()->get_sock();
-
-// 	while (true) 
-// 	{
-// 		ready_sockets = current_sockets;
-
-// 		if (select(max_fd + 1, &ready_sockets, NULL, NULL, NULL) == -1) 
-// 		{
-// 			std::cerr << "Select error: " << strerror(errno);
-// 			break;
-// 		}
-
-// 		// Check each socket for readiness
-// 		for(int i = 0; i <= max_fd; i++) 
-// 		{
-// 			if (FD_ISSET(i, &ready_sockets)) 
-// 			{
-// 				if (i == max_fd) 
-// 				{
-// 					// Accept new connection
-// 					accepter();
-// 				} 
-// 				else 
-// 				{
-// 					handler();
-
-// 					if(strlen(_buffer) !=  0) // Check if there's data in the buffer
-// 					{
-// 						responder();
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// }
+std::string &TestServer::getName()
+{
+	return _server_name;
+}

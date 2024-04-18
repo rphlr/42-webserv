@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <cstring>
 
 class HandleRequest {
 	public:

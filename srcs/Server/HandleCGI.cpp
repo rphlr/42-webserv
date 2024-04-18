@@ -52,7 +52,21 @@ std::string HandleCGI::execute() {
         close(stdin_pipefd[0]);
 
         prepareEnvironment();
-        execl("/usr/bin/php", "php", scriptPath.c_str(), (char *)NULL);
+
+		if (!postData.empty()) {
+			std::cout << "POST data: " << postData << std::endl;
+		}
+
+		// Exécute le script CGI
+		if (scriptPath.find(".php") != std::string::npos) {
+			execl("/usr/bin/php", "php", scriptPath.c_str(), (char *)NULL);
+		} else if (scriptPath.find(".py") != std::string::npos) {
+			execl("/usr/bin/python3", "python3", scriptPath.c_str(), (char *)NULL);
+		} else if (scriptPath.find(".pl") != std::string::npos) {
+			execl("/usr/bin/perl", "perl", scriptPath.c_str(), (char *)NULL);
+		} else {
+			execl(scriptPath.c_str(), scriptPath.c_str(), (char *)NULL);
+		}
         perror("execl");
         exit(EXIT_FAILURE);
     } else {

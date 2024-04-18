@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+         #
+#    By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/29 12:40:01 by rrouille          #+#    #+#              #
-#    Updated: 2024/04/07 18:25:19 by rrouille         ###   ########.fr        #
+#    Updated: 2024/04/11 21:28:48 by nvaubien         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -59,7 +59,7 @@ CLEAR				= \033c
 # Source and object files
 SRCS				= $(shell find ${SRCSDIR} -type f -name '*.cpp')
 OBJS				= $(SRCS:${SRCSDIR}/%.cpp=${OBJSDIR}/%.opp)
-CFLAGS				= -Wall -Wextra -Werror -std=c++98
+# CFLAGS				= -Wall -Wextra -Werror -std=c++98
 # LDFLAGS			= -g3 -fsanitize=address
 CC					= c++
 RM					= rm -rf
