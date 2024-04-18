@@ -35,6 +35,7 @@ void HandleRequest::setRequest( std::string request ) {
 
 void HandleRequest::handleRequest() {
 	// First line is the method path and protocol
+	// std::cout << YELLOW << "Request: " << _request << std::endl;
 	std::string extracted_request = _request.substr(0, _request.find("\n"));
 	extracted_request.erase(std::remove(extracted_request.begin(), extracted_request.end(), '\r'), extracted_request.end());
 	std::stringstream iss(extracted_request);

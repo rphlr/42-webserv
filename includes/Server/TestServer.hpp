@@ -66,6 +66,7 @@ private:
 	void handleUpload(int response_socket);
 
     std::string determineCgiScriptPath(const std::string &path);
+
 };
 
 #endif

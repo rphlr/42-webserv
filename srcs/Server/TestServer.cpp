@@ -159,28 +159,50 @@ void TestServer::run() {
 	}
 }
 
+bool isMultipart(const std::string& headers) {
+	std::cout << "Headers: " << headers << std::endl;
+    // Rechercher si le Content-Type est multipart/form-data
+    return headers.find("Content-Disposition") != std::string::npos;
+}
+
+// std::string extractHeaders(const std::string& request) {
+//     // Extrait simplement la partie des headers de la requête
+//     size_t end_of_headers = request.find("\r\n\r\n");
+//     std::string headers = request.substr(0, end_of_headers);
+// 	std::cout << "Headers Extracted: " << headers << std::endl;
+//     return headers;
+// }
+
 void TestServer::handler(int response_socket) {
 	std::cout << "Handling...\n";
-	HandleRequest new_request(_buffer);
-	new_request.handleRequest();
-	std::string method = new_request.getMethod();
-	std::cout << "Method: " << method << std::endl;
 
-	if (method == "GET") {
-		std::cout << "GET request\n";
-		handleGet(new_request, response_socket);
-	}
-	else if (method == "POST") {
-		// handlePost();
-		std::cout << "POST request\n";
-		handlePost(new_request, response_socket);
-	}
-	else if (method == "DELETE") {
-		// handleDelete();
-		std::cout << "DELETE request\n";
-	}
-	else {
-		std::cout << "Unsupported method\n";
+	// Pré-analyse pour déterminer le Content-Type
+    // std::string headers = extractHeaders(_buffer);
+    if (isMultipart(_buffer)) {
+        std::cout << "Multipart request, handling specially\n";
+        // handleMultipartRequest(_buffer, response_socket);
+    } else {
+		HandleRequest new_request(_buffer);
+		new_request.handleRequest();
+		std::string method = new_request.getMethod();
+		std::cout << "Method: " << method << std::endl;
+
+		if (method == "GET") {
+			std::cout << "GET request\n";
+			handleGet(new_request, response_socket);
+		}
+		else if (method == "POST") {
+			// handlePost();
+			std::cout << "POST request\n";
+			handlePost(new_request, response_socket);
+		}
+		else if (method == "DELETE") {
+			// handleDelete();
+			std::cout << "DELETE request\n";
+		}
+		else {
+			std::cout << "Unsupported method\n";
+		}
 	}
 }
 
