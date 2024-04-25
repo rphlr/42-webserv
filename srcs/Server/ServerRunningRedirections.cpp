@@ -27,10 +27,10 @@ std::string ServerRunning::generateDirectoryListing(const std::string& directory
 
 void ServerRunning::checkRedirection(int response_socket, std::string &path_to_check, std::string &method)
 {
-	if (path_to_check.find(".") != std::string::npos) {
-		handleFilePath(response_socket, path_to_check);
-		return;
-	}
+	// if (path_to_check.find(".") != std::string::npos) {
+	// 	handleFilePath(response_socket, path_to_check);
+	// 	return;
+	// }
 	for (std::vector<Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
 	{
 		if (path_to_check == (*it).getPath())
@@ -52,14 +52,12 @@ void ServerRunning::checkRedirection(int response_socket, std::string &path_to_c
 					handleFilePath(response_socket, inLocDefPath);
 				return;
 			}
+
+			if ((*it).checkMethod(method) == false)
+				handleErrorFilePath(response_socket, 405);
 			else
-			{
-				if ((*it).checkMethod(method) == false)
-					handleErrorFilePath(response_socket, 405);
-				else
-					handleFilePath(response_socket, (*it).getRedirect());
-				return;
-			}
+				handleFilePath(response_socket, (*it).getRedirect());
+			return;
 		}
 	}
 	std::string noLocDefPath(path_to_check + _default_file);

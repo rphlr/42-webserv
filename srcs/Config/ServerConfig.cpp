@@ -6,14 +6,17 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:40:45 by ckarl             #+#    #+#             */
-/*   Updated: 2024/04/18 19:17:08 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/25 18:05:01 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Config/ServerConfig.hpp"
 
 Server::Server(void): _server_name(""), _port(-1), _host(""), _max_body_size(-1),
-					_root(""), _default_file(""), _currentLoc(nullptr) {}
+					_root(""), _default_file(""), _currentLoc(nullptr)
+{
+	_error_pages[-1] = "/error_webpages/custom404.html";
+}
 
 Server::~Server(void) { _locations.clear(); }
 
