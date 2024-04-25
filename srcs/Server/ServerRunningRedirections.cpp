@@ -27,10 +27,10 @@ std::string ServerRunning::generateDirectoryListing(const std::string& directory
 
 void ServerRunning::checkRedirection(int response_socket, std::string &path_to_check, std::string &method)
 {
-	// if (path_to_check.find(".") != std::string::npos) {
-	// 	handleFilePath(response_socket, path_to_check);
-	// 	return;
-	// }
+	if (path_to_check.find(".") != std::string::npos) {
+		handleFilePath(response_socket, path_to_check);
+		return;
+	}
 	for (std::vector<Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
 	{
 		if (path_to_check == (*it).getPath())

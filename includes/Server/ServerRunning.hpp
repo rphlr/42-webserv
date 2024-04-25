@@ -45,7 +45,7 @@ public:
 
 private:
 	std::string _rootPath;
-	char _buffer[3000];
+	char _buffer[10000];
 	int _new_socket;
 	int _listen_socket;
 	int _max_nbr_of_sockets;
@@ -65,6 +65,7 @@ private:
 	std::vector<Location> _locations;
 	std::map<int, std::string> _response_code;
 
+	void receiver(int receive_socket);
 	void handler(int response_socket);
 	void handleGet(HandleRequest &new_request, int response_socket);
 	void handlePost(HandleRequest &new_request, int response_socket);

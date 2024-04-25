@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:40:45 by ckarl             #+#    #+#             */
-/*   Updated: 2024/04/25 18:05:01 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/25 18:16:54 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ void	Server::setPort(string &po)
 void	Server::setSize(string &si)
 {
 	int s = std::stoi(si);
-	if (s < 1000 && s >= 0 && _max_body_size < 0)					//check for BUFFER_SIZE (maybe throw error?)
+	if (s >= 0 && _max_body_size < 0)
 		_max_body_size = s;
 	else
 		throw std::invalid_argument(INVALID_CONF + "max_body_size (empty, double or size)");
@@ -68,7 +68,6 @@ void	Server::setRoot(string &r)
 		_root = r;
 	else
 		throw std::invalid_argument(INVALID_CONF + "root (empty or double)");
-	//check here if path exists or not?
 }
 
 void	Server::setErrorPage(string &c, string &path)

@@ -146,26 +146,76 @@ void ServerRunning::run() {
 		}
 		if (FD_ISSET(i, &_read_fds) && i != _listen_socket)
 		{
-			memset(_buffer, 0, sizeof(_buffer));
-			if (recv(i, _buffer, 3000, 0) < 0)
-			{
-				std::cerr << "Could not read from client on fd " << i << ", removing client" << std::endl;
-				FD_CLR(i, &_master_fds);
-				FD_CLR(i, &_read_fds);
-				if (FD_ISSET(i, &_write_fds))
-					FD_CLR(i, &_write_fds);
-				custom_close(i);
-				while (FD_ISSET(_max_nbr_of_sockets, &_master_fds) == false)
-					_max_nbr_of_sockets--;
-			}
-			else
-				FD_SET(i, &_write_fds);
+			receiver(i);
+			// memset(_buffer, 0, sizeof(_buffer));
+			// std::string full_request;
+			// int bytes_recv = 0;
+			// while (1) {
+			// 	char	tmp_buffer[3000];
+			// 	memset(tmp_buffer, 0, sizeof(tmp_buffer));
+			// 	bytes_recv = recv(i, tmp_buffer, 3000, 0);
+			// 	if (bytes_recv < 0)
+			// 	{
+			// 		std::cerr << "Could not read from client on fd " << i << ", removing client" << std::endl;
+			// 		FD_CLR(i, &_master_fds);
+			// 		FD_CLR(i, &_read_fds);
+			// 		if (FD_ISSET(i, &_write_fds))
+			// 			FD_CLR(i, &_write_fds);
+			// 		custom_close(i);
+			// 		while (FD_ISSET(_max_nbr_of_sockets, &_master_fds) == false)
+			// 			_max_nbr_of_sockets--;
+			// 		break ;
+			// 	}
+			// 	full_request.append(tmp_buffer, bytes_recv);
+			// 	if (full_request.find("\r\n0\r\n\r\n") != std::string::npos)
+			// 		break ;
+			// }
+			// if (bytes_recv > 0) {
+			// 	memset(_buffer, 0, sizeof(_buffer));
+			// 	strcpy(_buffer, full_request.c_str());
+			// 	FD_SET(i, &_write_fds);
+			// }
 		}
 		if (FD_ISSET(i, &_write_fds))
 		{
 			std::cout << MAGENTA << "Sending to client on fd " << i << RESET << "\n\n";
 			handler(i);
 		}
+	}
+}
+
+//determine if chunked or unchunked by checking for transfer encoding: chunked
+void	ServerRunning::receiver(int receive_socket)
+{
+	std::string full_request;
+	int bytes_recv = 0;
+	char	tmp_buffer[3000];
+
+	for (int i = 0; i < 1000; i++) {
+		memset(tmp_buffer, 0, sizeof(tmp_buffer));
+		bytes_recv = recv(receive_socket, tmp_buffer, 3000, 0);
+		if (bytes_recv < 0)
+		{
+			std::cerr << "Could not read from client on fd " << receive_socket << ", removing client" << std::endl;
+			FD_CLR(receive_socket, &_master_fds);
+			FD_CLR(receive_socket, &_read_fds);
+			if (FD_ISSET(receive_socket, &_write_fds))
+				FD_CLR(receive_socket, &_write_fds);
+			custom_close(receive_socket);
+			while (FD_ISSET(_max_nbr_of_sockets, &_master_fds) == false)
+				_max_nbr_of_sockets--;
+			break ;
+		}
+		full_request.append(tmp_buffer, bytes_recv);
+		if (i == 0 && full_request.find("Transfer-Encoding: chunked") == std::string::npos)
+			break ;
+		if (full_request.find("\r\n0\r\n\r\n") != std::string::npos)
+			break ;
+	}
+	if (bytes_recv > 0) {
+		memset(_buffer, 0, sizeof(_buffer));
+		strcpy(_buffer, full_request.c_str());
+		FD_SET(receive_socket, &_write_fds);
 	}
 }
 
