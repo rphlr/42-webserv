@@ -5,7 +5,7 @@ void ServerRunning::handleGet(HandleRequest &request, int response_socket) {
 	std::string method = request.getMethod();
 
 	if (path.size() >= 4 && path.substr(path.size() - 4) == ".css") {
-		std::cout << "css request path: " << path << std::endl;
+		// std::cout << "css request path: " << path << std::endl;
 		handleCss(response_socket);
 	}
 	else {
