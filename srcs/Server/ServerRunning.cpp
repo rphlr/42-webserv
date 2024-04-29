@@ -142,14 +142,14 @@ void ServerRunning::run() {
 				if (_max_nbr_of_sockets < _new_socket)
 					_max_nbr_of_sockets = _new_socket;
 			}
-			std::cout << BLUE << "New client on port: " << _port << " with fd " << _new_socket << RESET << std::endl;
+			// std::cout << BLUE << "New client on port: " << _port << " with fd " << _new_socket << RESET << std::endl;
 		}
 		if (FD_ISSET(i, &_read_fds) && i != _listen_socket)
 		{
 			memset(_buffer, 0, sizeof(_buffer));
 			if (recv(i, _buffer, 3000, 0) < 0)
 			{
-				std::cerr << "Could not read from client on fd " << i << ", removing client" << std::endl;
+				// std::cerr << "Could not read from client on fd " << i << ", removing client" << std::endl;
 				FD_CLR(i, &_master_fds);
 				FD_CLR(i, &_read_fds);
 				if (FD_ISSET(i, &_write_fds))
@@ -160,10 +160,11 @@ void ServerRunning::run() {
 			}
 			else
 				FD_SET(i, &_write_fds);
+			// std::cout << GREEN << "    BUFFER DE MERDE :\n" << _buffer << RESET << std::endl;
 		}
 		if (FD_ISSET(i, &_write_fds))
 		{
-			std::cout << MAGENTA << "Sending to client on fd " << i << RESET << "\n\n";
+			// std::cout << MAGENTA << "Sending to client on fd " << i << RESET << "\n\n";
 			handler(i);
 		}
 	}
@@ -176,23 +177,23 @@ void ServerRunning::handler(int response_socket) {
 
 	if (method == "GET")
 	{
-		std::cout << "GET method" << std::endl;
+		// std::cout << "GET method" << std::endl;
 		handleGet(new_request, response_socket);
 	}
 	else if (method == "POST")
 	{
-		std::cout << "POST method" << std::endl;
+		// std::cout << "POST method" << std::endl;
 		handlePost(new_request, response_socket);
 	}
 	else if (method == "DELETE")
 	{
 		// handleDelete(new_request, response_socket);
-		std::cout << "DELETE method" << std::endl;
+		// std::cout << "DELETE method" << std::endl;
 	}
 	else
 	{
-		if (method.empty())
-			std::cout << "Unsupported method (it's empty) " << std::endl;
+		// if (method.empty())
+			// std::cout << "Unsupported method (it's empty) " << std::endl;
 		handleErrorFilePath(response_socket, 501);
 	}
 }
