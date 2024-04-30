@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Location.hpp                                       :+:      :+:    :+:   */
+/*   LocationConfig.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/21 22:33:57 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/15 10:12:36 by nvaubien         ###   ########.fr       */
+/*   Updated: 2024/04/18 17:41:35 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ public:
 	bool	&getDirList(void);
 
 	bool	validMethod(string &m);
+	bool	checkMethod(string &m);
 
 private:
 	string					_path;

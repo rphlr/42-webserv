@@ -1,68 +1,69 @@
 #include "../../includes/Server/ServerRunning.hpp"
 
-void ServerRunning::handleNotImplemented(HandleRequest &new_request, int response_socket)
-{
-	std::string filePath = this->_rootPath + "/error_webpage/custom501.html";
-	// std::cout << "Root path: " << filePath << std::endl;
-	std::ifstream file(filePath);
-	if (!file.is_open())
-	{
-		std::cerr << "Failed to open handleNotImplemented\n";
-		return;
-	}
-	std::stringstream buffer;
-	buffer << file.rdbuf();
-	std::string responseBody = buffer.str();
-
-	std::string responseHeaders = "HTTP/1.1 501 Not Implemented\r\n";
-	responseHeaders += "Content-Type: text/html\r\n";
-	responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
-
-	std::string response = responseHeaders + "\r\n" + responseBody;
-
-	custom_send(response_socket, response.c_str(), response.size());
-}
-
 void ServerRunning::handleGet(HandleRequest &request, int response_socket) {
 	std::string path = request.getPath();
+	std::string method = request.getMethod();
 
-	if (path.substr(path.size() - 4) == ".css") {
+	if (path.size() >= 4 && path.substr(path.size() - 4) == ".css") {
 		handleCss(response_socket);
-	} else if (path == "/home" || path == "/testHome.html") {
-		// std::cout << "Handling home\n";
-		handleRoot(response_socket);
-	} else if (path == "/form" || path == "/testForm.html") {
-		// std::cout << "Handling form\n";
-		handleForm(response_socket);
-	} else if (path == "/upload") {
-		// std::cout << "Handling upload\n";
-		handleUpload(response_socket);
-	} else {
-		handleError(response_socket);
+	}
+	else {
+		checkIfRedirectionNeeded(response_socket, path, method);
 	}
 }
 
-void ServerRunning::handleUpload(int response_socket) {
-	std::string filePath = this->_rootPath + "/default_webpages/siteUpDownload.html";
-	std::cout << "Root path: " << filePath << "\n\n";
+void ServerRunning::handleFilePath(int response_socket, std::string &path)
+{
+	std::stringstream buffer;
+	int status_code;
+	std::string filePath = _rootPath + path;
 	std::ifstream file(filePath);
+	if (!file.good())
+	{
+		status_code = 404;
+		filePath = _rootPath + _error_pages.at(-1);
+		std::ifstream errorFile(filePath);
+		buffer << errorFile.rdbuf();
+	}
+	else {
+		status_code = 200;
+		std::ifstream okayFile(filePath);
+		buffer << okayFile.rdbuf();
+	}
+	sendResponse(response_socket, buffer.str(), status_code, "text/html");
+}
+
+void ServerRunning::handleErrorFilePath(int response_socket, int error_code)
+{
+	std::stringstream buffer;
+	std::string filePath;
+	if (_error_pages.find(error_code) == _error_pages.end())
+		filePath = _rootPath + _error_pages.at(-1);
+	else
+		filePath = _rootPath + _error_pages.at(error_code);
+	std::ifstream errorFile(filePath);
+	if (!errorFile.good())
+	{
+		std::cerr << "Could not open requested error page " << error_code << std::endl;
+		return ;
+	}
+	buffer << errorFile.rdbuf();
+	sendResponse(response_socket, buffer.str(), error_code, "text/html");
+}
+
+void ServerRunning::handleCss(int response_socket)
+{
+	std::string filePath = this->_rootPath + "/default_webpages/styles.css";
+	std::ifstream file(filePath);
+
 	if (!file.is_open())
 	{
-		std::cerr << "Failed to open handleUpload\n";
+		std::cerr << "Failed to open handleCss\n";
 		return;
 	}
 	std::stringstream buffer;
 	buffer << file.rdbuf();
-	std::string responseBody = buffer.str();
-
-	std::string responseHeaders = "HTTP/1.1 200 Ok\r\n";
-	responseHeaders += "Content-Type: text/html\r\n";
-	responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
-
-	std::string response = responseHeaders + "\r\n" + responseBody;
-
-	// std::cout << "Response: " << response << std::endl;
-	custom_send(response_socket, response.c_str(), response.size());
+	sendResponse(response_socket, buffer.str(), 200, "text/css");
 }
 
 std::string ServerRunning::determineCgiScriptPath(const std::string& requestPath) {
@@ -75,25 +76,7 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 
 	if (std::stoi(request.getHeader("Content-Length")) > _max_body_size)
 	{
-		std::string filePath = this->_rootPath + "/error_webpage/custom413.html";
-		std::ifstream file(filePath);
-		if (!file.is_open())
-		{
-			std::cerr << "Failed to open handlePost\n";
-			return;
-		}
-
-		std::stringstream buffer;
-		buffer << file.rdbuf();
-		std::string responseBody = buffer.str();
-
-		std::string responseHeaders = "HTTP/1.1 413 Payload Too Large\r\n";
-		responseHeaders += "Content-Type: text/html\r\n";
-		responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
-
-		std::string response = responseHeaders + "\r\n" + responseBody;
-
-		custom_send(response_socket, response.c_str(), response.size());
+		handleErrorFilePath(response_socket, 413);
 		return;
 	}
 	else if (path.substr(0, 9) == "/cgi-bin/") {
@@ -119,24 +102,8 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 		custom_send(response_socket, cgiOutput.c_str(), cgiOutput.size());
 	}
 	else {
-		std::string filePath = this->_rootPath + "/default_webpages/siteHome.html";
-		std::ifstream file(filePath);
-		if (!file.is_open())
-		{
-			std::cerr << "Failed to open handlePost\n";
-			return;
-		}
-		std::stringstream buffer;
-		buffer << file.rdbuf();
-		std::string responseBody = buffer.str();
-
-		std::string responseHeaders = "HTTP/1.1 200 Ok\r\n";
-		responseHeaders += "Content-Type: text/html\r\n";
-		responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
-
-		std::string response = responseHeaders + "\r\n" + responseBody;
-
-		custom_send(response_socket, response.c_str(), response.size());
+		std::string homePath = "/default_webpages/siteHome.html";
+		handleFilePath(response_socket, homePath);
 	}
 }
 
@@ -146,99 +113,4 @@ void ServerRunning::handleDelete(HandleRequest &request, int response_socket) {
 	// Implement the DELETE request
 	// send(_new_socket, response.c_str(), response.size(), 0);
 	return;
-}
-
-void ServerRunning::handleRoot(int response_socket)
-{
-	std::string filePath = this->_rootPath + "/default_webpages/siteHome.html";
-	// std::cout << "Root path: " << filePath << "\n\n";
-	std::ifstream file(filePath);
-	if (!file.is_open())
-	{
-		// handle the error, e.g. by logging it and returning
-		std::cerr << "Failed to open file handle-root\n";
-		return;
-	}
-	std::stringstream buffer;
-	buffer << file.rdbuf();
-	std::string responseBody = buffer.str();
-
-	std::string responseHeaders = "HTTP/1.1 200 Ok\r\n";
-	responseHeaders += "Content-Type: text/html\r\n";
-	responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
-
-	std::string response = responseHeaders + "\r\n" + responseBody;
-
-	custom_send(response_socket, response.c_str(), response.size());
-}
-
-void ServerRunning::handleCss(int response_socket)
-{
-	std::string filePath = this->_rootPath + "/default_webpages/styles.css";
-	std::ifstream file(filePath);
-
-	if (!file.is_open())
-	{
-		// handle the error, e.g. by logging it and returning
-		std::cerr << "Failed to open handleCss\n";
-		return;
-	}
-	std::stringstream buffer;
-	buffer << file.rdbuf();
-	std::string responseBody = buffer.str();
-
-	std::string responseHeaders = "HTTP/1.1 200 Ok\r\n";
-	responseHeaders += "Content-Type: text/css\r\n";
-	responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
-
-	std::string response = responseHeaders + "\r\n" + responseBody;
-
-	custom_send(response_socket, response.c_str(), response.size());
-}
-
-void ServerRunning::handleForm(int response_socket)
-{
-	std::string filePath = this->_rootPath + "/default_webpages/siteForm.html";
-	std::ifstream file(filePath);
-
-	if (!file.is_open())
-	{
-		// handle the error, e.g. by logging it and returning
-		std::cerr << "Failed to open handleForm\n";
-		return;
-	}
-	std::stringstream buffer;
-	buffer << file.rdbuf();
-	std::string responseBody = buffer.str();
-
-	std::string responseHeaders = "HTTP/1.1 200 Ok\r\n";
-	responseHeaders += "Content-Type: text/html\r\n";
-	responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
-
-	std::string response = responseHeaders + "\r\n" + responseBody;
-
-	custom_send(response_socket, response.c_str(), response.size());
-}
-
-void ServerRunning::handleError(int response_socket)
-{
-	std::string filePath = this->_rootPath + "/error_webpage/custom404.html";
-	// std::cout << "Root path: " << filePath << std::endl;
-	std::ifstream file(filePath);
-	if (!file.is_open())
-	{
-		std::cerr << "Failed to open handleError\n";
-		return;
-	}
-	std::stringstream buffer;
-	buffer << file.rdbuf();
-	std::string responseBody = buffer.str();
-
-	std::string responseHeaders = "HTTP/1.1 404 Not Found\r\n";
-	responseHeaders += "Content-Type: text/html\r\n";
-	responseHeaders += "Content-Length: " + std::to_string(responseBody.size()) + "\r\n";
-
-	std::string response = responseHeaders + "\r\n" + responseBody;
-
-	custom_send(response_socket, response.c_str(), response.size());
 }

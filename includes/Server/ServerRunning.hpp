@@ -11,11 +11,13 @@
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #include <netinet/in.h>
 #include <fcntl.h>
 #include <cstdlib>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #define RESET "\033[0m"
 #define BLACK "\033[30m"
@@ -43,7 +45,7 @@ public:
 
 private:
 	std::string _rootPath;
-	char _buffer[3000];
+	char _buffer[10000];
 	int _new_socket;
 	int _listen_socket;
 	int _max_nbr_of_sockets;
@@ -54,36 +56,31 @@ private:
 	fd_set _read_fds;
 	fd_set _write_fds;
 
-	int	get_socket();
-	void custom_close(int i);
-	void custom_send(int response_socket, const char *response_str, size_t response_size);
-
-
 	std::string _server_name;
 	int _port;
 	std::string _host;
 	int _max_body_size;
-	// std::string _root;
-	// std::string _default_file;
-	// std::map<int, std::string> _error_pages;
-	// std::vector<Location> _locations;
+	std::string _default_file;
+	std::map<int, std::string> _error_pages;
+	std::vector<Location> _locations;
+	std::map<int, std::string> _response_code;
 
+	void receiver(int receive_socket);
 	void handler(int response_socket);
-	// HandleRequest _request;
-
-	typedef void (ServerRunning::*RouteHandler)(int response_socket);
-	std::map<std::string, RouteHandler> _routes;
-
 	void handleGet(HandleRequest &new_request, int response_socket);
 	void handlePost(HandleRequest &new_request, int response_socket);
 	void handleDelete(HandleRequest &new_request, int response_socket);
 
-	void handleRoot(int response_socket);
+	void handleFilePath(int response_socket, std::string &path);
+	void handleErrorFilePath(int response_socket, int error_code);
 	void handleCss(int response_socket);
-	void handleError(int response_socket);
-	void handleForm(int response_socket);
-	void handleUpload(int response_socket);
-	void handleNotImplemented(HandleRequest &new_request, int response_socket);
+
+	void checkIfRedirectionNeeded(int response_socket, std::string &path_to_check, std::string &method);
+	std::string generateDirectoryListing(const std::string& directoryPath);
+	bool pathExists(std::string &path_to_check);
+	void sendResponse(int response_socket, std::string buffer, int status_code, std::string content_type);
+	void custom_send(int response_socket, const char *response_str, size_t response_size);
+	void custom_close(int i);
 
 	std::string determineCgiScriptPath(const std::string &path);
 };

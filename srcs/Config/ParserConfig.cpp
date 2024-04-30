@@ -6,18 +6,15 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/04/05 15:47:27 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/04/17 14:04:20 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Config/ParserConfig.hpp"
 
 Parser::Parser(void) : inServ(false), inLoc(false), inErr(false), currentServer(NULL) {}
-
 Parser::~Parser(void) { servers.clear(); }
-
 Parser::Parser(const Parser &c) { (void) c; }
-
 Parser &Parser::operator = (const Parser &c)
 {
 	(void) c;
@@ -97,16 +94,12 @@ vector<Server>	Parser::parseFile(string doc)
 		}
 		handleLine(line);
 	}
-	//print out all servers in the vector
-	// for(unsigned int i = 0; i < servers.size(); i++) {
-	// 	std::cout << "server:" << servers[i] << std::endl;
-	// }
-	// testing if servers are the same or different by comparing name, port and host
-	// if (servers[0] == servers[1])
-	// 	std::cout << "they're the same" << std::endl;
-	// else
-	// 	std::cout << "they're different" << std::endl;
-
+	for (vector<Server>::iterator it = servers.begin(); it != (servers.end() - 1); it++) {
+		for (vector<Server>::iterator it2 = it + 1; it2 != servers.end(); it2++) {
+			if (*it == *it2)
+				throw std::runtime_error("Two or more servers have the same name, port or host");
+		}
+	}
 	inputFile.close();
 	return servers;
 }
