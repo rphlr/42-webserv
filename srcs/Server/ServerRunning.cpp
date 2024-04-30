@@ -107,7 +107,8 @@ void ServerRunning::init()
 }
 
 void ServerRunning::run() {
-	FD_COPY(&_master_fds, &_read_fds);
+	// FD_COPY(&_master_fds, &_read_fds);
+  memcpy(&_read_fds, &_master_fds, sizeof(_master_fds));
 
 	int select_value = select(_max_nbr_of_sockets + 1, &_read_fds, &_write_fds, NULL, &_timeout);
 	if (select_value < 0 || select_value > FD_SETSIZE)
@@ -150,7 +151,7 @@ void ServerRunning::run() {
 		}
 		if (FD_ISSET(i, &_write_fds))
 		{
-			std::cout << MAGENTA << "Sending to client on fd " << i << RESET << "\n\n";
+			// std::cout << MAGENTA << "Sending to client on fd " << i << RESET << "\n\n";
 			handler(i);
 		}
 	}
@@ -196,23 +197,22 @@ void ServerRunning::handler(int response_socket) {
 
 	if (method == "GET")
 	{
-		std::cout << "GET method" << std::endl;
+    std::cout << "GET REQUEST\n" << RESET;
 		handleGet(new_request, response_socket);
 	}
 	else if (method == "POST")
 	{
-		std::cout << "POST method" << std::endl;
+    std::cout << "POST REQUEST\n" << RESET;
 		handlePost(new_request, response_socket);
 	}
 	else if (method == "DELETE")
 	{
 		// handleDelete(new_request, response_socket);
-		std::cout << "DELETE method" << std::endl;
 	}
 	else
 	{
 		if (method.empty())
-			std::cout << "Unsupported method (it's empty) " << std::endl;
+			std::cout << RED << "Unsupported method or empty request (it's empty) " << RESET << std::endl;
 		handleErrorFilePath(response_socket, 501);
 	}
 }

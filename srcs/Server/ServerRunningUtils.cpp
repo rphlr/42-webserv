@@ -9,7 +9,7 @@ void ServerRunning::custom_close(int i)
 void ServerRunning::custom_send(int response_socket, const char *response_str, size_t response_size)
 {
 	if (send(response_socket, response_str, response_size, 0) < 0){
-		std::cerr << "Could not send to client on fd " << response_socket << ", removing client" << std::endl;
+		std::cerr << RED << "Couldn't send to client on FD: " << response_socket << ", removing client" << RESET << std::endl;
 		FD_CLR(response_socket, &_write_fds);
 		if (FD_ISSET(response_socket, &_read_fds)) {
 			FD_CLR(response_socket, &_master_fds);
