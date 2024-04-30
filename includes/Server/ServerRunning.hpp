@@ -45,7 +45,7 @@ public:
 
 private:
 	std::string _rootPath;
-	char _buffer[3000];
+	char _buffer[10000];
 	int _new_socket;
 	int _listen_socket;
 	int _max_nbr_of_sockets;
@@ -65,6 +65,7 @@ private:
 	std::vector<Location> _locations;
 	std::map<int, std::string> _response_code;
 
+	void receiver(int receive_socket);
 	void handler(int response_socket);
 	void handleGet(HandleRequest &new_request, int response_socket);
 	void handlePost(HandleRequest &new_request, int response_socket);
@@ -74,10 +75,10 @@ private:
 	void handleErrorFilePath(int response_socket, int error_code);
 	void handleCss(int response_socket);
 
-	void checkRedirection(int response_socket, std::string &path_to_check, std::string &method);
+	void checkIfRedirectionNeeded(int response_socket, std::string &path_to_check, std::string &method);
 	std::string generateDirectoryListing(const std::string& directoryPath);
-	bool	pathExists(std::string &path_to_check);
-	void	sendResponse(int response_socket, std::string buffer, int status_code, std::string content_type);
+	bool pathExists(std::string &path_to_check);
+	void sendResponse(int response_socket, std::string buffer, int status_code, std::string content_type);
 	void custom_send(int response_socket, const char *response_str, size_t response_size);
 	void custom_close(int i);
 

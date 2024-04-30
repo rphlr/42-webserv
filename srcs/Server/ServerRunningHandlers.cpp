@@ -8,7 +8,7 @@ void ServerRunning::handleGet(HandleRequest &request, int response_socket) {
 		handleCss(response_socket);
 	}
 	else {
-		checkRedirection(response_socket, path, method);
+		checkIfRedirectionNeeded(response_socket, path, method);
 	}
 }
 
@@ -21,7 +21,7 @@ void ServerRunning::handleFilePath(int response_socket, std::string &path)
 	if (!file.good())
 	{
 		status_code = 404;
-		filePath = _rootPath + _error_pages.at(404);
+		filePath = _rootPath + _error_pages.at(-1);
 		std::ifstream errorFile(filePath);
 		buffer << errorFile.rdbuf();
 	}
@@ -35,12 +35,12 @@ void ServerRunning::handleFilePath(int response_socket, std::string &path)
 
 void ServerRunning::handleErrorFilePath(int response_socket, int error_code)
 {
-	if (_error_pages.find(error_code) == _error_pages.end())
-	{
-		error_code = 404;
-	}
 	std::stringstream buffer;
-	std::string filePath = _rootPath + _error_pages.at(error_code);
+	std::string filePath;
+	if (_error_pages.find(error_code) == _error_pages.end())
+		filePath = _rootPath + _error_pages.at(-1);
+	else
+		filePath = _rootPath + _error_pages.at(error_code);
 	std::ifstream errorFile(filePath);
 	if (!errorFile.good())
 	{
