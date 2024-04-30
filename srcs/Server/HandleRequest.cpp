@@ -102,7 +102,7 @@ void HandleRequest::handleRequest() {
 		size_t fileend = _request.find("\r\n", filestart);
 		_body = _request.substr(filestart, fileend - filestart);
 		// parts = splitMultipartFormData(_body, "WebKitFormBoundary");
-		// std::cout << "File:[" << file1 << "]" << std::endl;
+		std::cout << "File:[" << _body << "]" << std::endl;
 		// std::ofstream file("upload.bin", std::ios::binary);
 	}
 
