@@ -25,7 +25,7 @@ std::string ServerRunning::generateDirectoryListing(const std::string& directory
 	return ss.str();
 }
 
-void ServerRunning::checkRedirection(int response_socket, std::string &path_to_check, std::string &method)
+void ServerRunning::checkIfRedirectionNeeded(int response_socket, std::string &path_to_check, std::string &method)
 {
 	if (path_to_check.find(".") != std::string::npos) {
 		handleFilePath(response_socket, path_to_check);
