@@ -5,23 +5,22 @@
 #include <map>
 
 class HandleCGI {
-public:
-    HandleCGI(const std::string& scriptPath,
-              const std::map<std::string, std::string>& env,
-              const std::string& postData);
-    ~HandleCGI();
+    public:
+        HandleCGI(const std::string& scriptPath,
+                const std::map<std::string, std::string>& env,
+                const std::string& postData);
+        ~HandleCGI();
 
-    std::string execute();
+        std::string execute();
 
-private:
-    std::string scriptPath;
-    std::map<std::string, std::string> env;
-    std::string postData;
+    private:
+        std::string scriptPath;
+        std::map<std::string, std::string> env;
+        std::string postData;
 
-    void prepareEnvironment();
+        void prepareEnvironment();
 
-    std::string captureOutput();
+        std::string captureOutput();
 };
 
 #endif
-// 058 233 31 64

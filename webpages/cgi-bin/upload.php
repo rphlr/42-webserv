@@ -1,6 +1,7 @@
 <?php
 error_reporting(E_ALL);
-$targetDir = "/full/path/to/webpages/uploads/"; // Use the full path
+$pwd = getcwd();
+$targetDir = "/uploads";
 
 if (!is_dir($targetDir)) {
     if (!mkdir($targetDir, 0777, true)) {
