@@ -107,8 +107,7 @@ void ServerRunning::init()
 }
 
 void ServerRunning::run() {
-	// FD_COPY(&_master_fds, &_read_fds);
-  memcpy(&_read_fds, &_master_fds, sizeof(_master_fds));
+	FD_COPY(&_master_fds, &_read_fds);
 
 	int select_value = select(_max_nbr_of_sockets + 1, &_read_fds, &_write_fds, NULL, &_timeout);
 	if (select_value < 0 || select_value > FD_SETSIZE)
@@ -151,8 +150,9 @@ void ServerRunning::run() {
 		}
 		if (FD_ISSET(i, &_write_fds))
 		{
-			// std::cout << MAGENTA << "Sending to client on fd " << i << RESET << "\n\n";
+			std::cout << MAGENTA << "Sending to client on fd " << i << RESET << "\n\n";
 			handler(i);
+			FD_CLR(i, &_write_fds);
 		}
 	}
 }
@@ -162,13 +162,16 @@ void	ServerRunning::receiver(int receive_socket)
 {
 	std::string full_request;
 	int bytes_recv = 0;
-	char	tmp_buffer[3000];
+	char	tmp_buffer[10000];
 
-	for (int i = 0; i < 1000; i++) {
+	for (int i = 0; i < 100; i++) {
 		memset(tmp_buffer, 0, sizeof(tmp_buffer));
-		bytes_recv = recv(receive_socket, tmp_buffer, 3000, 0);
+		bytes_recv = recv(receive_socket, tmp_buffer, 10000, 0);
+		std::cout << RED << "bytes recv(): " << bytes_recv << RESET << std::endl;
 		if (bytes_recv < 0)
 		{
+			if (i > 0)
+				break;
 			std::cerr << "Could not read from client on fd " << receive_socket << ", removing client" << std::endl;
 			FD_CLR(receive_socket, &_master_fds);
 			FD_CLR(receive_socket, &_read_fds);
@@ -180,11 +183,12 @@ void	ServerRunning::receiver(int receive_socket)
 			return ;
 		}
 		full_request.append(tmp_buffer, bytes_recv);
-		if (i == 0 && full_request.find("Transfer-Encoding: chunked") == std::string::npos)
+		if (bytes_recv < 10000) {
+			std::cout << "found end of request" << std::endl;
 			break ;
-		if (full_request.find("\r\n0\r\n\r\n") != std::string::npos)
-			break ;
+		}
 	}
+	std::cout << "full_request in receiver: " << MAGENTA << full_request << RESET << std::endl;
 	memset(_buffer, 0, sizeof(_buffer));
 	strcpy(_buffer, full_request.c_str());
 	FD_SET(receive_socket, &_write_fds);
@@ -197,12 +201,12 @@ void ServerRunning::handler(int response_socket) {
 
 	if (method == "GET")
 	{
-    std::cout << "GET REQUEST\n" << RESET;
+	std::cout << "GET REQUEST\n" << RESET;
 		handleGet(new_request, response_socket);
 	}
 	else if (method == "POST")
 	{
-    std::cout << "POST REQUEST\n" << RESET;
+	std::cout << "POST REQUEST\n" << RESET;
 		handlePost(new_request, response_socket);
 	}
 	else if (method == "DELETE")

@@ -79,7 +79,7 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 		handleErrorFilePath(response_socket, 413);
 		return;
 	}
-	else if (path.substr(0, 9) == "/cgi-bin/") {
+	else if (path.find("/cgi-bin/") != std::string::npos) {
 		std::cout << "Handling CGI\n";
 		std::map<std::string, std::string> cgiEnv;
 		cgiEnv["REQUEST_METHOD"] = "POST";
