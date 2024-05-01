@@ -52,9 +52,9 @@ std::string HandleCGI::execute() {
 
         prepareEnvironment();
 
-		if (!postData.empty()) {
-			std::cout << "POST data: " << postData << std::endl;
-		}
+		// if (!postData.empty()) {
+		// 	std::cout << "POST data: " << postData << std::endl;
+		// }
 
 		// Exécute le script CGI
 		if (scriptPath.find(".php") != std::string::npos) {

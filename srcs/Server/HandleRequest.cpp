@@ -14,7 +14,6 @@
 #define BRIGHT_RED "\033[91m"
 
 HandleRequest::HandleRequest( std::string &incoming_request ) {
-	// std::cout << "incoming request: " << incoming_request << std::endl;
 	_request = incoming_request;
 }
 
@@ -30,13 +29,13 @@ std::string HandleRequest::getPath() const {
 	return _path;
 }
 
+std::string HandleRequest::getProtocol() const {
+	return _protocol;
+}
+
 void HandleRequest::setRequest( std::string request ) {
 	_request = request;
 }
-
-// std::string HandleRequest::getFullRequest(std::string fullrequest) const {
-
-// }
 
 void HandleRequest::handleRequest() {
 	std::string extracted_request = _request.substr(0, _request.find("\n"));
@@ -65,7 +64,7 @@ void HandleRequest::handleRequest() {
 			}
 		}
 		_headers["Content-Length"] = std::to_string(_request.size() - headers_end - 2);
-		std::cout << "!!!!Content-Length: " << _headers["Content-Length"] << std::endl;
+		// std::cout << "!!!!Content-Length: " << _headers["Content-Length"] << std::endl;
 		_path = "/cgi-bin/upload.php";
 		_protocol = "HTTP/1.1";
 	}
@@ -110,21 +109,10 @@ void HandleRequest::handleRequest() {
 		size_t fileend = _request.find("\r\n", filestart);
 		_body = _request.substr(filestart, fileend - filestart);
 	}
-	std::cout << RESET;
+	// std::cout << RESET;
 }
 
-HandleRequest::~HandleRequest() {
-    // std::map<std::string, std::string>::iterator contentLengthHeader = _headers.find("Content-Length");
-	// // std::cout << "Content-Length: " << contentLengthHeader->second << std::endl;
-    // if (contentLengthHeader != _headers.end()) {
-    //     int contentLength = std::stoi(contentLengthHeader->second);
-	// 	char *body = new char[contentLength + 1];
-	// 	memset(body, 0, contentLength + 1);
-	// 	memcpy(body, _request.c_str() + _request.size() - contentLength, contentLength);
-	// 	_body = body;
-	// 	delete[] body;
-    // }
-}
+HandleRequest::~HandleRequest() {}
 
 std::string HandleRequest::getBody() const {
 	return _body;

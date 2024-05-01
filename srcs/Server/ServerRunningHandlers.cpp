@@ -77,25 +77,34 @@ std::string ServerRunning::determineCgiScriptPath(const std::string& requestPath
 #include <map>
 
 std::string ServerRunning::handlePostData(const std::string &postData) {
-	// remove the 4 first lines
-	// stock the rest in a buffer until the line starting by "------WebKitFormBoundary"
 	std::stringstream ss(postData);
 	std::string line;
 
-	// while 4 lines
 	for (int i = 0; i < 4; i++)
 		std::getline(ss, line);
-	// while not "------WebKitFormBoundary" save in the buffer
 	std::string buffer;
 	while (std::getline(ss, line) && line.find("------WebKitFormBoundary") == std::string::npos)
 		buffer += line + "\n";
-	// std::cout << RED << "Buffer: " << buffer << RESET << std::endl;
 	return buffer;
+}
+
+std::string ServerRunning::getFileName(const std::string &postData) {
+	std::stringstream ss(postData);
+	std::string line;
+	std::string filePath;
+
+	for (int i = 0; i < 2; i++)
+		std::getline(ss, line);
+	
+	filePath = line.substr(line.find("filename=") + 10);
+	filePath = filePath.substr(0, filePath.find("\""));
+	std::cout << RED << "File path: " << filePath << RESET << std::endl;
+	return filePath;
 }
 
 void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 	std::string path = request.getPath();
-	std::cout << "path: " << path << std::endl;
+	// std::cout << "path: " << path << std::endl;
 	try {
 		std::stoi(request.getHeader("Content-Length"));
 	}
@@ -116,14 +125,28 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 		std::cout << "Request method: " << cgiEnv["REQUEST_METHOD"] << std::endl;
 		std::string scriptPath = determineCgiScriptPath(path);
 
-		// std::cout << "Script path: " << scriptPath << std::endl;
 		std::string postData = request.getRequest();
 		std::string data = handlePostData(postData);
 		cgiEnv["CONTENT_LENGTH"] = std::to_string(data.size());
-		std::cout << "Content length: " << cgiEnv["CONTENT_LENGTH"] << std::endl;
 		cgiEnv["CONTENT_TYPE"] = request.getHeader("Content-Type");
+		cgiEnv["SCRIPT_NAME"] = scriptPath;
+		cgiEnv["FILENAME"] = getFileName(postData);
+		cgiEnv["SERVER_PROTOCOL"] = request.getProtocol();
+		cgiEnv["SERVER_SOFTWARE"] = "webserv";
+		cgiEnv["SERVER_NAME"] = request.getHeader("Host");
+		cgiEnv["SERVER_PORT"] = std::to_string(_port);
+
+		std::cout << "Content length: " << cgiEnv["CONTENT_LENGTH"] << std::endl;
+		std::cout << "Content type: " << cgiEnv["CONTENT_TYPE"] << std::endl;
+		std::cout << "Script name: " << cgiEnv["SCRIPT_NAME"] << std::endl;
+		std::cout << "File path info: " << cgiEnv["FILENAME"] << std::endl;
+		std::cout << "Server protocol: " << cgiEnv["SERVER_PROTOCOL"] << std::endl;
+		std::cout << "Server software: " << cgiEnv["SERVER_SOFTWARE"] << std::endl;
+		std::cout << "Server name: " << cgiEnv["SERVER_NAME"] << std::endl;
+		std::cout << "Server port: " << cgiEnv["SERVER_PORT"] << std::endl;
 
 		std::cout << "Script path: " << scriptPath << std::endl;
+
 		HandleCGI cgiHandler(scriptPath, cgiEnv, data);
 		std::cout << "Executing CGI\n";
 		std::string cgiOutput = cgiHandler.execute();
