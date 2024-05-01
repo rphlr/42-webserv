@@ -32,6 +32,10 @@ void HandleRequest::setRequest( std::string request ) {
 	_request = request;
 }
 
+// std::string HandleRequest::getFullRequest(std::string fullrequest) const {
+	
+// }
+
 void HandleRequest::handleRequest() {
 	std::string extracted_request = _request.substr(0, _request.find("\n"));
 	if (extracted_request.find("WebKitFormBoundary") != std::string::npos) {
@@ -40,7 +44,7 @@ void HandleRequest::handleRequest() {
 		// size_t boundary_start = _request.find("WebKitFormBoundary");
         // std::string boundary = _request.substr(boundary_start, _request.find("\r\n", boundary_start) - boundary_start);
 		_method = "POST";
-		// std::cout << "Boundary: " << boundary << std::endl;
+		std::cout << "Boundary: " << boundary << std::endl;
 
 		// Next lines are the headers
 		size_t headers_start = _request.find("\n") + 1;
@@ -55,16 +59,17 @@ void HandleRequest::handleRequest() {
 				std::string header_value = header_line.substr(separator + 2);
 				header_value.erase(std::remove(header_value.begin(), header_value.end(), '\r'), header_value.end());
 				_headers[header_name] = header_value;
-				// std::cout << "!!!!" << header_name << ": " << header_value << std::endl;
+				std::cout << "!!!!" << header_name << ": " << header_value << std::endl;
 			}
 		}
 		_headers["Content-Length"] = std::to_string(_request.size() - headers_end - 2);
-		// std::cout << "!!!!Content-Length: " << _headers["Content-Length"] << std::endl;
-		_path = "/cgi";
+		std::cout << "!!!!Content-Length: " << _headers["Content-Length"] << std::endl;
+		_path = "/cgi-bin/upload.php";
 		_protocol = "HTTP/1.1";
 	}
 	else
 	{
+		std::cout << "HTTP request" << std::endl;
 		extracted_request.erase(std::remove(extracted_request.begin(), extracted_request.end(), '\r'), extracted_request.end());
 		std::stringstream iss(extracted_request);
 		std::string segment;

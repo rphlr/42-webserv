@@ -12,6 +12,7 @@
 
 class HandleRequest {
 	public:
+		HandleRequest() = default;
 		HandleRequest( char *incoming_request );
 		~HandleRequest();
 		void handleRequest();

@@ -78,27 +78,27 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 		handleErrorFilePath(response_socket, 413);
 		return;
 	}
-	else if (path.find("/cgi") != std::string::npos) {
+	else if (path.find("/cgi-bin/") != std::string::npos) {
 		std::cout << "Handling CGI\n";
 		std::map<std::string, std::string> cgiEnv;
 		cgiEnv["REQUEST_METHOD"] = "POST";
 		std::cout << "Request method: " << cgiEnv["REQUEST_METHOD"] << std::endl;
-		std::string scriptPath = determineCgiScriptPath(path);
+		// std::string scriptPath = determineCgiScriptPath(path);
 
-		std::cout << "Script path: " << scriptPath << std::endl;
-		std::string postData = request.getBody();
-		std::cout << "Post data: " << postData << std::endl;
+		// std::cout << "Script path: " << scriptPath << std::endl;
+		std::string postData = request.getRequest();
+		std::cout << "Post data: " << postData << ";;;;;" << std::endl;
 		// handlePostData(postData);
-		cgiEnv["CONTENT_LENGTH"] = std::to_string(postData.size());
-		std::cout << "Content length: " << cgiEnv["CONTENT_LENGTH"] << std::endl;
-		cgiEnv["CONTENT_TYPE"] = request.getHeader("Content-Type");
+		// cgiEnv["CONTENT_LENGTH"] = std::to_string(postData.size());
+		// std::cout << "Content length: " << cgiEnv["CONTENT_LENGTH"] << std::endl;
+		// cgiEnv["CONTENT_TYPE"] = request.getHeader("Content-Type");
 
-		std::cout << "Script path: " << scriptPath << std::endl;
-		HandleCGI cgiHandler(scriptPath, cgiEnv, postData);
-		std::cout << "Executing CGI\n";
-		std::string cgiOutput = cgiHandler.execute();
+		// std::cout << "Script path: " << scriptPath << std::endl;
+		// HandleCGI cgiHandler(scriptPath, cgiEnv, postData);
+		// std::cout << "Executing CGI\n";
+		// std::string cgiOutput = cgiHandler.execute();
 
-		std::cout << "CGI output: " << cgiOutput << std::endl;
+		// std::cout << "CGI output: " << cgiOutput << std::endl;
 		// custom_send(response_socket, cgiOutput.c_str(), cgiOutput.size());
 	}
 	else {

@@ -192,12 +192,14 @@ void	ServerRunning::receiver(int receive_socket)
 	memset(_buffer, 0, sizeof(_buffer));
 	strcpy(_buffer, full_request.c_str());
 	FD_SET(receive_socket, &_write_fds);
+
 }
 
 void ServerRunning::handler(int response_socket) {
 	HandleRequest new_request(_buffer);
 	new_request.handleRequest();
 	std::string method = new_request.getMethod();
+	std::cout << "Buffer: " << _buffer << std::endl;
 
 	if (method == "GET")
 	{
