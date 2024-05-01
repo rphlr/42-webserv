@@ -147,9 +147,9 @@ void ServerRunning::run() {
 		if (FD_ISSET(i, &_read_fds) && i != _listen_socket)
 		{
 			receiver(i);
-		}
-		if (FD_ISSET(i, &_write_fds))
-		{
+		// }
+		// if (FD_ISSET(i, &_write_fds))
+		// {
 			// std::cout << MAGENTA << "Sending to client on fd " << i << RESET << "\n\n";
 			handler(i);
 			FD_CLR(i, &_write_fds);
