@@ -11,7 +11,8 @@ ServerRunning &ServerRunning::operator = (const ServerRunning &t)
 	if (this != &t)
 	{
 		_rootPath = t._rootPath;
-		memcpy(_buffer, t._buffer, sizeof(t._buffer));
+		// memcpy(_buffer, t._buffer, sizeof(t._buffer));
+		_full_request = t._full_request;
 		_new_socket = t._new_socket;
 		_listen_socket = t._listen_socket;
 		_max_nbr_of_sockets = t._max_nbr_of_sockets;
@@ -157,17 +158,22 @@ void ServerRunning::run() {
 	}
 }
 
+// std::string	&end_of_cgi(std::string &delim_cgi)
+// {
+// 	std::string end_of_cgi = delim_cgi + "--";
+// 	return end_of_cgi;
+// }
+
 //determine if chunked or unchunked by checking for transfer encoding: chunked
 void	ServerRunning::receiver(int receive_socket)
 {
-	std::string full_request;
-	int bytes_recv = 0;
-	char	tmp_buffer[10000];
+	int			bytes_recv = 0;
+	char		tmp_buffer[10000];
+	std::string	delim_cgi;
 
 	for (int i = 0; i < 100; i++) {
 		memset(tmp_buffer, 0, sizeof(tmp_buffer));
 		bytes_recv = recv(receive_socket, tmp_buffer, 10000, 0);
-		// std::cout << RED << "bytes recv(): " << bytes_recv << RESET << std::endl;
 		if (bytes_recv < 0)
 		{
 			if (i > 0)
@@ -182,44 +188,48 @@ void	ServerRunning::receiver(int receive_socket)
 				_max_nbr_of_sockets--;
 			return ;
 		}
-		full_request.append(tmp_buffer, bytes_recv);
-		if (bytes_recv < 10000) {
-			// std::cout << "found end of request" << std::endl;
-			break ;
+		std::cout << "bytes read in receiver: " << bytes_recv << std::endl;
+		_full_request.append(tmp_buffer, bytes_recv);
+
+		if (i == 0) {
+			std::stringstream str(_full_request);
+			std::string first_line;
+			std::getline(str, first_line);
+			std::cout << BLUE << "first request line: " << first_line << RESET << std::endl;
+			if (first_line.find("------WebKitFormBoundary") != std::string::npos) {
+				delim_cgi = first_line + "--";
+			}
 		}
+		if (bytes_recv < 0)
+			break;
+		if (_full_request.find(delim_cgi) != std::string::npos)
+			break;
 	}
-	// std::cout << "full_request in receiver: " << MAGENTA << full_request << RESET << std::endl;
-	memset(_buffer, 0, sizeof(_buffer));
-	strcpy(_buffer, full_request.c_str());
 	FD_SET(receive_socket, &_write_fds);
 
 }
 
 void ServerRunning::handler(int response_socket) {
-	HandleRequest new_request(_buffer);
+	std::cout << "full_request in handler: " << GREEN << _full_request << RESET << std::endl;
+	HandleRequest new_request(_full_request);
 	new_request.handleRequest();
 	std::string method = new_request.getMethod();
-	std::cout << "Buffer: " << _buffer << std::endl;
+	_full_request.clear();
 
 	if (method == "GET")
 	{
-		// std::cout << "GET method" << std::endl;
 		handleGet(new_request, response_socket);
 	}
 	else if (method == "POST")
 	{
-		// std::cout << "POST method" << std::endl;
 		handlePost(new_request, response_socket);
 	}
 	else if (method == "DELETE")
 	{
 		handleDelete(new_request, response_socket);
-		// std::cout << "DELETE method" << std::endl;
 	}
 	else
 	{
-		// if (method.empty())
-			// std::cout << "Unsupported method (it's empty) " << std::endl;
 		handleErrorFilePath(response_socket, 501);
 	}
 }

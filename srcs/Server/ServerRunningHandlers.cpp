@@ -87,7 +87,7 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 
 		// std::cout << "Script path: " << scriptPath << std::endl;
 		std::string postData = request.getRequest();
-		std::cout << "Post data: " << postData << ";;;;;" << std::endl;
+		std::cout << BLUE << "Post data: " << postData << ";;;;;" << RESET << std::endl;
 		// handlePostData(postData);
 		// cgiEnv["CONTENT_LENGTH"] = std::to_string(postData.size());
 		// std::cout << "Content length: " << cgiEnv["CONTENT_LENGTH"] << std::endl;

@@ -1,5 +1,5 @@
 #include "../../includes/Server/HandleRequest.hpp"
-#include <fstream> 
+#include <fstream>
 
 #define RESET "\033[0m"
 #define BLACK "\033[30m"
@@ -13,7 +13,9 @@
 #define BRIGHT_BLACK "\033[90m"
 #define BRIGHT_RED "\033[91m"
 
-HandleRequest::HandleRequest( char *incoming_request ) : _request(incoming_request) {
+HandleRequest::HandleRequest( std::string &incoming_request ) {
+	// std::cout << "incoming request: " << incoming_request << std::endl;
+	_request = incoming_request;
 }
 
 std::string HandleRequest::getRequest() const {
@@ -33,7 +35,7 @@ void HandleRequest::setRequest( std::string request ) {
 }
 
 // std::string HandleRequest::getFullRequest(std::string fullrequest) const {
-	
+
 // }
 
 void HandleRequest::handleRequest() {
