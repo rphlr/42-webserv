@@ -89,13 +89,21 @@ std::string ServerRunning::handlePostData(const std::string &postData) {
 	std::string buffer;
 	while (std::getline(ss, line) && line.find("------WebKitFormBoundary") == std::string::npos)
 		buffer += line + "\n";
-	std::cout << RED << "Buffer: " << buffer << RESET << std::endl;
+	// std::cout << RED << "Buffer: " << buffer << RESET << std::endl;
 	return buffer;
 }
 
 void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 	std::string path = request.getPath();
 	std::cout << "path: " << path << std::endl;
+	try {
+		std::stoi(request.getHeader("Content-Length"));
+	}
+	catch (std::exception &e) {
+		handleErrorFilePath(response_socket, 413);
+		return;
+	}
+
 	if (std::stoi(request.getHeader("Content-Length")) > _max_body_size)
 	{
 		handleErrorFilePath(response_socket, 413);

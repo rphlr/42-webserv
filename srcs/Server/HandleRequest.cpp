@@ -1,5 +1,5 @@
 #include "../../includes/Server/HandleRequest.hpp"
-#include <fstream> 
+#include <fstream>
 
 #define RESET "\033[0m"
 #define BLACK "\033[30m"
@@ -13,7 +13,9 @@
 #define BRIGHT_BLACK "\033[90m"
 #define BRIGHT_RED "\033[91m"
 
-HandleRequest::HandleRequest( char *incoming_request ) : _request(incoming_request) {
+HandleRequest::HandleRequest( std::string &incoming_request ) {
+	// std::cout << "incoming request: " << incoming_request << std::endl;
+	_request = incoming_request;
 }
 
 std::string HandleRequest::getRequest() const {
@@ -33,7 +35,7 @@ void HandleRequest::setRequest( std::string request ) {
 }
 
 // std::string HandleRequest::getFullRequest(std::string fullrequest) const {
-	
+
 // }
 
 void HandleRequest::handleRequest() {
@@ -44,7 +46,7 @@ void HandleRequest::handleRequest() {
 		// size_t boundary_start = _request.find("WebKitFormBoundary");
         // std::string boundary = _request.substr(boundary_start, _request.find("\r\n", boundary_start) - boundary_start);
 		_method = "POST";
-		std::cout << "Boundary: " << boundary << std::endl;
+		// std::cout << "Boundary: " << boundary << std::endl;
 
 		// Next lines are the headers
 		size_t headers_start = _request.find("\n") + 1;
@@ -59,7 +61,7 @@ void HandleRequest::handleRequest() {
 				std::string header_value = header_line.substr(separator + 2);
 				header_value.erase(std::remove(header_value.begin(), header_value.end(), '\r'), header_value.end());
 				_headers[header_name] = header_value;
-				std::cout << "!!!!" << header_name << ": " << header_value << std::endl;
+				// std::cout << "!!!!" << header_name << ": " << header_value << std::endl;
 			}
 		}
 		_headers["Content-Length"] = std::to_string(_request.size() - headers_end - 2);
@@ -112,16 +114,16 @@ void HandleRequest::handleRequest() {
 }
 
 HandleRequest::~HandleRequest() {
-    std::map<std::string, std::string>::iterator contentLengthHeader = _headers.find("Content-Length");
-	// std::cout << "Content-Length: " << contentLengthHeader->second << std::endl;
-    if (contentLengthHeader != _headers.end()) {
-        int contentLength = std::stoi(contentLengthHeader->second);
-		char *body = new char[contentLength + 1];
-		memset(body, 0, contentLength + 1);
-		memcpy(body, _request.c_str() + _request.size() - contentLength, contentLength);
-		_body = body;
-		delete[] body;
-    }
+    // std::map<std::string, std::string>::iterator contentLengthHeader = _headers.find("Content-Length");
+	// // std::cout << "Content-Length: " << contentLengthHeader->second << std::endl;
+    // if (contentLengthHeader != _headers.end()) {
+    //     int contentLength = std::stoi(contentLengthHeader->second);
+	// 	char *body = new char[contentLength + 1];
+	// 	memset(body, 0, contentLength + 1);
+	// 	memcpy(body, _request.c_str() + _request.size() - contentLength, contentLength);
+	// 	_body = body;
+	// 	delete[] body;
+    // }
 }
 
 std::string HandleRequest::getBody() const {

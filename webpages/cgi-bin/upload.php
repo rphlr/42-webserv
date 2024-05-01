@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL);
 $pwd = getcwd();
-$targetDir = "/uploads";
+$targetDir = "webpages/uploads";
 
 if (!is_dir($targetDir)) {
     if (!mkdir($targetDir, 0777, true)) {

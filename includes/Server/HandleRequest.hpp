@@ -12,7 +12,7 @@
 
 class HandleRequest {
 	public:
-		HandleRequest( char *incoming_request );
+		HandleRequest( std::string &incoming_request );
 		~HandleRequest();
 		void handleRequest();
 

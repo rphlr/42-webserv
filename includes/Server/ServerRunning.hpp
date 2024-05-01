@@ -46,6 +46,7 @@ public:
 private:
 	std::string _rootPath;
 	char _buffer[1000000];
+	std::string _full_request;
 	int _new_socket;
 	int _listen_socket;
 	int _max_nbr_of_sockets;
