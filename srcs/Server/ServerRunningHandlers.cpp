@@ -67,7 +67,30 @@ void ServerRunning::handleCss(int response_socket)
 }
 
 std::string ServerRunning::determineCgiScriptPath(const std::string& requestPath) {
-	return this->_rootPath + requestPath.substr(17);
+	std::string rootPath = this->_rootPath;
+	std::string scriptPath = rootPath + requestPath;
+	return scriptPath;
+}
+
+#include <sstream>
+#include <string>
+#include <map>
+
+std::string ServerRunning::handlePostData(const std::string &postData) {
+	// remove the 4 first lines
+	// stock the rest in a buffer until the line starting by "------WebKitFormBoundary"
+	std::stringstream ss(postData);
+	std::string line;
+
+	// while 4 lines
+	for (int i = 0; i < 4; i++)
+		std::getline(ss, line);
+	// while not "------WebKitFormBoundary" save in the buffer
+	std::string buffer;
+	while (std::getline(ss, line) && line.find("------WebKitFormBoundary") == std::string::npos)
+		buffer += line + "\n";
+	std::cout << RED << "Buffer: " << buffer << RESET << std::endl;
+	return buffer;
 }
 
 void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
@@ -83,23 +106,22 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 		std::map<std::string, std::string> cgiEnv;
 		cgiEnv["REQUEST_METHOD"] = "POST";
 		std::cout << "Request method: " << cgiEnv["REQUEST_METHOD"] << std::endl;
-		// std::string scriptPath = determineCgiScriptPath(path);
+		std::string scriptPath = determineCgiScriptPath(path);
 
 		// std::cout << "Script path: " << scriptPath << std::endl;
 		std::string postData = request.getRequest();
-		std::cout << "Post data: " << postData << ";;;;;" << std::endl;
-		// handlePostData(postData);
-		// cgiEnv["CONTENT_LENGTH"] = std::to_string(postData.size());
-		// std::cout << "Content length: " << cgiEnv["CONTENT_LENGTH"] << std::endl;
-		// cgiEnv["CONTENT_TYPE"] = request.getHeader("Content-Type");
+		std::string data = handlePostData(postData);
+		cgiEnv["CONTENT_LENGTH"] = std::to_string(data.size());
+		std::cout << "Content length: " << cgiEnv["CONTENT_LENGTH"] << std::endl;
+		cgiEnv["CONTENT_TYPE"] = request.getHeader("Content-Type");
 
-		// std::cout << "Script path: " << scriptPath << std::endl;
-		// HandleCGI cgiHandler(scriptPath, cgiEnv, postData);
-		// std::cout << "Executing CGI\n";
-		// std::string cgiOutput = cgiHandler.execute();
+		std::cout << "Script path: " << scriptPath << std::endl;
+		HandleCGI cgiHandler(scriptPath, cgiEnv, data);
+		std::cout << "Executing CGI\n";
+		std::string cgiOutput = cgiHandler.execute();
 
-		// std::cout << "CGI output: " << cgiOutput << std::endl;
-		// custom_send(response_socket, cgiOutput.c_str(), cgiOutput.size());
+		std::cout << "CGI output: " << cgiOutput << std::endl;
+		custom_send(response_socket, cgiOutput.c_str(), cgiOutput.size());
 	}
 	else {
 		std::string homePath = "/default_webpages/siteHome.html";

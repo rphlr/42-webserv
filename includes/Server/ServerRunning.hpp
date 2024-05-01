@@ -74,6 +74,7 @@ private:
 	void handleFilePath(int response_socket, std::string &path);
 	void handleErrorFilePath(int response_socket, int error_code);
 	void handleCss(int response_socket);
+	std::string handlePostData(const std::string &postData);
 
 	void checkIfRedirectionNeeded(int response_socket, std::string &path_to_check, std::string &method);
 	std::string generateDirectoryListing(const std::string& directoryPath);

@@ -183,7 +183,7 @@ void	ServerRunning::receiver(int receive_socket)
 			return ;
 		}
 		full_request.append(tmp_buffer, bytes_recv);
-		if (bytes_recv < 10000) {
+		if (bytes_recv < 0) {
 			// std::cout << "found end of request" << std::endl;
 			break ;
 		}
