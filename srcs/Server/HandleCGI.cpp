@@ -18,6 +18,7 @@ void HandleCGI::prepareEnvironment() {
         setenv(it->first.c_str(), it->second.c_str(), 1);
         std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
     }
+    
 }
 
 std::string HandleCGI::execute() {

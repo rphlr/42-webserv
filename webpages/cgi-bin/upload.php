@@ -1,7 +1,17 @@
 <?php
 error_reporting(E_ALL);
+
+$filename = getenv('FILENAME');
+$tempFile = "/tmp/$filename";
 $pwd = getcwd();
-$targetDir = "webpages/uploads";
+$targetDir = "$pwd/webpages/default_webpages/uploads";
+$targetFile = $targetDir . "/" . $filename;
+$content_type = getenv('CONTENT_TYPE');
+$size = getenv('CONTENT_LENGTH');
+$port = getenv('SERVER_PORT');
+$method = getenv('REQUEST_METHOD');
+$server_software = getenv('SERVER_SOFTWARE');
+$redirect_status = getenv('REDIRECT_STATUS');
 
 if (!is_dir($targetDir)) {
     if (!mkdir($targetDir, 0777, true)) {
@@ -10,14 +20,15 @@ if (!is_dir($targetDir)) {
     }
 }
 
-$targetFile = $targetDir . basename($_FILES["file"]["name"]);
+
+$targetFile = $targetDir . "/" . $filename;
 error_log("Uploaded file target name : " . $targetFile);
 
 $uploadOk = 1;
 
 // Check if file is an image
 if(isset($_POST["submit"])) {
-    $check = getimagesize($_FILES["file"]["tmp_name"]);
+    $check = getimagesize($_FILES["FILENAME"]["tmp_name"]);
     if($check !== false) {
         $uploadOk = 1;
     } else {
@@ -33,26 +44,30 @@ if (file_exists($targetFile)) {
 }
 
 // Check file size
-else if ($_FILES["file"]["size"] > 500000) {
+else if ($size > 500000) {
     echo "Sorry, your file is too large.\n";
     $uploadOk = 0;
 }
 
-// Allow certain file formats
-else if(!in_array($imageFileType, ['jpg', 'png', 'jpeg', 'gif'])) {
-    echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.\n";
-    $uploadOk = 0;
-}
+// print all the environment variables and print the file content
+echo "Content-type: " . $content_type . "\n";
+echo "Content-length: " . $size . "\n";
+echo "Port: " . $port . "\n";
+echo "Method: " . $method . "\n";
+echo "Server software: " . $server_software . "\n";
+echo "Filename: " . $filename . "\n";
+echo "Target file: " . $targetFile . "\n";
 
-// Check if $uploadOk is set to 0 by an error
-if ($uploadOk == 0) {
-    echo "Sorry, your file was not uploaded.";
-} else {
-    if (move_uploaded_file($_FILES["file"]["tmp_name"], $targetFile)) {
-        echo "The file ". htmlspecialchars(basename($_FILES["file"]["name"])). " has been uploaded.";
-    } else {
-        error_log("Failed to move uploaded file.");
+if (file_exists($targetFile))
+    echo "Sorry, file already exists.\n";
+else {
+    // Tentative de déplacement du fichier temporaire vers le répertoire cible
+    if (rename($tempFile, $targetFile))
+        echo "The file " . htmlspecialchars($filename) . " has been uploaded successfully.";
+    else {
+        error_log("Failed to move the file from temp directory.");
         echo "Sorry, there was an error uploading your file.";
     }
 }
+
 ?>

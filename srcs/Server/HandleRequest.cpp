@@ -1,5 +1,6 @@
 #include "../../includes/Server/HandleRequest.hpp"
 #include <fstream>
+#include <dirent.h>
 
 #define RESET "\033[0m"
 #define BLACK "\033[30m"
@@ -37,8 +38,49 @@ void HandleRequest::setRequest( std::string request ) {
 	_request = request;
 }
 
+std::string HandleRequest::listed_files(std::string path)
+{
+	std::string files;
+	DIR *dir;
+	struct dirent *ent;
+	if ((dir = opendir(path.c_str())) != NULL)
+	{
+		while ((ent = readdir(dir)) != NULL)
+		{
+			if (ent->d_name[0] != '.')
+			{
+				files += "\t\t\t\t\"" + std::string(ent->d_name) + "\",\n";
+			}
+		}
+		files.pop_back();
+		files.pop_back();
+
+		files += "\n";
+		closedir(dir);
+	}
+	else
+	{
+		perror("could not open directory");
+	}
+	return files;
+}
+
 void HandleRequest::handleRequest() {
 	std::string extracted_request = _request.substr(0, _request.find("\n"));
+
+
+	std::ofstream file("webpages/cgi-bin/files.json");
+	file << "{\n";
+	file << "\t\"files\": [\n";
+
+	std::string path = "webpages/default_webpages/uploads";
+	std::string files = listed_files(path);
+
+	file << files;
+	file << "\t\t\t]\n";
+	file << "}\n";
+	file.close();
+
 	if (extracted_request.find("WebKitFormBoundary") != std::string::npos) {
 		std::cout << "CGI request" << std::endl;
 		std::string boundary = extracted_request.substr(extracted_request.find("WebKitFormBoundary"));
@@ -83,6 +125,9 @@ void HandleRequest::handleRequest() {
 		_method = segments[0];
 		_path = segments[1];
 		_protocol = segments[2];
+
+		// if (_method == "DELETE")
+		// 	_path = _path.substr(0, _path.find("?"));
 
 		// Next lines are the headers
 		size_t headers_start = _request.find("\r\n") + 2;

@@ -127,6 +127,8 @@ void ServerRunning::run() {
 		}
 		return;
 	}
+
+
 	for (int i = 0; i <= _max_nbr_of_sockets; i++)
 	{
 		if (FD_ISSET(i, &_read_fds) && i == _listen_socket)

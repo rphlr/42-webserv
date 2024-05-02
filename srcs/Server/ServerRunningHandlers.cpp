@@ -121,38 +121,33 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 	else if (path.find("/cgi-bin/") != std::string::npos) {
 		std::cout << "Handling CGI\n";
 		std::map<std::string, std::string> cgiEnv;
-		cgiEnv["REQUEST_METHOD"] = "POST";
 		std::cout << "Request method: " << cgiEnv["REQUEST_METHOD"] << std::endl;
 		std::string scriptPath = determineCgiScriptPath(path);
 
 		std::string postData = request.getRequest();
 		std::string data = handlePostData(postData);
+		// save data to temp file
+		std::string tempFilePath = "/tmp/" + getFileName(postData);
+		std::ofstream tempFile(tempFilePath, std::ios::out | std::ios::binary);
+		tempFile << data;
+		tempFile.close();
+
+		cgiEnv["REQUEST_METHOD"] = "POST";
 		cgiEnv["CONTENT_LENGTH"] = std::to_string(data.size());
 		cgiEnv["CONTENT_TYPE"] = request.getHeader("Content-Type");
 		cgiEnv["SCRIPT_NAME"] = scriptPath;
 		cgiEnv["FILENAME"] = getFileName(postData);
 		cgiEnv["SERVER_PROTOCOL"] = request.getProtocol();
 		cgiEnv["SERVER_SOFTWARE"] = "webserv";
-		cgiEnv["SERVER_NAME"] = request.getHeader("Host");
 		cgiEnv["SERVER_PORT"] = std::to_string(_port);
-
-		std::cout << "Content length: " << cgiEnv["CONTENT_LENGTH"] << std::endl;
-		std::cout << "Content type: " << cgiEnv["CONTENT_TYPE"] << std::endl;
-		std::cout << "Script name: " << cgiEnv["SCRIPT_NAME"] << std::endl;
-		std::cout << "File path info: " << cgiEnv["FILENAME"] << std::endl;
-		std::cout << "Server protocol: " << cgiEnv["SERVER_PROTOCOL"] << std::endl;
-		std::cout << "Server software: " << cgiEnv["SERVER_SOFTWARE"] << std::endl;
-		std::cout << "Server name: " << cgiEnv["SERVER_NAME"] << std::endl;
-		std::cout << "Server port: " << cgiEnv["SERVER_PORT"] << std::endl;
-
-		std::cout << "Script path: " << scriptPath << std::endl;
+		cgiEnv["REDIRECT_STATUS"] = "200";
 
 		HandleCGI cgiHandler(scriptPath, cgiEnv, data);
 		std::cout << "Executing CGI\n";
 		std::string cgiOutput = cgiHandler.execute();
 
 		std::cout << "CGI output: " << cgiOutput << std::endl;
-		custom_send(response_socket, cgiOutput.c_str(), cgiOutput.size());
+		// custom_send(response_socket, cgiOutput.c_str(), cgiOutput.size());
 	}
 	else {
 		std::string homePath = "/default_webpages/siteHome.html";
@@ -161,26 +156,31 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 }
 
 void ServerRunning::handleDelete(HandleRequest &request, int response_socket) {
-	// (void) request;
-	// (void) response_socket;
-	// Implement the DELETE request
-
 	std::string path = request.getPath();
-	std::string filePath = this->_rootPath + path;
-	std::ifstream file(filePath);
-	if (!file.good())
-	{
-		handleErrorFilePath(response_socket, 404);
-	}
-	else {
-		if (remove(filePath.c_str()) != 0)
-		{
-			handleErrorFilePath(response_socket, 500);
-		}
-		else {
-			handleErrorFilePath(response_socket, 204);
-		}
-	}
-	// send(_new_socket, response.c_str(), response.size(), 0);
-	// return;
+
+	std::string filename = path.substr(path.find("file=") + 5);
+
+	std::cout << "Filename: " << filename << std::endl;
+	std::cout << "Path: " << path << std::endl;
+
+	std::string filePath = _rootPath + "/webpages/default_webpages/uploads/" + filename;
+	std::cout << "File path: " << filePath << std::endl;
+
+	std::string scriptPath = determineCgiScriptPath("/cgi-bin/deleteFile.php");
+	std::map<std::string, std::string> cgiEnv;
+	cgiEnv["REQUEST_METHOD"] = "DELETE";
+	cgiEnv["SCRIPT_NAME"] = scriptPath;
+	cgiEnv["FILENAME"] = filename;
+	cgiEnv["SERVER_PROTOCOL"] = request.getProtocol();
+	cgiEnv["SERVER_SOFTWARE"] = "webserv";
+	cgiEnv["SERVER_PORT"] = std::to_string(_port);
+	cgiEnv["REDIRECT_STATUS"] = "200";
+
+	HandleCGI cgiHandler(scriptPath, cgiEnv, "");
+	std::string cgiOutput = cgiHandler.execute();
+	std::cout << "CGI output: " << cgiOutput << std::endl;
+
+
+	std::string homePath = "/default_webpages/siteHome.html";
+	handleFilePath(response_socket, homePath);
 }

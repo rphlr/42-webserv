@@ -19,7 +19,6 @@
 	</nav>
 
 	<main>
-    <!-- Begin Sign Up Section -->
 		<section id="signup">
 			<h2>Sign Up for Free</h2>
 			
@@ -48,7 +47,6 @@
 				<button type="submit" >GET STARTED</button>
 			</form>
 		</section>
-		<!-- End Sign Up Section -->
 
 		<section id="upload">
 			<h2>Upload File here</h2>
@@ -59,9 +57,92 @@
 		</section>
 
 		<section id="download">
+			<h2>Download Files here</h2>
+			<div id="file-links">Loading files...</div>
+
+			<!-- <script>
+				fetch('../cgi-bin/files.json')
+				.then(response => response.json())
+				.then(data => {
+					const container = document.getElementById('file-links');
+					if (data.files && data.files.length > 0) {
+					const list = document.createElement('ul');
+					data.files.forEach(file => {
+						const listItem = document.createElement('li');
+						const link = document.createElement('a');
+						link.href = `../default_webpages/uploads/${file}`;
+						link.textContent = file;
+						link.download = file;
+						listItem.appendChild(link);
+						list.appendChild(listItem);
+						// echo the path to link
+						console.log(link.href);
+					});
+					container.innerHTML = '';
+					container.appendChild(list);
+
+					} else {
+					container.textContent = 'No files to download.';
+					}
+				})
+				.catch(() => {
+					document.getElementById('file-links').textContent = 'Failed to load files.';
+				});
+			</script> -->
+			<script>
+				fetch('../cgi-bin/files.json')
+				.then(response => response.json())
+				.then(data => {
+					const container = document.getElementById('file-links');
+					if (data.files && data.files.length > 0) {
+						const list = document.createElement('ul');
+						data.files.forEach(file => {
+							const listItem = document.createElement('li');
+				
+							// Créer le bouton de suppression
+							const deleteButton = document.createElement('button');
+							deleteButton.textContent = 'Supprimer';
+							deleteButton.onclick = function() { deleteFile(file); };
+							listItem.appendChild(deleteButton);
+				
+							// Créer le lien de téléchargement
+							const link = document.createElement('a');
+							link.href = `../default_webpages/uploads/${file}`;
+							link.textContent = file;
+							link.download = file;
+							listItem.appendChild(link);
+				
+							list.appendChild(listItem);
+						});
+						container.innerHTML = '';
+						container.appendChild(list);
+					} else {
+						container.textContent = 'No files to download.';
+					}
+				})
+				.catch(() => {
+					document.getElementById('file-links').textContent = 'Failed to load files.';
+				});
+				
+				// Fonction pour supprimer le fichier
+				function deleteFile(fileName) {
+					fetch(`../cgi-bin/deleteFile.php?file=${fileName}`, { method: 'DELETE' })
+					.then(response => response.json())
+					
+					window.location.reload(); 
+				}
+
+				// function deleteFile(fileName) {
+				// 	fetch(`../cgi-bin/deleteFile.php?file=${fileName}`, { method: 'DELETE' })
+				// 	.then(response => response.json())
+				// }
+				</script>				
+		</section>
+
+		<!-- <section id="download">
 			<h2>Download File here</h2>
 			<p>Download here [insert download]</p>
-		</section>
+		</section> -->
 	</main>
 
 	<footer>

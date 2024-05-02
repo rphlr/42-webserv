@@ -31,6 +31,8 @@ class HandleRequest {
         std::string getHeader(const std::string& headerName) const;
         std::string getBody() const;
 
+		std::string listed_files(std::string path);
+
 	private:
 		std::string _request;
 		std::string _method;
