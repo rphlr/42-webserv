@@ -7,6 +7,68 @@ void ServerRunning::handleGet(HandleRequest &request, int response_socket) {
 	if (path.size() >= 4 && path.substr(path.size() - 4) == ".css") {
 		handleCss(response_socket);
 	}
+	else if (path.find("add_cookie.py") != std::string::npos) {
+		std::string scriptPath = determineCgiScriptPath("/cgi-bin/add_cookie.py");
+		std::map<std::string, std::string> cgiEnv;
+		cgiEnv["HTTP_COOKIE"] = request.getHeader("Cookie");
+		cgiEnv["REQUEST_METHOD"] = "GET";
+		cgiEnv["SCRIPT_NAME"] = scriptPath;
+		cgiEnv["SERVER_PROTOCOL"] = request.getProtocol();
+		cgiEnv["SERVER_SOFTWARE"] = "webserv";
+		cgiEnv["SERVER_PORT"] = std::to_string(_port);
+		cgiEnv["REDIRECT_STATUS"] = "200";
+		cgiEnv["QUERY_STRING"] = request.getPath().substr(request.getPath().find("?") + 1);
+
+		HandleCGI cgiHandler(scriptPath, cgiEnv, "");
+		std::string cgiOutput = cgiHandler.execute();
+
+		// Lecture du fichier dans une std::string
+		std::ifstream file(_rootPath + "/default_webpages/cgi.html");
+		std::stringstream buffer;
+		buffer << file.rdbuf();
+		std::string content = buffer.str();
+
+		// Recherche et remplacement dans la std::string
+		const std::string searchText = "<!-- cookieAddingReplacement -->";
+		const std::string replaceText = "<p><b>Cookie added!</b></p>";
+		size_t pos = content.find(searchText);
+		if (pos != std::string::npos)
+			content.replace(pos, searchText.length(), replaceText);
+
+		// Envoyer la réponse modifiée
+		sendResponse(response_socket, content, 200, "text/html");
+	}
+	else if (path.find("get_cookie.py") != std::string::npos) {
+		std::string scriptPath = determineCgiScriptPath("/cgi-bin/get_cookie.py");
+		std::map<std::string, std::string> cgiEnv;
+		cgiEnv["HTTP_COOKIE"] = request.getHeader("Cookie");
+		cgiEnv["REQUEST_METHOD"] = "GET";
+		cgiEnv["SCRIPT_NAME"] = scriptPath;
+		cgiEnv["SERVER_PROTOCOL"] = request.getProtocol();
+		cgiEnv["SERVER_SOFTWARE"] = "webserv";
+		cgiEnv["SERVER_PORT"] = std::to_string(_port);
+		cgiEnv["REDIRECT_STATUS"] = "200";
+		cgiEnv["QUERY_STRING"] = request.getPath().substr(request.getPath().find("?") + 1);
+
+		HandleCGI cgiHandler(scriptPath, cgiEnv, "");
+		std::string cgiOutput = cgiHandler.execute();
+
+		// Lecture du fichier dans une std::string
+		std::ifstream file(_rootPath + "/default_webpages/cgi.html");
+		std::stringstream buffer;
+		buffer << file.rdbuf();
+		std::string content = buffer.str();
+
+		// Recherche et remplacement dans la std::string
+		const std::string searchText = "<!-- cookieGettingReplacement -->";
+		const std::string replaceText = "<p><b>Cookie: " + cgiOutput + "</b></p>";
+		size_t pos = content.find(searchText);
+		if (pos != std::string::npos)
+			content.replace(pos, searchText.length(), replaceText);
+		
+		// Envoyer la réponse modifiée
+		sendResponse(response_socket, content, 200, "text/html");
+	}
 	else {
 		checkIfRedirectionNeeded(response_socket, path, method);
 	}
@@ -83,7 +145,7 @@ std::string ServerRunning::handlePostData(const std::string &postData) {
 	for (int i = 0; i < 4; i++)
 		std::getline(ss, line);
 	std::string buffer;
-	while (std::getline(ss, line) && line.find("------WebKitFormBoundary") == std::string::npos)
+	while (std::getline(ss, line) && line.find("WebKitFormBoundary") == std::string::npos)
 		buffer += line + "\n";
 	return buffer;
 }
@@ -98,13 +160,11 @@ std::string ServerRunning::getFileName(const std::string &postData) {
 	
 	filePath = line.substr(line.find("filename=") + 10);
 	filePath = filePath.substr(0, filePath.find("\""));
-	std::cout << RED << "File path: " << filePath << RESET << std::endl;
 	return filePath;
 }
 
 void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 	std::string path = request.getPath();
-	// std::cout << "path: " << path << std::endl;
 	try {
 		std::stoi(request.getHeader("Content-Length"));
 	}
@@ -118,15 +178,12 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 		handleErrorFilePath(response_socket, 413);
 		return;
 	}
-	else if (path.find("/cgi-bin/") != std::string::npos) {
-		std::cout << "Handling CGI\n";
+	else if (path.find("upload=true") != std::string::npos) {
 		std::map<std::string, std::string> cgiEnv;
-		std::cout << "Request method: " << cgiEnv["REQUEST_METHOD"] << std::endl;
-		std::string scriptPath = determineCgiScriptPath(path);
+		std::string scriptPath = determineCgiScriptPath("/cgi-bin/upload.php");
 
 		std::string postData = request.getRequest();
 		std::string data = handlePostData(postData);
-		// save data to temp file
 		std::string tempFilePath = "/tmp/" + getFileName(postData);
 		std::ofstream tempFile(tempFilePath, std::ios::out | std::ios::binary);
 		tempFile << data;
@@ -143,11 +200,75 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 		cgiEnv["REDIRECT_STATUS"] = "200";
 
 		HandleCGI cgiHandler(scriptPath, cgiEnv, data);
-		std::cout << "Executing CGI\n";
 		std::string cgiOutput = cgiHandler.execute();
+		std::cout << cgiOutput << std::endl;
 
-		std::cout << "CGI output: " << cgiOutput << std::endl;
-		// custom_send(response_socket, cgiOutput.c_str(), cgiOutput.size());
+		// // Lecture du fichier dans une std::string
+		// std::ifstream file(_rootPath + "/default_webpages/cgi.html");
+		// std::stringstream buffer;
+		// buffer << file.rdbuf();
+
+		// // Recherche et remplacement dans la std::string
+		// const std::string searchText = "<!-- fileUploadReplacement -->";
+		// const std::string replaceText = "<p><b>" + cgiOutput + "</b></p>";
+		// size_t pos = buffer.str().find(searchText);
+		// if (pos != std::string::npos)
+		// 	buffer.str().replace(pos, searchText.length(), replaceText);
+		
+		// // Envoyer la réponse modifiée
+		// sendResponse(response_socket, buffer.str(), 200, "text/html");
+	}
+	else if (path.find("?file=") != std::string::npos) {
+		std::cout << "Code execution" << std::endl;
+		std::map<std::string, std::string> cgiEnv;
+
+		std::string postData = request.getRequest();
+		std::string data = handlePostData(postData);
+		std::string tempFilePath = _rootPath + "/cgi-bin/" + getFileName(postData);
+		std::ofstream tempFile(tempFilePath, std::ios::out | std::ios::binary);
+		tempFile << data;
+		tempFile.close();
+		// std::cout << "Temp file created in " << tempFilePath << std::endl;
+		std::string scriptPath = determineCgiScriptPath("default_webpages/executeCode.html?" + getFileName(postData));
+
+		cgiEnv["REQUEST_METHOD"] = "POST";
+		cgiEnv["CONTENT_LENGTH"] = request.getHeader("Content-Length");
+		cgiEnv["CONTENT_TYPE"] = request.getHeader("Content-Type");
+		cgiEnv["SCRIPT_NAME"] = scriptPath;
+		cgiEnv["SERVER_PROTOCOL"] = request.getProtocol();
+		cgiEnv["SERVER_SOFTWARE"] = "webserv";
+		cgiEnv["SERVER_PORT"] = std::to_string(_port);
+		cgiEnv["REDIRECT_STATUS"] = "200";
+		cgiEnv["FILENAME"] = getFileName(postData);
+
+		HandleCGI cgiHandler(scriptPath, cgiEnv, data);
+		// HandleCGI cgiHandler(scriptPath, cgiEnv, request.getBody());
+		std::string cgiOutput = cgiHandler.execute();
+		std::cout << cgiOutput << std::endl;
+
+		// Lecture du fichier dans une std::string
+		std::ifstream file(_rootPath + "/default_webpages/executeCode.html");
+		std::stringstream buffer;
+		buffer << file.rdbuf();
+		
+		// Extraction de la chaîne du stringstream
+		std::string content = buffer.str();
+
+		// Recherche et remplacement dans la std::string
+		const std::string searchText = "<!-- results -->";
+		const std::string replaceText = cgiOutput;
+		size_t pos = content.find(searchText);
+
+		if (pos != std::string::npos) {
+			content.replace(pos, searchText.length(), replaceText);
+		}
+
+		// Remettre la chaîne modifiée dans le stringstream
+		buffer.str("");
+		buffer << content;
+
+		// Envoyer la réponse modifiée
+		sendResponse(response_socket, content, 200, "text/html");
 	}
 	else {
 		std::string homePath = "/default_webpages/siteHome.html";
@@ -156,15 +277,10 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 }
 
 void ServerRunning::handleDelete(HandleRequest &request, int response_socket) {
+	// get filename from request
 	std::string path = request.getPath();
-
 	std::string filename = path.substr(path.find("file=") + 5);
-
-	std::cout << "Filename: " << filename << std::endl;
-	std::cout << "Path: " << path << std::endl;
-
 	std::string filePath = _rootPath + "/webpages/default_webpages/uploads/" + filename;
-	std::cout << "File path: " << filePath << std::endl;
 
 	std::string scriptPath = determineCgiScriptPath("/cgi-bin/deleteFile.php");
 	std::map<std::string, std::string> cgiEnv;
@@ -178,9 +294,5 @@ void ServerRunning::handleDelete(HandleRequest &request, int response_socket) {
 
 	HandleCGI cgiHandler(scriptPath, cgiEnv, "");
 	std::string cgiOutput = cgiHandler.execute();
-	std::cout << "CGI output: " << cgiOutput << std::endl;
-
-
-	std::string homePath = "/default_webpages/siteHome.html";
-	handleFilePath(response_socket, homePath);
+	std::cout << cgiOutput << std::endl;
 }

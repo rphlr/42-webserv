@@ -18,9 +18,18 @@
 	</nav>
 
 	<main>
-		<section id="home">
-			<h2>Home</h2>
-			<p>Welcome to website magnifique. Have fun and don't get lost!</p>
+		<section id="form">
+			<h2>Execute Code</h2>
+			<p class="info">You can execute code with the following extensions: .php, .py, .pl, .sh</p> </br>
+			<form method="post" enctype="multipart/form-data" action="executeCode.html">
+				<label for="file">Upload a file:</label>
+				<input type="file" name="file" id="file">
+				<input type="submit" value="Execute now!">
+			</form>
+			<h3>Results:</h3>
+			<pre>
+				<!-- results -->
+			</pre>
 		</section>
 	</main>
 

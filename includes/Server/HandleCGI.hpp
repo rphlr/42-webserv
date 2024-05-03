@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include "../42webserv.hpp"
 
 class HandleCGI {
     public:
@@ -19,8 +20,6 @@ class HandleCGI {
         std::string postData;
 
         void prepareEnvironment();
-
-        std::string captureOutput();
 };
 
 #endif

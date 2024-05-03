@@ -160,12 +160,6 @@ void ServerRunning::run() {
 	}
 }
 
-// std::string	&end_of_cgi(std::string &delim_cgi)
-// {
-// 	std::string end_of_cgi = delim_cgi + "--";
-// 	return end_of_cgi;
-// }
-
 //determine if chunked or unchunked by checking for transfer encoding: chunked
 void	ServerRunning::receiver(int receive_socket)
 {
@@ -190,7 +184,6 @@ void	ServerRunning::receiver(int receive_socket)
 				_max_nbr_of_sockets--;
 			return ;
 		}
-		// std::cout << "bytes read in receiver: " << bytes_recv << std::endl;
 		_full_request.append(tmp_buffer, bytes_recv);
 
 		if (i == 0) {
@@ -198,7 +191,7 @@ void	ServerRunning::receiver(int receive_socket)
 			std::string first_line;
 			std::getline(str, first_line);
 			// std::cout << BLUE << "first request line: " << first_line << RESET << std::endl;
-			if (first_line.find("------WebKitFormBoundary") != std::string::npos) {
+			if (first_line.find("WebKitFormBoundary") != std::string::npos) {
 				delim_cgi = first_line + "--";
 			}
 		}
@@ -212,8 +205,8 @@ void	ServerRunning::receiver(int receive_socket)
 }
 
 void ServerRunning::handler(int response_socket) {
-	// std::cout << "full_request in handler: " << GREEN << _full_request << RESET << std::endl;
 	HandleRequest new_request(_full_request);
+	// std::cout << "Request: " << _full_request << std::endl;
 	new_request.handleRequest();
 	std::string method = new_request.getMethod();
 	_full_request.clear();

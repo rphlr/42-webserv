@@ -16,7 +16,6 @@ HandleCGI::~HandleCGI() {}
 void HandleCGI::prepareEnvironment() {
     for (std::map<std::string, std::string>::const_iterator it = env.begin(); it != env.end(); ++it) {
         setenv(it->first.c_str(), it->second.c_str(), 1);
-        std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
     }
     
 }
@@ -30,6 +29,20 @@ std::string HandleCGI::execute() {
         return "";
     }
 
+    bool codeExecution = false;
+
+    // Exécute le script CGI
+    if (scriptPath.find("?") != std::string::npos) {
+        // then it's something like this /Volumes/Code/42-school/Cursus/Rank05/webserv/webpagesdefault_webpages/executeCode.html?test.py
+        // so we need to extract the path to the script (test.py in cgi-bin)
+        scriptPath = scriptPath.substr(scriptPath.find("?") + 1);
+        char *cwd = getcwd(NULL, 0);
+        std::string rootPath = std::string(cwd) + "/" + "webpages/cgi-bin/";
+        free(cwd);
+        scriptPath = rootPath + scriptPath;
+        std::cout << "Script path: " << scriptPath << std::endl;
+        codeExecution = true;
+    }
     pid_t pid = fork();
     if (pid == -1) {
         perror("fork");
@@ -53,20 +66,17 @@ std::string HandleCGI::execute() {
 
         prepareEnvironment();
 
-		// if (!postData.empty()) {
-		// 	std::cout << "POST data: " << postData << std::endl;
-		// }
-
-		// Exécute le script CGI
-		if (scriptPath.find(".php") != std::string::npos) {
+		if (scriptPath.find(".php") != std::string::npos)
 			execl("/usr/bin/php", "php", scriptPath.c_str(), (char *)NULL);
-		} else if (scriptPath.find(".py") != std::string::npos) {
+		else if (scriptPath.find(".py") != std::string::npos)
 			execl("/usr/bin/python3", "python3", scriptPath.c_str(), (char *)NULL);
-		} else if (scriptPath.find(".pl") != std::string::npos) {
+		else if (scriptPath.find(".pl") != std::string::npos)
 			execl("/usr/bin/perl", "perl", scriptPath.c_str(), (char *)NULL);
-		} else {
+        else if (scriptPath.find(".sh") != std::string::npos)
+            execl("/bin/sh", "sh", scriptPath.c_str(), (char *)NULL);
+        else
 			execl(scriptPath.c_str(), scriptPath.c_str(), (char *)NULL);
-		}
+
         perror("execl");
         exit(EXIT_FAILURE);
     } else {
@@ -87,71 +97,19 @@ std::string HandleCGI::execute() {
         while ((count = read(stdout_pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
             buffer[count] = '\0';
             output += buffer;
+            // std::cout << YELLOW << "Output: " << output << std::endl << RESET;
         }
         close(stdout_pipefd[0]);
 
         int status;
         waitpid(pid, &status, 0);
 
+        if (codeExecution) {
+            std::string rmCommand = "rm -f '" + scriptPath + "'";
+            if (system(rmCommand.c_str()) != 0) {
+                std::cerr << "Failed to delete script: " << scriptPath << std::endl;
+            }
+        }
         return output;
     }
 }
-
-
-// std::string HandleCGI::execute() {
-//     int pipefd[2];
-//     if (!pipe(pipefd)) {
-//         perror("pipe");
-//         return "";
-//     }
-
-//     pid_t pid = fork();
-//     if (pid == -1) {
-//         perror("fork");
-//         close(pipefd[0]);
-//         close(pipefd[1]);
-//         return "";
-//     } else if (pid == 0) {
-//         // Child process
-//         close(pipefd[0]); // Close unused read end
-
-//         // Redirect stdout to pipe
-//         dup2(pipefd[1], STDOUT_FILENO); 
-//         close(pipefd[1]); // Close the write end of the stdout pipe
-
-//         // Redirect stdin from a pipe if there is POST data
-//         if (!postData.empty()) {
-//             close(STDIN_FILENO); // Close existing stdin
-//             dup(pipefd[0]); // Duplicate the read end of the pipe to stdin
-//             close(pipefd[0]); // Close the read end of the pipe
-//         }
-
-//         prepareEnvironment();
-
-//         // Using execl to call the PHP interpreter. 
-//         // Note: The path to the PHP interpreter might need to be changed according to your system setup.
-//         execl("/usr/bin/php", "php", scriptPath.c_str(), (char *)NULL);
-
-//         // execl only returns on error
-//         perror("execl");
-//         exit(EXIT_FAILURE);
-//     } else {
-//         // Parent process
-//         close(pipefd[1]); // Close the write end of the stdout pipe
-        
-//         // Reading the output from the CGI script
-//         std::string output;
-//         char buffer[1024];
-//         ssize_t count;
-//         while ((count = read(pipefd[0], buffer, sizeof(buffer)-1)) > 0) {
-//             buffer[count] = '\0';
-//             output += buffer;
-//         }
-//         close(pipefd[0]); // Close the read end of the stdout pipe
-
-//         int status;
-//         waitpid(pid, &status, 0);
-
-//         return output;
-//     }
-// }

@@ -2,18 +2,6 @@
 #include <fstream>
 #include <dirent.h>
 
-#define RESET "\033[0m"
-#define BLACK "\033[30m"
-#define RED "\033[31m"
-#define GREEN "\033[32m"
-#define YELLOW "\033[33m"
-#define BLUE "\033[34m"
-#define MAGENTA "\033[35m"
-#define CYAN "\033[36m"
-#define WHITE "\033[37m"
-#define BRIGHT_BLACK "\033[90m"
-#define BRIGHT_RED "\033[91m"
-
 HandleRequest::HandleRequest( std::string &incoming_request ) {
 	_request = incoming_request;
 }
@@ -36,6 +24,14 @@ std::string HandleRequest::getProtocol() const {
 
 void HandleRequest::setRequest( std::string request ) {
 	_request = request;
+}
+
+void HandleRequest::setMethod( std::string method ) {
+	_method = method;
+}
+
+std::string HandleRequest::getBody() const {
+	return _body;
 }
 
 std::string HandleRequest::listed_files(std::string path)
@@ -68,7 +64,6 @@ std::string HandleRequest::listed_files(std::string path)
 void HandleRequest::handleRequest() {
 	std::string extracted_request = _request.substr(0, _request.find("\n"));
 
-
 	std::ofstream file("webpages/cgi-bin/files.json");
 	file << "{\n";
 	file << "\t\"files\": [\n";
@@ -82,12 +77,9 @@ void HandleRequest::handleRequest() {
 	file.close();
 
 	if (extracted_request.find("WebKitFormBoundary") != std::string::npos) {
-		std::cout << "CGI request" << std::endl;
+		// std::cout << "CGI REQUEST" << std::endl;
 		std::string boundary = extracted_request.substr(extracted_request.find("WebKitFormBoundary"));
-		// size_t boundary_start = _request.find("WebKitFormBoundary");
-        // std::string boundary = _request.substr(boundary_start, _request.find("\r\n", boundary_start) - boundary_start);
 		_method = "POST";
-		// std::cout << "Boundary: " << boundary << std::endl;
 
 		// Next lines are the headers
 		size_t headers_start = _request.find("\n") + 1;
@@ -102,17 +94,28 @@ void HandleRequest::handleRequest() {
 				std::string header_value = header_line.substr(separator + 2);
 				header_value.erase(std::remove(header_value.begin(), header_value.end(), '\r'), header_value.end());
 				_headers[header_name] = header_value;
-				// std::cout << "!!!!" << header_name << ": " << header_value << std::endl;
 			}
 		}
 		_headers["Content-Length"] = std::to_string(_request.size() - headers_end - 2);
-		// std::cout << "!!!!Content-Length: " << _headers["Content-Length"] << std::endl;
-		_path = "/cgi-bin/upload.php";
+		// get header Content-Disposition
+		std::string content_disposition = getHeader("Content-Disposition");
+		std::string filename = content_disposition.substr(content_disposition.find("filename=") + 10);
+		filename = filename.substr(0, filename.find("\""));
+		if (filename.find(".py") != std::string::npos || filename.find(".sh") != std::string::npos || filename.find(".pl") != std::string::npos || filename.find(".php") != std::string::npos)
+			 _path = "/default_webpages/executeCode.html?file=" + filename;
+		 else
+			 _path = "/default_webpages/cgi.html?upload=true";
 		_protocol = "HTTP/1.1";
 	}
 	else
 	{
-		std::cout << "HTTP request" << std::endl;
+		if (extracted_request.find("HTTP") == std::string::npos)
+		{
+			_method = "GET";
+			_path = "/upload";
+			return;
+		}
+		// std::cout << "HTTP REQUEST" << std::endl;
 		extracted_request.erase(std::remove(extracted_request.begin(), extracted_request.end(), '\r'), extracted_request.end());
 		std::stringstream iss(extracted_request);
 		std::string segment;
@@ -125,9 +128,6 @@ void HandleRequest::handleRequest() {
 		_method = segments[0];
 		_path = segments[1];
 		_protocol = segments[2];
-
-		// if (_method == "DELETE")
-		// 	_path = _path.substr(0, _path.find("?"));
 
 		// Next lines are the headers
 		size_t headers_start = _request.find("\r\n") + 2;
@@ -149,24 +149,48 @@ void HandleRequest::handleRequest() {
 	size_t body_start = _request.find("\r\n\r\n");
 	if (body_start != std::string::npos) {
 		_body = _request.substr(body_start + 4);
-	} else {
-		size_t filestart = _request.find("\r\n\r\n") + 4;
-		size_t fileend = _request.find("\r\n", filestart);
-		_body = _request.substr(filestart, fileend - filestart);
 	}
+
+	// handle cookie
+	if (_path.find("add_cookie.py") != std::string::npos) {
+		std::string key = _path.substr(_path.find("key=") + 4);
+		std::string value;
+		size_t ampPos = key.find("&");
+		if (ampPos != std::string::npos) {
+			value = key.substr(ampPos + 6);  // Assume "value=" follows "&" directly
+			key = key.substr(0, ampPos);
+		}
+
+		// Set cookie if key and value are not empty
+		if (!key.empty() && !value.empty()) {
+			std::string cookie = key + value;
+			_headers["Cookie"] = cookie;
+		}
+		// std::cout << "cookie: " << _headers["Cookie"] << std::endl;
+	}
+
+	// handle get cookie
+	if (_path.find("get_cookie.py") != std::string::npos) {
+		std::string cookie = getHeader("Cookie");
+		_body = cookie;
+	}
+	// std::cout << MAGENTA;
+	// std::cout << "Method: " << _method << std::endl;
+	// std::cout << "Path: " << _path << std::endl;
+	// // std::cout << "Protocol: " << _protocol << std::endl;
+	// // std::cout << "Headers: " << std::endl;
+	// // for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it) {
+	// // 	std::cout << it->first << ": " << it->second << std::endl;
+	// // }
 	// std::cout << RESET;
+
 }
 
 HandleRequest::~HandleRequest() {}
 
-std::string HandleRequest::getBody() const {
-	return _body;
-}
-
 std::string HandleRequest::getHeader(const std::string& headerName) const {
     std::map<std::string, std::string>::const_iterator it = _headers.find(headerName);
-    if (it != _headers.end()) {
+    if (it != _headers.end())
         return it->second;
-    }
     return "";
 }

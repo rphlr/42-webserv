@@ -22,7 +22,7 @@ if (!is_dir($targetDir)) {
 
 
 $targetFile = $targetDir . "/" . $filename;
-error_log("Uploaded file target name : " . $targetFile);
+// error_log("Uploaded file target name : " . $targetFile);
 
 $uploadOk = 1;
 
@@ -44,25 +44,16 @@ if (file_exists($targetFile)) {
 }
 
 // Check file size
-else if ($size > 500000) {
-    echo "Sorry, your file is too large.\n";
-    $uploadOk = 0;
-}
+// else if ($size > 500000) {
+//     echo "Sorry, your file is too large.\n";
+//     $uploadOk = 0;
+// }
 
-// print all the environment variables and print the file content
-echo "Content-type: " . $content_type . "\n";
-echo "Content-length: " . $size . "\n";
-echo "Port: " . $port . "\n";
-echo "Method: " . $method . "\n";
-echo "Server software: " . $server_software . "\n";
-echo "Filename: " . $filename . "\n";
-echo "Target file: " . $targetFile . "\n";
-
-if (file_exists($targetFile))
+if ($uploadOk == 0)
     echo "Sorry, file already exists.\n";
 else {
     // Tentative de déplacement du fichier temporaire vers le répertoire cible
-    if (rename($tempFile, $targetFile))
+    if (copy($tempFile, $targetFile))
         echo "The file " . htmlspecialchars($filename) . " has been uploaded successfully.";
     else {
         error_log("Failed to move the file from temp directory.");
