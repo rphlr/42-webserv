@@ -6,7 +6,7 @@
 /*   By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:04:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/05/03 12:50:47 by rrouille         ###   ########.fr       */
+/*   Updated: 2024/05/05 11:40:30 by rrouille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@
 #define WHITE "\033[37m"
 #define BRIGHT_BLACK "\033[90m"
 #define BRIGHT_RED "\033[91m"
+#define BOLD "\033[1m"
 
 #include "./Config/Config.hpp"
 #include "./Server/ServerRunning.hpp"

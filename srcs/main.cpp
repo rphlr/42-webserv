@@ -6,7 +6,7 @@
 /*   By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 14:03:58 by rrouille          #+#    #+#             */
-/*   Updated: 2024/04/30 17:09:45 by rrouille         ###   ########.fr       */
+/*   Updated: 2024/05/05 11:55:55 by rrouille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,51 @@ void	server_running(std::vector<Server> config_servers)
 	}
 }
 
+void	print_infos(std::vector<Server> config_servers)
+{
+	const int totalWidth = 80;
+	std::cout << "There " << (config_servers.size() == 1 ? "is " : "are ") << config_servers.size() << " server" << (config_servers.size() == 1 ? "" : "s") << " in the configuration file." << std::endl;
+	for (std::vector<Server>::iterator it = config_servers.begin(); it != config_servers.end(); it++) {
+		int serverIndex = std::distance(config_servers.begin(), it) + 1;
+		std::cout << std::endl << (serverIndex == 1 ? "First" : (serverIndex == 2 ? "Second" : (serverIndex == 3 ? "Third" : std::to_string(serverIndex) + "th"))) << " server configuration:" << std::endl;
+		std::cout << RED << "┌" BOLD "SERVER CONFIG" RESET RED "─────────────────────────────────────────────────────────────┐" << RESET << std::endl;
+		std::cout << RED << "│" << RESET << std::left << std::setw(34) << BOLD " Name:" RESET << std::left << std::setw(totalWidth - 32) << it->getServerName() << RED << "│" << RESET << std::endl;
+		std::cout << RED << "│" << RESET << std::left << std::setw(34) << BOLD " Host:" RESET << std::left << std::setw(totalWidth - 32) << it->getHost() << RED << "│" << RESET << std::endl;
+		std::cout << RED << "│" << RESET << std::left << std::setw(34) << BOLD " Port:" RESET << std::left << std::setw(totalWidth - 32) << it->getPort() << RED << "│" << RESET << std::endl;
+		std::cout << RED << "│" << RESET << std::left << std::setw(34) << BOLD " Root:" RESET << std::left << std::setw(totalWidth - 32) << it->getRoot() << RED << "│" << RESET << std::endl;
+		std::cout << RED << "│" << RESET << std::left << std::setw(34) << BOLD " Default file:" RESET << std::left << std::setw(totalWidth - 32) << it->getDefFile() << RED << "│" << RESET << std::endl;
+		std::cout << RED << "│" << RESET << std::left << std::setw(34) << BOLD " Max body size:" RESET << std::left << std::setw(totalWidth - 32) << it->getSize() << RED << "│" << RESET << std::endl;
+		std::cout << RED << "└──────────────────────────────────────────────────────────────────────────┘" << RESET << std::endl;
+
+		// Print error pages
+		std::cout << BLUE << "┌" BOLD "ERROR PAGES" RESET BLUE "───────────────────────────────────────────────────────────────┐" << RESET << std::endl;
+		for (std::map<int, std::string>::iterator it2 = it->getErrorPages().begin(); it2 != it->getErrorPages().end(); it2++)
+			std::cout << BLUE << "│" << RESET << " " << std::left << std::setw(25) << it2->first << std::left << std::setw(totalWidth - 32) << it2->second << BLUE << "│" << RESET << std::endl;
+		std::cout << BLUE << "└──────────────────────────────────────────────────────────────────────────┘" << RESET << std::endl;
+
+		// Print locations
+		bool first = true;
+		for (std::vector<Location>::iterator it2 = it->getLocations().begin(); it2 != it->getLocations().end(); it2++) {
+			if (first)
+				std::cout << GREEN << "┌" BOLD "LOCATIONS" RESET GREEN "─────────────────────────────────────────────────────────────────┐" << RESET << std::endl;
+			else
+				std::cout << GREEN << "├──────────────────────────────────────────────────────────────────────────┤" << RESET << std::endl;
+			std::cout << GREEN << "│" << RESET << std::left << std::setw(34) << BOLD " Path:" RESET << std::left << std::setw(totalWidth - 32) << it2->getPath() << GREEN << "│" << RESET << std::endl;
+			std::cout << GREEN << "│" << RESET << std::left << std::setw(34) << BOLD " Redirection:" RESET << std::left << std::setw(totalWidth - 32) << it2->getRedirect() << GREEN << "│" << RESET << std::endl;
+			std::string methods_str;
+			for (std::vector<std::string>::iterator it3 = it2->getMethods().begin(); it3 != it2->getMethods().end(); it3++) {
+				if (it3 != it2->getMethods().begin())
+					methods_str += ", ";
+				methods_str += *it3;
+			}
+			std::cout << GREEN << "│" << RESET << std::left << std::setw(34) << BOLD " Methods:" RESET << std::left << std::setw(totalWidth - 32) << methods_str << GREEN << "│" << RESET << std::endl;
+			std::cout << GREEN << "│" << RESET << std::left << std::setw(34) << BOLD " Directory Listing:" RESET << std::left << std::setw(totalWidth - 27) << (it2->getDirList() ? GREEN "ON" : RED "OFF") << GREEN << "│" << RESET << std::endl;
+			first = false;
+		}
+		std::cout << GREEN << "└──────────────────────────────────────────────────────────────────────────┘" << RESET << std::endl;
+	}
+}
+
 int	main(int ac, char **av)
 {
 	Parser	parsing;
@@ -46,6 +91,7 @@ int	main(int ac, char **av)
 		signal(SIGPIPE, SIG_IGN);
 		config = (ac == 1 ? "configfiles/default.conf" : av[1]);
 		config_servers = parsing.parseFile(config);
+		print_infos(config_servers);
 		server_running(config_servers);
 	}
 	catch (std::exception &e) {

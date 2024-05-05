@@ -184,7 +184,8 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 
 		std::string postData = request.getRequest();
 		std::string data = handlePostData(postData);
-		std::string tempFilePath = "/tmp/" + getFileName(postData);
+		std::string tempFilePath = _rootPath + "/default_webpages/uploads/" + getFileName(postData);
+		std::cout << "Temp file created in " << tempFilePath << std::endl;
 		std::ofstream tempFile(tempFilePath, std::ios::out | std::ios::binary);
 		tempFile << data;
 		tempFile.close();
@@ -199,9 +200,9 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 		cgiEnv["SERVER_PORT"] = std::to_string(_port);
 		cgiEnv["REDIRECT_STATUS"] = "200";
 
-		HandleCGI cgiHandler(scriptPath, cgiEnv, data);
-		std::string cgiOutput = cgiHandler.execute();
-		std::cout << cgiOutput << std::endl;
+		// HandleCGI cgiHandler(scriptPath, cgiEnv, data);
+		// std::string cgiOutput = cgiHandler.execute();
+		// std::cout << cgiOutput << std::endl;
 
 		// // Lecture du fichier dans une std::string
 		// std::ifstream file(_rootPath + "/default_webpages/cgi.html");
@@ -280,19 +281,23 @@ void ServerRunning::handleDelete(HandleRequest &request, int response_socket) {
 	// get filename from request
 	std::string path = request.getPath();
 	std::string filename = path.substr(path.find("file=") + 5);
-	std::string filePath = _rootPath + "/webpages/default_webpages/uploads/" + filename;
+	std::string filePath = _rootPath + "/default_webpages/uploads/" + filename;
 
-	std::string scriptPath = determineCgiScriptPath("/cgi-bin/deleteFile.php");
-	std::map<std::string, std::string> cgiEnv;
-	cgiEnv["REQUEST_METHOD"] = "DELETE";
-	cgiEnv["SCRIPT_NAME"] = scriptPath;
-	cgiEnv["FILENAME"] = filename;
-	cgiEnv["SERVER_PROTOCOL"] = request.getProtocol();
-	cgiEnv["SERVER_SOFTWARE"] = "webserv";
-	cgiEnv["SERVER_PORT"] = std::to_string(_port);
-	cgiEnv["REDIRECT_STATUS"] = "200";
+	std::cout << "Deleting file: " << filePath << std::endl;
+	// std::string scriptPath = determineCgiScriptPath("/cgi-bin/deleteFile.php");
+	// std::map<std::string, std::string> cgiEnv;
+	// cgiEnv["REQUEST_METHOD"] = "DELETE";
+	// // cgiEnv["SCRIPT_NAME"] = scriptPath;
+	// // cgiEnv
+	// cgiEnv["FILENAME"] = filename;
+	// cgiEnv["SERVER_PROTOCOL"] = request.getProtocol();
+	// cgiEnv["SERVER_SOFTWARE"] = "webserv";
+	// cgiEnv["SERVER_PORT"] = std::to_string(_port);
+	// cgiEnv["REDIRECT_STATUS"] = "200";
 
-	HandleCGI cgiHandler(scriptPath, cgiEnv, "");
-	std::string cgiOutput = cgiHandler.execute();
-	std::cout << cgiOutput << std::endl;
+	std::remove(filePath.c_str());
+
+	// HandleCGI cgiHandler(scriptPath, cgiEnv, "");
+	// std::string cgiOutput = cgiHandler.execute();
+	// std::cout << cgiOutput << std::endl;
 }

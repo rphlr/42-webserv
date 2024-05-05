@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:40:45 by ckarl             #+#    #+#             */
-/*   Updated: 2024/04/25 18:16:54 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/05/05 09:59:00 by rrouille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,13 @@ vector<Location>	&Server::getLocations(void)
 	if (!_locations.empty())
 		return _locations;
 	throw std::runtime_error(NO_LOC);
+}
+
+std::string	&Server::getServerName(void)
+{
+	if (!_server_name.empty())
+		return _server_name;
+	throw std::runtime_error("Server name is empty");
 }
 
 bool	Server::isComplete(void)
