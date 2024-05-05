@@ -31,18 +31,15 @@ std::string HandleCGI::execute() {
 
     bool codeExecution = false;
 
-    // Exécute le script CGI
     if (scriptPath.find("?") != std::string::npos) {
-        // then it's something like this /Volumes/Code/42-school/Cursus/Rank05/webserv/webpagesdefault_webpages/executeCode.html?test.py
-        // so we need to extract the path to the script (test.py in cgi-bin)
         scriptPath = scriptPath.substr(scriptPath.find("?") + 1);
         char *cwd = getcwd(NULL, 0);
         std::string rootPath = std::string(cwd) + "/" + "webpages/cgi-bin/";
         free(cwd);
         scriptPath = rootPath + scriptPath;
-        std::cout << "Script path: " << scriptPath << std::endl;
         codeExecution = true;
     }
+    // Exécute le script CGI
     pid_t pid = fork();
     if (pid == -1) {
         perror("fork");
@@ -75,7 +72,7 @@ std::string HandleCGI::execute() {
         else if (scriptPath.find(".sh") != std::string::npos)
             execl("/bin/sh", "sh", scriptPath.c_str(), (char *)NULL);
         else
-			execl(scriptPath.c_str(), scriptPath.c_str(), (char *)NULL);
+            std::cerr << "Unsupported script type" << std::endl;
 
         perror("execl");
         exit(EXIT_FAILURE);
