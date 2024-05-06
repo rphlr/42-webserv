@@ -6,7 +6,7 @@
 #    By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/29 12:40:01 by rrouille          #+#    #+#              #
-#    Updated: 2024/05/01 12:59:48 by rrouille         ###   ########.fr        #
+#    Updated: 2024/05/06 18:15:44 by rrouille         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,9 +18,10 @@
 
 # Name of the executable
 NAME				= webserv
+PROGRAMMERS			= rrouille, nvaubien, ckarl
 
 # Arguments passed to the executable
-ARGS				= $(filter-out $@,${MAKECMDGOALS})
+ARGS				= $(filter-out $@,$(MAKECMDGOALS))
 
 # Directories for source and object files
 SRCSDIR				= srcs
@@ -30,6 +31,7 @@ HDRDIR				= includes
 # Terminal color settings for output messages
 GRAY				= \033[0;90m
 RED					= \033[0;91m
+ORANGE				= \033[0;33m
 GREEN				= \033[0;92m
 YELLOW				= \033[0;93m
 BLUE				= \033[0;94m
@@ -47,11 +49,15 @@ BG_M				= \033[45m
 BG_C				= \033[46m
 BG_W				= \033[47m
 
-# Text formatting options for output messages
+# Colors and ANSI escape codes for cursor movement
+CLEAR_LINE			= \033[2K
+MOVE_BEGIN			= \033[1G
+MOVE_UP				= \033[1A
 BOLD				= \033[1m
 UNDERLINE			= \033[4m
 ITALIC				= \033[3m
 INVERTED			= \033[7m
+BOX_WIDTH			= 80
 
 # Command to clear the screen
 CLEAR				= \033c
@@ -86,40 +92,48 @@ endif
 # **************************************************************************** #
 
 # Rule to compile the entire program
-all:			${NAME}
-
-# Rule to compile the main executable
-${NAME}:		prog_name ${WAIT_CMD} ${OBJS}
+all:			prog_info ${WAIT_CMD} ${NAME}
 				${COMPILATION}
 				@if [ -d "${OBJSDIR}" ] && [ "$$(ls ${OBJSDIR}/*.opp 2>/dev/null)" ]; then \
-					newest_obj=$$(ls -t ${OBJSDIR}/*.opp ${OBJSDIR}/*/*.opp ${OBJSDIR}/*/*/*.opp | head -1); \
+					newest_obj=$$(ls -t ${OBJSDIR}/*.opp ${OBJSDIR}/*/*.opp | head -1); \
 					if [ -f "${NAME}" ] && [ "${NAME}" -nt "$$newest_obj" ]; then \
-						printf "\033[A\033[2K"; \
-						printf "┌──────────\n"; \
-						printf "│\tNothing to be done for ${GREEN}${NAME}${ENDCOLOR}.\n└──────────\n"; \
+						printf "${GREEN}┌${BOLD}COMPILATION INFO${ENDCOLOR}${GREEN}──────────────────────────────────────────────────────────┐\n"; \
+						printf "│${ENDCOLOR} Nothing to be done for ${BOLD}${NAME}${ENDCOLOR}.                                          ${GREEN}│\n"; \
+						printf "└──────────────────────────────────────────────────────────────────────────┘${ENDCOLOR}\n"; \
 					else \
 						printf "\033[A\033[2K"; \
-						printf "┌──────────\n"; \
-						printf "│\tSources for ${GREEN}${NAME}${ENDCOLOR} done.\n"; \
-						printf "├──────────\n├─>>> ${GREEN}${NAME}${ENDCOLOR} compiled!\n└──────────\n"; \
+						printf "${GREEN}┌${BOLD}COMPILATION INFO${ENDCOLOR}${GREEN}──────────────────────────────────────────────────────────┐\n"; \
+						printf "│${ENDCOLOR} ${BOLD}${NAME}${ENDCOLOR} compiled! Launch it with \'${BOLD}./${NAME}${ENDCOLOR}\'.                            ${GREEN}│\n"; \
+						printf "└──────────────────────────────────────────────────────────────────────────┘${ENDCOLOR}\n"; \
 					fi \
 				else \
-					printf "\033[A\033[2K"; \
-					printf "┌──────────\n"; \
-					printf "│\tNothing to be done for ${GREEN}${NAME}${ENDCOLOR}.\n└──────────\n"; \
+					printf "${GREEN}┌${BOLD}COMPILATION INFO${ENDCOLOR}${GREEN}─────────────────────────────────────────────────────────┐\n"; \
+					printf "│${ENDCOLOR} Nothing to be done for ${BOLD}${NAME}${ENDCOLOR}.                                         ${GREEN}│\n"; \
+					printf "└─────────────────────────────────────────────────────────────────────────┘${ENDCOLOR}\n"; \
 				fi
 
+# Rule to compile the main executable
+${NAME}:		${OBJS}
+				${COMPILATION}
+
 # Rule to compile object files
-${OBJSDIR}/%.opp:	${SRCSDIR}/%.cpp
+${OBJSDIR}/%.opp: ${SRCSDIR}/%.cpp
 				@${MKDIR} ${@D}
-				@if [[ $(if $(filter dbg,${MAKECMDGOALS}),1,0) == "1" ]]; then \
-					printf "│\t > ${YELLOW}DEBUG${ENDCOLOR} Compiling ${YELLOW}$<${ENDCOLOR} with ${YELLOW}${DFLAGS}${ENDCOLOR} and ${YELLOW}${LDFLAGS}${ENDCOLOR}...\r"; \
-					${CC} -D ${DFLAGS} -c $< -o $@ ${LDFLAGS}; \
+				@$(eval COUNT=$(shell echo $$(($(COUNT)+1))))
+				@if [ $(COUNT) -eq 1 ]; then \
+					printf "${YELLOW}┌${BOLD}COMPILATION${ENDCOLOR}${YELLOW}───────────────────────────────────────────────────────────────┐\n"; \
+					printf "${YELLOW}│${ENDCOLOR} ${BOLD}${COUNT}${ENDCOLOR} out of ${BOLD}${words $(SRCS)}${ENDCOLOR} files compiled.                                              ${YELLOW}│${ENDCOLOR}\n"; \
+					printf "${YELLOW}└──────────────────────────────────────────────────────────────────────────┘\n"; \
+					printf "${MOVE_UP}${MOVE_UP}"; \
 				else \
-					printf "│\t > Compiling ${YELLOW}$<${ENDCOLOR} for ${GREEN}${NAME}${ENDCOLOR}...\r"; \
-					${CC} ${CFLAGS} -c $< -o $@ -I${HDRDIR}; \
+					printf "${CLEAR_LINE}"; \
+					if [ $(COUNT) -lt $(words $(SRCS)) ]; then \
+						printf "${YELLOW}│${ENDCOLOR} ${BOLD}${COUNT}${ENDCOLOR} out of ${BOLD}${words $(SRCS)}${ENDCOLOR} files compiled.                                              ${YELLOW}│${ENDCOLOR}${MOVE_BEGIN}"; \
+					else \
+						printf "${YELLOW}│${ENDCOLOR} All sources compiled for ${BOLD}${NAME}${ENDCOLOR}.                                        ${YELLOW}│${ENDCOLOR}\n\n\n"; \
+					fi; \
 				fi
-				@printf "\33[2K"
+				@${CC} ${CFLAGS} -c $< -o $@ -I${HDRDIR}
 
 CC_PROG			= ${CC} ${CFLAGS} ${OBJS} -o ${NAME}
 COMPILATION		= ${CC_PROG}
@@ -128,9 +142,9 @@ run:
 				@if [ ! -f "${NAME}" ]; then \
 					${MAKE} all; \
 				fi
-				@printf "┌──────────\n"
-				@printf "│\tRunning ${GREEN}${NAME}${ENDCOLOR}...\n"
-				@printf "└──────────\n"
+				@printf "${GREEN}┌${BOLD}RUNNING${ENDCOLOR}${GREEN}───────────────────────────────────────────────────────────────────┐\n"
+				@printf "${GREEN}│${ENDCOLOR} Running ${BOLD}${NAME}${ENDCOLOR}...                                                       ${GREEN}│\n"
+				@printf "${GREEN}└──────────────────────────────────────────────────────────────────────────┘${ENDCOLOR}\n"
 				@./${NAME} ${ARGS}
 
 debug:
@@ -145,43 +159,21 @@ debug:
 
 # Rebuild the entire project
 re:				fclean ${WAIT_CMD} all
-				# @printf "\n┌──────────\n│ Cleaning and ${GREEN}recompiling${ENDCOLOR}...\n"
-				# @${MAKE} fclean r
-				# @${MAKE} all r
 
-# **************************************************************************** #
-#                                 UTILITIES                                    #
-# **************************************************************************** #
+################################################################################
+#                              Usefuls                                         #
+################################################################################
 
-prog_name:
-				@printf "${RED}"
-				@cat makefile_utils/prog_name
-				@printf "${ENDCOLOR}\n"
-
-help:
-				@if [ "${PRINT_SCREEN}" = "YES" ]; then \
-					${ECHO} "${CLEAR}\c"; \
-					${MAKE} draw_help; \
-					for i in 3 2 1 0; do \
-						printf '\r${BLUE}Help will be shown in: %d${ENDCOLOR}' "$$i"; \
-						sleep 1; \
-						printf '${CLEARLN}'; \
-					done; \
-				fi
-				@${ECHO} "${GRAY}🏃 Run ${ITALIC}\`./${NAME}\`${ENDCOLOR}${GRAY} to see the program in action.${ENDCOLOR}${GRAY}"
-				@${ECHO} "${BOLD}${UNDERLINE}💡 TIPS: 💡${ENDCOLOR}${GRAY}"
-				@${ECHO} "\t- You can also use ${ITALIC}\`make run\`${ENDCOLOR}${GRAY} or ${ITALIC}\`make r\`${ENDCOLOR}${GRAY} to try it out."
-				@${ECHO} "\t- Check for memory leaks with ${ITALIC}\`make leaks\`${ENDCOLOR}${GRAY} or ${ITALIC}\`make l\`${ENDCOLOR}${GRAY}."
-				@${ECHO} "\t- Check the 42 norm with ${ITALIC}\`make norm\`${ENDCOLOR}${GRAY} or ${ITALIC}\`make n\`${ENDCOLOR}${GRAY}."
-				@${ECHO} "\t- Check the forbidden functions with ${ITALIC}\`make check_forbidden\`${ENDCOLOR}${GRAY} or ${ITALIC}\`make cf\`${ENDCOLOR}${GRAY}."
-				@${ECHO} "\t- Use ${ITALIC}\`make lldb\`${ENDCOLOR}${GRAY} to run the program with lldb."
-				@${ECHO} "\t- Use ${ITALIC}\`make fast\`${ENDCOLOR}${GRAY} or ${ITALIC}\`make cf\`${ENDCOLOR}${GRAY} to compile the program faster."
-				@${ECHO} "\t- Use ${ITALIC}\`make clear\`${ENDCOLOR}${GRAY} or ${ITALIC}\`make c\`${ENDCOLOR}${GRAY} to clear the screen."
-				@${ECHO} "\t- Use ${ITALIC}\`make clean\`${ENDCOLOR}${GRAY} to clean the object files."
-				@${ECHO} "\t- Use ${ITALIC}\`make fclean\`${ENDCOLOR}${GRAY} to clean the object files and the executable."
-				@${ECHO} ""
-				@${ECHO} "${YELLOW}🌟 Use ${ITALIC}\`make help\`${ENDCOLOR}${YELLOW} or ${ITALIC}\`make h\`${ENDCOLOR}${YELLOW} to display these helpful tips. 🚀${ENDCOLOR}"
-h:				help
+# Rule to display the project information
+prog_info:
+				@printf "${BLUE}┌${BOLD}PROJECT INFO${ENDCOLOR}${BLUE}──────────────────────────────────────────────────────────────┐\n"
+				@printf "${BLUE}│${ENDCOLOR} Project name:\t\t${BOLD}${NAME}${ENDCOLOR}                                            ${BLUE}│\n"
+				@printf "${BLUE}│${ENDCOLOR} Source folder:\t${BOLD}${SRCSDIR}${ENDCOLOR}/                                              ${BLUE}│\n"
+				@printf "${BLUE}│${ENDCOLOR} Object folder:\t${BOLD}${OBJSDIR}${ENDCOLOR}/                                              ${BLUE}│\n"
+				@printf "${BLUE}│${ENDCOLOR} Header folder:\t${BOLD}${HDRDIR}${ENDCOLOR}/                                          ${BLUE}│\n"
+				@printf "${BLUE}├──────────────────────────────────────────────────────────────────────────┤\n"
+				@printf "${BLUE}│${ENDCOLOR} Made by\t\t${BOLD}${PROGRAMMERS}${ENDCOLOR}                          ${BLUE}│\n"
+				@printf "${BLUE}└──────────────────────────────────────────────────────────────────────────┘${ENDCOLOR}\n"
 
 ################################################################################
 #                       Cleaning and Maintenance                               #
@@ -190,53 +182,43 @@ h:				help
 # Clean object files and executable
 clean:
 				@if [[ $(if $(filter r,${MAKECMDGOALS}),1,0) == "1" ]]; then \
-					printf "├──────────\n"; \
+					printf "${ORANGE}├──────────────────────────────────────────────────────────────────────────┤${ENDCOLOR}\n"; \
 				else \
-					printf "┌──────────\n"; \
+					printf "${ORANGE}┌${BOLD}CLEANING${ENDCOLOR}${ORANGE}──────────────────────────────────────────────────────────────────┐\n"; \
 				fi
 				@if [ -d "./${OBJSDIR}" ]; then \
-					printf "│\tRemoving ${RED}${OBJSDIR}${ENDCOLOR} for ${YELLOW}${NAME}${ENDCOLOR}\n"; \
+					printf "${ORANGE}│${ENDCOLOR} Removing ${BOLD}${OBJSDIR}${ENDCOLOR} for ${BOLD}${NAME}${ENDCOLOR}.                                               ${ORANGE}│${ENDCOLOR}\n"; \
 					rm -rf ${OBJSDIR}; \
 				else \
-					printf "│\t${RED}${OBJSDIR}${ENDCOLOR} already removed for ${YELLOW}${NAME}${ENDCOLOR}!\n"; \
+					printf "${ORANGE}│${ENDCOLOR} ${BOLD}${OBJSDIR}${ENDCOLOR} already removed for ${BOLD}${NAME}${ENDCOLOR}!                                        ${ORANGE}│${ENDCOLOR}\n"; \
 				fi
 				if [ $(if $(filter r,${MAKECMDGOALS}),1,0) == "1" ]; then \
-					printf "├──────────\n"; \
+					printf "${ORANGE}├──────────────────────────────────────────────────────────────────────────┤${ENDCOLOR}\n"; \
 				else \
-					printf "└──────────\n"; \
+					printf "${ORANGE}└──────────────────────────────────────────────────────────────────────────┘${ENDCOLOR}\n"; \
 				fi
 
 # Clean everything including the executable
 fclean: 
-				@printf "┌──────────\n"
+				@printf "${RED}┌${BOLD}DEEP CLEANING${ENDCOLOR}${RED}─────────────────────────────────────────────────────────────┐\n"
 				@if [ -d "./${OBJSDIR}" ]; then \
-					printf "│\tRemoving ${RED}${OBJSDIR}${ENDCOLOR} for ${YELLOW}${NAME}${ENDCOLOR}\n"; \
+					printf "${RED}│${ENDCOLOR} Removing ${BOLD}${OBJSDIR}${ENDCOLOR} for ${BOLD}${NAME}${ENDCOLOR}.                                               ${RED}│${ENDCOLOR}\n"; \
 					rm -rf ${OBJSDIR}; \
 				else \
-					printf "│\t${RED}${OBJSDIR}${ENDCOLOR} already removed for ${YELLOW}${NAME}${ENDCOLOR}!\n"; \
+					printf "${RED}│${ENDCOLOR} ${BOLD}${OBJSDIR}${ENDCOLOR} already removed for ${BOLD}${NAME}${ENDCOLOR}!                                        ${RED}│${ENDCOLOR}\n"; \
 				fi
-				@printf "\033[A\033[2K"
+				@printf "${RED}├──────────────────────────────────────────────────────────────────────────┤${ENDCOLOR}\n"
 				@if [ -e "./${NAME}" ]; then \
-					printf "│\tRemoving ${YELLOW}${NAME}${ENDCOLOR}\n"; \
+					printf "${RED}│${ENDCOLOR} Removing ${BOLD}${NAME}${ENDCOLOR}.                                                        ${RED}│${ENDCOLOR}\n"; \
 					rm -rf ${NAME}; \
 				else \
-					printf "│\t${YELLOW}${NAME}${ENDCOLOR} already removed!\n"; \
+					printf "${RED}│${ENDCOLOR} ${BOLD}${NAME}${ENDCOLOR} already removed!                                                 ${RED}│${ENDCOLOR}\n"; \
 				fi
-				@printf "└──────────\n"
+				@printf "${RED}└──────────────────────────────────────────────────────────────────────────┘${ENDCOLOR}\n"
 
 ################################################################################
 #                                 Github                                       #
 ################################################################################
-
-# Rule to push changes to Git
-push:			fclean
-				@git add .
-				@if [ -z "${ARGS}" ]; then \
-					echo "${RED}❌ Please provide a commit message! ✨${ENDCOLOR}"; \
-					exit 1; \
-				fi
-				@git commit -m "${ARGS}"
-				@git push
 
 # Rule to pull changes from Git
 pull:

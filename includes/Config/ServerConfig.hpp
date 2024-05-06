@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:12:22 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/20 12:51:25 by nvaubien         ###   ########.fr       */
+/*   Updated: 2024/05/05 09:57:34 by rrouille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,16 +43,17 @@ public:
 	void	setDefFile(string &d);
 	void	setErrorPage(string &c, string &path);
 
-	string	&getName(void);
-	int		&getPort(void);
-	string	&getHost(void);
-	int		&getSize(void);
-	string	&getRoot(void);
-	string	&getDefFile(void);
-	Location	*getCurrentLoc(void);
-	string	&getErrorPath(int code);
-	vector<Location>	&getLocations(void);
+	string					&getName(void);
+	int						&getPort(void);
+	string					&getHost(void);
+	int						&getSize(void);
+	string					&getRoot(void);
+	string					&getDefFile(void);
+	Location				*getCurrentLoc(void);
+	string					&getErrorPath(int code);
+	vector<Location>		&getLocations(void);
 	std::map<int, string>	&getErrorPages(void);
+	string					&getServerName(void);
 
 	bool	isComplete(void);
 	void	addLocationChangePointer(void);

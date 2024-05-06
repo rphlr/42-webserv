@@ -1,4 +1,5 @@
 #include "../../includes/Server/ServerRunning.hpp"
+#include <iomanip>
 
 ServerRunning::~ServerRunning() {}
 ServerRunning::ServerRunning(const ServerRunning &t)
@@ -36,6 +37,7 @@ ServerRunning &ServerRunning::operator = (const ServerRunning &t)
 
 ServerRunning::ServerRunning( Server &server ) {
 	char *cwd = getcwd(NULL, 0);
+	_host = server.getHost();
 	this->_rootPath = std::string(cwd) + "/" + server.getRoot();
 	free(cwd);
 	u_long interface;
@@ -49,7 +51,6 @@ ServerRunning::ServerRunning( Server &server ) {
 	_max_body_size = server.getSize();
 	_default_file = server.getDefFile();
 	_error_pages = server.getErrorPages();
-	_locations = server.getLocations();
 	_response_code.insert(std::make_pair(200, "Ok"));
 	_response_code.insert(std::make_pair(404, "Not Found"));
 	_response_code.insert(std::make_pair(405, "Method Not Allowed"));

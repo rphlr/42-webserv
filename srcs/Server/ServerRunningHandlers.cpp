@@ -179,47 +179,20 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 		return;
 	}
 	else if (path.find("upload=true") != std::string::npos) {
+		// upload file
 		std::map<std::string, std::string> cgiEnv;
 		std::string scriptPath = determineCgiScriptPath("/cgi-bin/upload.php");
 
 		std::string postData = request.getRequest();
 		std::string data = handlePostData(postData);
-		std::string tempFilePath = "/tmp/" + getFileName(postData);
+		std::string tempFilePath = _rootPath + "/default_webpages/uploads/" + getFileName(postData);
+		std::cout << "Temp file created in " << tempFilePath << std::endl;
 		std::ofstream tempFile(tempFilePath, std::ios::out | std::ios::binary);
 		tempFile << data;
 		tempFile.close();
-
-		cgiEnv["REQUEST_METHOD"] = "POST";
-		cgiEnv["CONTENT_LENGTH"] = std::to_string(data.size());
-		cgiEnv["CONTENT_TYPE"] = request.getHeader("Content-Type");
-		cgiEnv["SCRIPT_NAME"] = scriptPath;
-		cgiEnv["FILENAME"] = getFileName(postData);
-		cgiEnv["SERVER_PROTOCOL"] = request.getProtocol();
-		cgiEnv["SERVER_SOFTWARE"] = "webserv";
-		cgiEnv["SERVER_PORT"] = std::to_string(_port);
-		cgiEnv["REDIRECT_STATUS"] = "200";
-
-		HandleCGI cgiHandler(scriptPath, cgiEnv, data);
-		std::string cgiOutput = cgiHandler.execute();
-		std::cout << cgiOutput << std::endl;
-
-		// // Lecture du fichier dans une std::string
-		// std::ifstream file(_rootPath + "/default_webpages/cgi.html");
-		// std::stringstream buffer;
-		// buffer << file.rdbuf();
-
-		// // Recherche et remplacement dans la std::string
-		// const std::string searchText = "<!-- fileUploadReplacement -->";
-		// const std::string replaceText = "<p><b>" + cgiOutput + "</b></p>";
-		// size_t pos = buffer.str().find(searchText);
-		// if (pos != std::string::npos)
-		// 	buffer.str().replace(pos, searchText.length(), replaceText);
-		
-		// // Envoyer la réponse modifiée
-		// sendResponse(response_socket, buffer.str(), 200, "text/html");
 	}
 	else if (path.find("?file=") != std::string::npos) {
-		std::cout << "Code execution" << std::endl;
+		// CGI request
 		std::map<std::string, std::string> cgiEnv;
 
 		std::string postData = request.getRequest();
@@ -228,7 +201,6 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 		std::ofstream tempFile(tempFilePath, std::ios::out | std::ios::binary);
 		tempFile << data;
 		tempFile.close();
-		// std::cout << "Temp file created in " << tempFilePath << std::endl;
 		std::string scriptPath = determineCgiScriptPath("default_webpages/executeCode.html?" + getFileName(postData));
 
 		cgiEnv["REQUEST_METHOD"] = "POST";
@@ -242,9 +214,7 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 		cgiEnv["FILENAME"] = getFileName(postData);
 
 		HandleCGI cgiHandler(scriptPath, cgiEnv, data);
-		// HandleCGI cgiHandler(scriptPath, cgiEnv, request.getBody());
 		std::string cgiOutput = cgiHandler.execute();
-		std::cout << cgiOutput << std::endl;
 
 		// Lecture du fichier dans une std::string
 		std::ifstream file(_rootPath + "/default_webpages/executeCode.html");
@@ -279,20 +249,27 @@ void ServerRunning::handlePost(HandleRequest &request, int response_socket) {
 void ServerRunning::handleDelete(HandleRequest &request, int response_socket) {
 	// get filename from request
 	std::string path = request.getPath();
-	std::string filename = path.substr(path.find("file=") + 5);
-	std::string filePath = _rootPath + "/webpages/default_webpages/uploads/" + filename;
+	std::cout << "Path: " << path << std::endl;
+	std::cout << "rootPath: " << _rootPath << std::endl;
+	std::string filePath = "";
+	if (path.find("file=") != std::string::npos) {
+		std::string filename = path.substr(path.find("file=") + 5);
+		filePath = _rootPath + "/default_webpages/uploads/" + filename;
 
-	std::string scriptPath = determineCgiScriptPath("/cgi-bin/deleteFile.php");
-	std::map<std::string, std::string> cgiEnv;
-	cgiEnv["REQUEST_METHOD"] = "DELETE";
-	cgiEnv["SCRIPT_NAME"] = scriptPath;
-	cgiEnv["FILENAME"] = filename;
-	cgiEnv["SERVER_PROTOCOL"] = request.getProtocol();
-	cgiEnv["SERVER_SOFTWARE"] = "webserv";
-	cgiEnv["SERVER_PORT"] = std::to_string(_port);
-	cgiEnv["REDIRECT_STATUS"] = "200";
+		std::remove(filePath.c_str());
+		return;
+	}
+	else {
+		filePath = _rootPath + path;
+	}
 
-	HandleCGI cgiHandler(scriptPath, cgiEnv, "");
-	std::string cgiOutput = cgiHandler.execute();
-	std::cout << cgiOutput << std::endl;
+	if (filePath.find("/default_webpages/uploads/") == std::string::npos || std::remove(filePath.c_str()) != 0) {
+		std::cerr << "Error deleting file" << std::endl;
+		handleErrorFilePath(response_socket, 501);
+		return;
+	}
+	else if (path.find("file=") == std::string::npos) {
+		std::string homePath = "/default_webpages/siteHome.html";
+		handleFilePath(response_socket, homePath);
+	}
 }
