@@ -17,7 +17,6 @@ void HandleCGI::prepareEnvironment() {
     for (std::map<std::string, std::string>::const_iterator it = env.begin(); it != env.end(); ++it) {
         setenv(it->first.c_str(), it->second.c_str(), 1);
     }
-    
 }
 
 std::string HandleCGI::execute() {
