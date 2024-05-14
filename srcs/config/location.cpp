@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/21 22:34:00 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/29 17:39:27 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/01 15:37:11 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,18 +60,21 @@ void	Location::setMethods(string &m)
 	//check if valid and not yet set and insert in map
 	size_t	pos = 0;
 	string	temp;
-	do { pos = m.find(",");
-		if (pos == std::string::npos)
+	while (!m.empty())
+	{
+		pos = m.find(",");
+		if (pos == string::npos)
 			temp = m;
 		else
-		{
 			temp = m.substr(0, pos);
-			if (std::find(_methods.begin(), _methods.end(), m) != _methods.end() || validMethod(m) == false)
-				throw std::invalid_argument(INVALID_CONF + "location method (invalid or double)");
-			_methods.push_back(m);
+		if (std::find(_methods.begin(), _methods.end(), temp)!= _methods.end() || validMethod(temp) == false)
+			throw std::invalid_argument(INVALID_CONF + "location method (invalid or double)");
+		_methods.push_back(temp);
+		if (pos != string::npos)
 			m = m.substr(pos + 1);
-		}
-	} while (pos != std::string::npos);
+		else
+			m.clear();
+	}
 }
 
 void	Location::setDirList(string &d)		//check for double listing?
@@ -102,11 +105,14 @@ std::ostream& operator << (std::ostream& os, Location &obj)
 		std::cout << "redirect: " << obj.getRedirect() << std::endl;
 	if (!obj.getMethods().empty()) {
 		std::vector<string>	tempMethods = obj.getMethods();
-		std::cout << "methods:" << std::endl;
+		std::cout << "methods: ";
 		for(unsigned int i = 0; i < tempMethods.size(); i++) {
-			std::cout << "\t" + tempMethods[i] << std::endl;
+			std::cout << tempMethods[i];
+			if (i != tempMethods.size() - 1)
+				std::cout << ",";
 		}
+		std::cout << std::endl;
 	}
-	std::cout << "directory_listing: " << obj.getDirList() << std::endl;
+	std::cout << "directory_listing: " << (obj.getDirList() ? "on" : "off") << std::endl;
 	return os;
 }

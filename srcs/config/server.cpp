@@ -6,7 +6,7 @@
 /*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:40:45 by ckarl             #+#    #+#             */
-/*   Updated: 2024/02/29 18:21:33 by ckarl            ###   ########.fr       */
+/*   Updated: 2024/03/01 17:12:48 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,14 +20,14 @@ Server::~Server(void) { _locations.clear(); }
 Server::Server(const Server &c) : _server_name(c._server_name), _port(c._port),
 								_host(c._host), _max_body_size(c._max_body_size),
 								_root(c._root), _default_file(c._default_file),
-								_error_pages(c._error_pages), _currentLoc(c._currentLoc) {}
+								_error_pages(c._error_pages), _locations(c._locations), _currentLoc(c._currentLoc) {}
 
 Server &Server::operator = (const Server &c)
 {
 	if (this != &c) {
 		_server_name = c._server_name; _port = c._port; _host = c._host;
 		_max_body_size = c._max_body_size; _root = c._root; _default_file = c._default_file;
-		_error_pages = c._error_pages; _currentLoc = c._currentLoc;
+		_error_pages = c._error_pages; _currentLoc = c._currentLoc; _locations = c._locations;
 	}
 	return *this;
 }
@@ -46,7 +46,7 @@ void	Server::setPort(string &po)
 	if (p > 0 && p < 65535 && _port < 0)
 		_port = p;
 	else
-		throw std::invalid_argument(INVALID_CONF + "port (double or size)");
+		throw std::invalid_argument(INVALID_CONF + "port (empty, double or size)");
 }
 
 void	Server::setSize(string &si)
@@ -55,7 +55,7 @@ void	Server::setSize(string &si)
 	if (s < 1000 && s >= 0 && _max_body_size < 0)					//check for BUFFER_SIZE (maybe throw error?)
 		_max_body_size = s;
 	else
-		throw std::invalid_argument(INVALID_CONF + "max_body_size (double or size)");
+		throw std::invalid_argument(INVALID_CONF + "max_body_size (empty, double or size)");
 }
 
 void	Server::setRoot(string &r)
@@ -63,7 +63,7 @@ void	Server::setRoot(string &r)
 	if (_root.empty() && !r.empty())
 		_root = r;
 	else
-		throw std::invalid_argument(INVALID_CONF + "root (double)");
+		throw std::invalid_argument(INVALID_CONF + "root (empty or double)");
 	//check here if path exists or not?
 }
 
@@ -73,7 +73,7 @@ void	Server::setErrorPage(string &c, string &path)
 	if (code >= 100 && code < 600 && _error_pages.find(code) == _error_pages.end())
 		_error_pages[code] = path;
 	else
-		throw std::invalid_argument(INVALID_CONF + "error_page (invalid or double)");
+		throw std::invalid_argument(INVALID_CONF + "error_page (empty, invalid or double)");
 }
 
 void	Server::setHost(string &h)
@@ -81,7 +81,7 @@ void	Server::setHost(string &h)
 	if (_host.empty() && !h.empty())
 		_host = h;
 	else
-		throw std::invalid_argument(INVALID_CONF + "host (double)");
+		throw std::invalid_argument(INVALID_CONF + "host (empty or double)");
 
 }
 
@@ -90,7 +90,7 @@ void	Server::setDefFile(string &d)
 	if (_default_file.empty() && !d.empty())
 		_default_file = d;
 	else
-		throw std::runtime_error(INVALID_CONF + "default_file (double)");
+		throw std::runtime_error(INVALID_CONF + "default_file (empty or double)");
 }
 
 string	&Server::getName(void) { return _server_name; }
@@ -133,8 +133,10 @@ bool	Server::isComplete(void)
 
 void	Server::addLocationChangePointer(void)
 {
+	// std::cout << "server name: " << _server_name << std::endl;
 	_locations.push_back(Location());
 	_currentLoc = &_locations.back();
+
 }
 
 void	Server::handleLocation(string &key, string &value)
@@ -155,6 +157,9 @@ void	Server::handleLocation(string &key, string &value)
 //outstream overload operator (non-member function)
 std::ostream& operator << (std::ostream& os, Server &obj)
 {
+	// vector<Location> locs = obj.getLocations();
+	// 	std::cout << "location size" << obj.getLocations().size() << std::endl;
+
 	if (!obj.isComplete())
 		std::cout << "Server is incomplete" << std::endl;
 	else {
@@ -164,16 +169,19 @@ std::ostream& operator << (std::ostream& os, Server &obj)
 		std::cout << "max_body_size: " << obj.getSize() << std::endl;
 		std::cout << "root: " << obj.getRoot() << std::endl;
 		std::cout << "default_file: " << obj.getDefFile() << std::endl;
+		std::cout << std::endl;
 		std::cout << "error_pages: " << std::endl;
 		std::map<int, string> errP = obj.getErrorPages();
 		for (std::map<int, string>::iterator it = errP.begin(); it != errP.end(); it++) {
-			std::cout << "\t" << it->first << ": " << it->second << std::endl;
+			std::cout << it->first << ": " << it->second << std::endl;
 		}
-
-		// vector<Location> locs = obj.getLocations();
-		// for(unsigned int i = 0; i < locs.size(); i++) {
-		// 	std::cout << "location 1:" << locs[i] << std::endl;
-		// }
+		std::cout << std::endl;
+		vector<Location> locs = obj.getLocations();
+		for(unsigned int i = 0; i < locs.size(); i++) {
+			std::cout << "location: " << i << std::endl;
+			std::cout << locs[i] << std::endl;
+			std::cout << std::endl;
+		}
 	}
 	return os;
 }
