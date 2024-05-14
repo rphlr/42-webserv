@@ -21,10 +21,32 @@
 // 	launch();
 // }
 
-TestServer::TestServer(Server &server) : SimpleServer( server ), _request("") {
-	// Create a function to setup routes
-	_routes["/home"] = &TestServer::handleHome;
-	_routes["/form"] = &TestServer::handleForm;
+/* *********************************** *
+**  Core functionnalities ************ *
+* *********************************** */
+ListeningSocket * TestServer::get_socket() {
+	return _socket;
+}
+
+// /* *********************************** *
+// **  Canonical Form ******************* *
+// * *********************************** */
+TestServer::TestServer( Server &server ) : _request(""){
+	int domain = AF_INET;
+	int service = SOCK_STREAM;
+	int protocol = 0;
+	int port = server.getPort();
+	u_long interface;
+	if (!server.getHost().compare("127.0.0.1")){
+		interface = INADDR_LOOPBACK;
+	}
+	else {
+		interface = inet_addr(server.getHost().c_str());
+	}
+	int bklg = 10;
+	_socket = new ListeningSocket( domain, service, protocol, port, interface, bklg );
+		// Create a function to setup routes
+	_routes["/home"] = &TestServer::handleRoot;
 	_routes["/styles.css"] = &TestServer::handleCss;
 	_routes["/upload"] = &TestServer::handlePost;
 	// _routes["/form"] = &TestServer::handleForm;
@@ -318,7 +340,7 @@ void TestServer::handleError(HandleRequest &request)
 
 /* TESTING */
 
-// void TestServer::launch() 
+// void TestServer::launch()
 // {
 // 	fd_set current_sockets, ready_sockets;
 // 	FD_ZERO(&current_sockets); // Clears the fd_set
@@ -328,27 +350,27 @@ void TestServer::handleError(HandleRequest &request)
 
 // 	int max_fd = get_socket()->get_sock();
 
-// 	while (true) 
+// 	while (true)
 // 	{
 // 		ready_sockets = current_sockets;
 
-// 		if (select(max_fd + 1, &ready_sockets, NULL, NULL, NULL) == -1) 
+// 		if (select(max_fd + 1, &ready_sockets, NULL, NULL, NULL) == -1)
 // 		{
 // 			std::cerr << "Select error: " << strerror(errno);
 // 			break;
 // 		}
 
 // 		// Check each socket for readiness
-// 		for(int i = 0; i <= max_fd; i++) 
+// 		for(int i = 0; i <= max_fd; i++)
 // 		{
-// 			if (FD_ISSET(i, &ready_sockets)) 
+// 			if (FD_ISSET(i, &ready_sockets))
 // 			{
-// 				if (i == max_fd) 
+// 				if (i == max_fd)
 // 				{
 // 					// Accept new connection
 // 					accepter();
-// 				} 
-// 				else 
+// 				}
+// 				else
 // 				{
 // 					handler();
 
