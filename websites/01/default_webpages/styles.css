@@ -1,0 +1,82 @@
+/* testStyle.css */
+
+body {
+	font-family: Georgia, sans-serif;
+	background-color: hsl(148, 52%, 87%);
+	margin: 0; /* Remove default margin */
+}
+
+header {
+	background-color: lightblue; /* Set background color for header */
+	text-align: center; /* Center-align header content */
+	padding: 20px 0; /* Add padding to header content */
+}
+
+nav {
+	text-align: center; /* Center-align navigation links */
+	margin-top: 20px; /* Add margin space above navigation */
+}
+
+nav a {
+	display: inline-block; /* Display navigation links inline */
+	margin: 0 10px; /* Add margin between navigation links */
+	text-decoration: none; /* Remove default underline */
+	color: #333; /* Set color for navigation links */
+}
+
+main {
+	padding: 20px; /* Add padding to main content */
+}
+
+footer {
+	text-align: center; /* Center-align footer content */
+	position: fixed;
+	bottom: 0;
+	width: 100%; /* Make footer span the entire width */
+	background-color: #626262; /* Set background color for footer */
+	color: #fff; /* Set text color for footer */
+	padding: 10px 0; /* Add padding to footer content */
+}
+
+/* Style the main content area as a flex container */
+main {
+	display: flex;
+	justify-content: center; /* Centers the content horizontally */
+	margin: 0 50px; /* Adds 50px margin to both the left and right */
+}
+
+section {
+	width: 100%;
+	max-width: 600px; /* Adjust the maximum width as needed */
+	box-sizing: border-box; /* Includes padding and border in the width */
+	padding: 20px;
+	margin: 10px; /* Adds spacing between sections */
+}
+/* class info */
+.info {
+	background-color: #f9f9f9; /* Set background color for info section */
+	font-size: smaller; /* Set font size for info section */
+	margin: 0 10px; /* Add margin space around info section */
+	padding: 10px; /* Add padding to info section */
+	border: #333 solid 1px; /* Add border around info section */
+	border-radius: 10px; /* Add rounded corners to info section */
+	box-shadow: 5px 5px 5px #333; /* Add shadow effect to info section */
+}
+
+/* Style for signup or login section */
+.signup {
+	flex: 1; /* Make signup section take up 1/3 of the available space */
+	margin: 0 10px; /* Add margin space around signup section */
+}
+
+/* Style for upload section */
+.upload {
+	flex: 2; /* Make upload section take up 2/3 of the available space */
+	margin: 0 10px; /* Add margin space around upload section */
+}
+
+/* Style for download section */
+.download {
+	flex: 3; /* Make download section take up 3/3 of the available space */
+	margin: 0 10px; /* Add margin space around download section */
+}

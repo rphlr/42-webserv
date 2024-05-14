@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>webserv</title>
+	<link rel="icon" type="image/x-icon" href="../favicon.ico">
+	<link rel="stylesheet" href="testStyle.css">
+</head>
+<body>
+
+	<header>
+		<h1>Website magnifique</h1>
+	</header>
+
+	<nav>
+		<a href="/index.html">Home</a></li>
+		<a href="/default_webpages/cgi.html">CGI test</a></li>
+		<a href="/default_webpages/login.html">Login</a></li>
+	</nav>
+
+	<main>
+		<section id="signup">
+			<h2>Cookies testing</h2>
+
+			<form action = "add_cookie" method = "get">
+				Cookie Name: <input type = "text" name = "key">  <br />
+				<br>
+				Cookie Value: <input type = "text" name = "value" />
+				<input type = "submit" value = "Submit" /> <br />
+			</form>
+			<!-- cookieAddingReplacement --> <br />
+
+			<h2> Get Cookie: </h2> <br />
+			<form action = "get_cookie" method = "get">
+				Cookie Name: <input type = "text" name = "key">  <br />
+				<br>
+				<input type = "submit" value = "Submit" /> <br />
+			</form>
+			<!-- cookieGettingReplacement --> <br />
+
+			<!-- <h2> Delete Cookie: </h2> <br />
+			<form action = "delete_cookie" method = "get">
+				Cookie Name: <input type = "text" name = "key">  <br />
+				<br>
+				<input type = "submit" value = "Submit" />
+			</form> -->
+			<!-- cookieDeletingReplacement <br /> -->
+		</section>
+
+		<section id="upload">
+			<h2>Upload Test</h2>
+			<p class="info">You can upload files with the following extensions: .png, .jpg, .txt, .pdf, .doc, .wav</br></br>ps: if you upload a python, php, perl or bash file, it will be executed</p></br>
+			<form id="uploadForm" method="post" enctype="multipart/form-data">
+				<input type="file" name="file">
+				<button type="submit" name="submit">Upload</button>
+			</form>
+			<script>
+				document.getElementById('uploadForm').onsubmit = function(event) {
+					// Événement de soumission du formulaire
+					event.preventDefault();
+
+					const formData = new FormData(this);
+					fetch(this.action, {
+						method: 'POST',
+						body: formData
+					}).then(() => {
+						window.location.reload();
+					}).catch(error => {
+						console.error('Error:', error);
+						alert('Upload failed!');
+					});
+				};
+			</script>
+			<!-- fileExistsReplacement -->
+		</section>
+
+		<section id="download">
+			<h2>Deleting test (and download)</h2>
+			<div id="file-links">Loading files...</div>
+			<script>
+				fetch('../cgi-bin/files.json')
+				.then(response => response.json())
+				.then(data => {
+					const container = document.getElementById('file-links');
+					if (data.files && data.files.length > 0) {
+						const list = document.createElement('ul');
+						data.files.forEach(file => {
+							const listItem = document.createElement('li');
+
+							// Créer le bouton de suppression
+							const deleteButton = document.createElement('button');
+							deleteButton.textContent = 'Delete';
+							deleteButton.onclick = function() { deleteFile(file); };
+							listItem.appendChild(deleteButton);
+
+							// Créer le lien de téléchargement
+							const link = document.createElement('a');
+							link.href = `../default_webpages/uploads/${file}`;
+							link.textContent = file;
+							link.download = file;
+							listItem.appendChild(link);
+
+							list.appendChild(listItem);
+						});
+						container.innerHTML = '';
+						container.appendChild(list);
+					} else {
+						container.textContent = 'No files downloaded yet!';
+					}
+				})
+				.catch(() => {
+					document.getElementById('file-links').textContent = 'Failed to load files.';
+				});
+
+				// Fonction pour supprimer le fichier
+				function deleteFile(fileName) {
+					fetch(`../cgi-bin/deleteFile.php?file=${fileName}`, { method: 'DELETE' })
+					window.location.reload();
+				}
+				</script>
+		</section>
+	</main>
+
+	<footer>
+		<p>&copy; 2024 website magnifique</p>
+	</footer>
+
+</body>
+</html>

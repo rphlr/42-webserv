@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>WEBSERV TEST SITE</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<header>
+		<h1>Website magnifique</h1>
+	</header>
+
+	<nav>
+		<a href="/index.html">Home</a></li>
+		<a href="/default_webpages/cgi.html">CGI test</a></li>
+	</nav>
+
+	<main>
+		<section id="form">
+			<h2>Welcome ! Please register</h2>
+			<form method="post" action="/register">
+				<label for="login">Login:</label>
+				<input type="text" id="login" name="login" required>
+				<br>
+				<label for="password">Password:</label>
+				<input type="password" id="password" name="password" required>
+				<br>
+				<input type="submit" value="Register">
+				<p>Already have an account? <a href="/login">Login</a></p>
+			</form>
+		</section>
+	</main>
+
+<footer>
+	<p>&copy; 2024 website magnifique</p>
+</footer>
+</body>
+</html>

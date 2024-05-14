@@ -2,17 +2,31 @@
 # define HANDLE_REQUEST_HPP
 
 #include <iostream>
+#include <iomanip>
 #include <map>
 #include <sstream>
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <cstring>
+
+#define RESET "\033[0m"
+#define BLACK "\033[30m"
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define YELLOW "\033[33m"
+#define BLUE "\033[34m"
+#define MAGENTA "\033[35m"
+#define CYAN "\033[36m"
+#define WHITE "\033[37m"
+#define BRIGHT_BLACK "\033[90m"
+#define BRIGHT_RED "\033[91m"
 
 class HandleRequest {
 	public:
-		HandleRequest( char *incoming_request );
+		HandleRequest( std::string &incoming_request );
 		~HandleRequest();
-		void handleRequest();
+		void handleRequest(std::string serverRoot);
 
 		void	setRequest( std::string request );
 		void	setMethod( std::string method );

@@ -3,17 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: rrouille <rrouille@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 22:40:45 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/20 12:35:24 by nvaubien         ###   ########.fr       */
+/*   Updated: 2024/05/14 18:47:38 by rrouille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Config/ServerConfig.hpp"
 
 Server::Server(void): _server_name(""), _port(-1), _host(""), _max_body_size(-1),
-					_root(""), _default_file(""), _currentLoc(nullptr) {}
+					_root(""), _default_file(""), _currentLoc(nullptr)
+{
+	_error_pages[-1] = "/error_webpages/404.html";
+}
 
 Server::~Server(void) { _locations.clear(); }
 
@@ -53,7 +56,7 @@ void	Server::setPort(string &po)
 void	Server::setSize(string &si)
 {
 	int s = std::stoi(si);
-	if (s < 1000 && s >= 0 && _max_body_size < 0)					//check for BUFFER_SIZE (maybe throw error?)
+	if (s >= 0 && _max_body_size < 0)
 		_max_body_size = s;
 	else
 		throw std::invalid_argument(INVALID_CONF + "max_body_size (empty, double or size)");
@@ -65,7 +68,6 @@ void	Server::setRoot(string &r)
 		_root = r;
 	else
 		throw std::invalid_argument(INVALID_CONF + "root (empty or double)");
-	//check here if path exists or not?
 }
 
 void	Server::setErrorPage(string &c, string &path)
@@ -101,6 +103,7 @@ int		&Server::getSize(void) { return _max_body_size; }
 string	&Server::getRoot(void) { return _root; }
 string	&Server::getDefFile(void) { return _default_file; }
 Location	*Server::getCurrentLoc(void) { return _currentLoc; }
+
 string	&Server::getErrorPath(int code)
 {
 	if (_error_pages.find(code) != _error_pages.end())
@@ -122,6 +125,13 @@ vector<Location>	&Server::getLocations(void)
 	throw std::runtime_error(NO_LOC);
 }
 
+std::string	&Server::getServerName(void)
+{
+	if (!_server_name.empty())
+		return _server_name;
+	throw std::runtime_error("Server name is empty");
+}
+
 bool	Server::isComplete(void)
 {
 	if (_server_name.empty() || _port < 0 || _host.empty() || _max_body_size < 0 \
@@ -134,7 +144,6 @@ bool	Server::isComplete(void)
 
 void	Server::addLocationChangePointer(void)
 {
-	// std::cout << "server name: " << _server_name << std::endl;
 	_locations.push_back(Location());
 	_currentLoc = &_locations.back();
 
@@ -162,7 +171,7 @@ bool	Server::operator == ( const Server &comp )
 	bool	portSame = _port == comp._port;
 	bool	hostSame = _host == comp._host;
 
-	return nameSame && portSame && hostSame;
+	return nameSame || (portSame && hostSame);
 }
 
 //outstream overload operator (non-member function)

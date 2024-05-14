@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ParserConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 17:21:27 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/20 14:42:30 by nvaubien         ###   ########.fr       */
+/*   Updated: 2024/05/08 13:57:56 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,16 +39,14 @@ public:
 	vector<Server>	parseFile(string doc);
 	void	handleLine(string &line);
 	void	handleSetting(string &key, string &value);
+	void	validServerConfig();
 
-	Server *getNthServer(int n);
-	//check all servers in the end -> isComplete, double ports, other errors ? double locations (not sure if this is an error)
-
-protected:
-	bool	inServ;
-	bool	inLoc;
-	bool	inErr;
-	vector<Server> servers;
-	Server	*currentServer;
+private:
+	bool	_inServ;
+	bool	_inLoc;
+	bool	_inErr;
+	vector<Server> _servers;
+	Server	*_currentServer;
 };
 
 namespace sign {

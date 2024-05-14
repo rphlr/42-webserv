@@ -3,21 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   ParserConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nvaubien <nvaubien@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: ckarl <ckarl@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 18:09:07 by ckarl             #+#    #+#             */
-/*   Updated: 2024/03/20 15:03:02 by nvaubien         ###   ########.fr       */
+/*   Updated: 2024/05/08 14:04:37 by ckarl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Config/ParserConfig.hpp"
 
-Parser::Parser(void) : inServ(false), inLoc(false), inErr(false), currentServer(NULL) {}
-
-Parser::~Parser(void) { servers.clear(); }
-
+Parser::Parser(void) : _inServ(false), _inLoc(false), _inErr(false), _currentServer(NULL) {}
+Parser::~Parser(void) { _servers.clear(); }
 Parser::Parser(const Parser &c) { (void) c; }
-
 Parser &Parser::operator = (const Parser &c)
 {
 	(void) c;
@@ -30,21 +27,16 @@ void	Parser::handleLine(string &line)
 	string	value;
 	int		pos;
 
-	//separate by ':' into two parts
-	// std::cout << "currentServer in handleLine: " << *currentServer << std::endl;
-	// std::cout << "server[0] in handleLine: " << servers[0] << std::endl;
-
 	line = line.substr(0, line.find("#"));
 	pos = line.find(sign::DOUBLE_DOT);
 	if (pos == (int)std::string::npos)
 		throw std::runtime_error(INVALID_CONF + "a line is missing the delimitor ':'");
 	key = line.substr(0, pos);
 	value = line.substr(pos + 1);
-	//send to set function - set in *currentServer
-	if (inErr)
-		currentServer->setErrorPage(key, value);
-	else if (inLoc)
-		currentServer->handleLocation(key, value);
+	if (_inErr)
+		_currentServer->setErrorPage(key, value);
+	else if (_inLoc)
+		_currentServer->handleLocation(key, value);
 	else
 		handleSetting(key, value);
 }
@@ -57,7 +49,7 @@ void	Parser::handleSetting(string &key, string &value)
 
 	for (int i = 0; i < 6; i++) {
 		if (key == setting[i]) {
-			(currentServer->*setValue[i])(value);
+			(_currentServer->*setValue[i])(value);
 			return ;
 		}
 	}
@@ -65,11 +57,24 @@ void	Parser::handleSetting(string &key, string &value)
 
 }
 
+void	Parser::validServerConfig()
+{
+	for (vector<Server>::iterator it = _servers.begin(); it != (_servers.end() - 1); it++) {
+		for (vector<Server>::iterator it2 = it + 1; it2 != _servers.end(); it2++) {
+			if (*it == *it2)
+				throw std::runtime_error("Two or more _servers have the same name, port or host");
+		}
+	}
+	for (vector<Server>::iterator it = _servers.begin(); it != _servers.end(); it++) {
+		if (it->isComplete() == false)
+			throw std::runtime_error(INVALID_CONF + "incomplete server config");
+	}
+}
+
 vector<Server>	Parser::parseFile(string doc)
 {
 	std::ifstream	inputFile;
 
-	//check if file can be opened or is empty
 	inputFile.open(doc, std::fstream::in);
 	if (inputFile.fail() || inputFile.peek() == EOF)
 		throw std::runtime_error(FILE_OPENING);
@@ -81,21 +86,21 @@ vector<Server>	Parser::parseFile(string doc)
 		if (line.empty() || line.at(0) == '#')
 			continue;
 		if (line == "server:") {
-			inLoc = false; inErr = false; inServ = true;
-			servers.push_back(Server());
-			currentServer = &servers.back();//point to next Server
+			_inLoc = false; _inErr = false; _inServ = true;
+			_servers.push_back(Server());
+			_currentServer = &_servers.back();
 			continue;
 		}
 		if (line == "error_page:") {
-			if (inErr || inLoc || !inServ)
+			if (_inErr || _inLoc || !_inServ)
 				throw std::runtime_error(SECTION_ERR + "error_page in wrong section");
-			inErr = true;
+			_inErr = true;
 			continue;
 		}
 		if (line == "location:") {
-			if (inServ) {
-				inLoc = true; inErr = false;
-				currentServer->addLocationChangePointer(); //point to next location inside of same server
+			if (_inServ) {
+				_inLoc = true; _inErr = false;
+				_currentServer->addLocationChangePointer();
 			}
 			else
 				throw std::runtime_error(SECTION_ERR + "location outside of server section");
@@ -103,25 +108,7 @@ vector<Server>	Parser::parseFile(string doc)
 		}
 		handleLine(line);
 	}
-	//print out all servers in the vector
-	for(unsigned int i = 0; i < servers.size(); i++) {
-		std::cout << "server:" << servers[i] << std::endl;
-	}
-
-	//testing if servers are the same or different by comparing name, port and host
-	// if (servers[0] == servers[1])
-	// 	std::cout << "they're the same" << std::endl;
-	// else
-	// 	std::cout << "they're different" << std::endl;
-
+	validServerConfig();
 	inputFile.close();
-	return servers;
+	return _servers;
 }
-
-Server *Parser::getNthServer(int n)
-{
-	if (n < 0 || n >= (int)servers.size())
-		throw std::out_of_range(INVALID_CONF + "server index out of range");
-	return &servers[n];
-}
-
